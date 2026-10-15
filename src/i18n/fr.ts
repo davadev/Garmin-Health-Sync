@@ -118,4 +118,22 @@ export const fr: Record<TranslationKeys, string> = {
 	modalManualLoginSubmit: "Se connecter",
 	modalManualLoginPasteButton: "Se connecter depuis le presse-papiers",
 	modalManualLoginPasteEmpty: "Aucun ticket ST-… trouvé dans le presse-papiers — copiez d'abord l'adresse de la page de résultat.",
+
+	// Credential login modal (mobile sign-in without a browser)
+	modalCredTitle: "Se connecter à Garmin",
+	modalCredIntro: "Votre mot de passe est envoyé uniquement à Garmin et n’est jamais stocké par ce plugin.",
+	modalCredEmail: "E-mail",
+	modalCredPassword: "Mot de passe",
+	modalCredSubmit: "Se connecter",
+	modalCredBrowserFallback: "Utiliser la connexion par navigateur",
+	modalCredMfaTitle: "Code de vérification",
+	modalCredMfaIntro: "Garmin vous a envoyé un code de vérification. Saisissez-le pour terminer la connexion.",
+	modalCredMfaCode: "Code",
+	modalCredErrorInvalid: "E-mail ou mot de passe incorrect.",
+	modalCredErrorMfa: "Code incorrect ou expiré. Réessayez.",
+	modalCredErrorBlocked: "Garmin a bloqué cette tentative de connexion. Utilisez la connexion par navigateur ou réessayez plus tard.",
+	modalCredErrorGeneric: "La connexion n’a pas abouti. Utilisez la connexion par navigateur ou copiez le diagnostic pour un rapport de bug.",
+	modalCredCopyDiagnostics: "Copier le diagnostic",
+	modalCredDiagnosticsCopied: "Diagnostic copié",
+	modalCredRetry: "Réessayer",
 };

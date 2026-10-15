@@ -118,4 +118,22 @@ export const es: Record<TranslationKeys, string> = {
 	modalManualLoginSubmit: "Iniciar sesión",
 	modalManualLoginPasteButton: "Iniciar sesión desde el portapapeles",
 	modalManualLoginPasteEmpty: "No se encontró ningún ticket ST-… en el portapapeles: copia primero la dirección de la página de resultado.",
+
+	// Credential login modal (mobile sign-in without a browser)
+	modalCredTitle: "Iniciar sesión en Garmin",
+	modalCredIntro: "Tu contraseña solo se envía a Garmin y este plugin nunca la guarda.",
+	modalCredEmail: "Correo electrónico",
+	modalCredPassword: "Contraseña",
+	modalCredSubmit: "Iniciar sesión",
+	modalCredBrowserFallback: "Usar inicio de sesión en el navegador",
+	modalCredMfaTitle: "Código de verificación",
+	modalCredMfaIntro: "Garmin te ha enviado un código de verificación. Introdúcelo para terminar de iniciar sesión.",
+	modalCredMfaCode: "Código",
+	modalCredErrorInvalid: "Correo o contraseña incorrectos.",
+	modalCredErrorMfa: "Código incorrecto o caducado. Inténtalo de nuevo.",
+	modalCredErrorBlocked: "Garmin bloqueó este intento de inicio de sesión. Usa el inicio de sesión en el navegador o inténtalo más tarde.",
+	modalCredErrorGeneric: "El inicio de sesión no se completó. Usa el inicio de sesión en el navegador o copia el diagnóstico para un informe de error.",
+	modalCredCopyDiagnostics: "Copiar diagnóstico",
+	modalCredDiagnosticsCopied: "Diagnóstico copiado",
+	modalCredRetry: "Reintentar",
 };

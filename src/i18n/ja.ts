@@ -118,4 +118,22 @@ export const ja: Record<TranslationKeys, string> = {
 	modalManualLoginSubmit: "ログイン",
 	modalManualLoginPasteButton: "クリップボードからログイン",
 	modalManualLoginPasteEmpty: "クリップボードに ST-… チケットが見つかりません。先に結果ページのアドレスをコピーしてください。",
+
+	// Credential login modal (mobile sign-in without a browser)
+	modalCredTitle: "Garmin にサインイン",
+	modalCredIntro: "パスワードは Garmin にのみ送信され、このプラグインが保存することはありません。",
+	modalCredEmail: "メールアドレス",
+	modalCredPassword: "パスワード",
+	modalCredSubmit: "サインイン",
+	modalCredBrowserFallback: "ブラウザでサインイン",
+	modalCredMfaTitle: "確認コード",
+	modalCredMfaIntro: "Garmin から確認コードが送信されました。入力してサインインを完了してください。",
+	modalCredMfaCode: "コード",
+	modalCredErrorInvalid: "メールアドレスまたはパスワードが正しくありません。",
+	modalCredErrorMfa: "コードが正しくないか期限切れです。もう一度お試しください。",
+	modalCredErrorBlocked: "Garmin がこのサインインをブロックしました。ブラウザでのサインインを使うか、後でもう一度お試しください。",
+	modalCredErrorGeneric: "サインインが完了しませんでした。ブラウザでのサインインを使うか、診断情報をコピーして不具合を報告してください。",
+	modalCredCopyDiagnostics: "診断情報をコピー",
+	modalCredDiagnosticsCopied: "診断情報をコピーしました",
+	modalCredRetry: "再試行",
 };

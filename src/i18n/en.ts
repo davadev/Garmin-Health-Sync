@@ -117,6 +117,24 @@ export const en = {
 	modalManualLoginSubmit: "Log in",
 	modalManualLoginPasteButton: "Sign in from clipboard",
 	modalManualLoginPasteEmpty: "No ST-… ticket found in the clipboard — copy the address of the result page first.",
+
+	// Credential login modal (mobile sign-in without a browser)
+	modalCredTitle: "Sign in to Garmin",
+	modalCredIntro: "Your password is sent only to Garmin and is never stored by this plugin.",
+	modalCredEmail: "Email",
+	modalCredPassword: "Password",
+	modalCredSubmit: "Sign in",
+	modalCredBrowserFallback: "Use browser login",
+	modalCredMfaTitle: "Verification code",
+	modalCredMfaIntro: "Garmin sent you a verification code. Enter it to finish signing in.",
+	modalCredMfaCode: "Code",
+	modalCredErrorInvalid: "Wrong email or password.",
+	modalCredErrorMfa: "Wrong or expired code. Try again.",
+	modalCredErrorBlocked: "Garmin blocked this sign-in attempt. Use the browser login instead, or try again later.",
+	modalCredErrorGeneric: "Sign-in did not complete. Use the browser login instead, or copy the diagnostics for a bug report.",
+	modalCredCopyDiagnostics: "Copy diagnostics",
+	modalCredDiagnosticsCopied: "Diagnostics copied",
+	modalCredRetry: "Try again",
 };
 
 export type TranslationKeys = keyof typeof en;

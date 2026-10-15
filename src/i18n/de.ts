@@ -119,4 +119,22 @@ export const de: Record<TranslationKeys, string> = {
 	modalManualLoginSubmit: "Anmelden",
 	modalManualLoginPasteButton: "Aus Zwischenablage anmelden",
 	modalManualLoginPasteEmpty: "Kein ST-…-Ticket in der Zwischenablage gefunden — kopiere zuerst die Adresse der Ergebnisseite.",
+
+	// Credential login modal (mobile sign-in without a browser)
+	modalCredTitle: "Bei Garmin anmelden",
+	modalCredIntro: "Dein Passwort wird nur an Garmin gesendet und vom Plugin nie gespeichert.",
+	modalCredEmail: "E-Mail",
+	modalCredPassword: "Passwort",
+	modalCredSubmit: "Anmelden",
+	modalCredBrowserFallback: "Browser-Anmeldung verwenden",
+	modalCredMfaTitle: "Bestätigungscode",
+	modalCredMfaIntro: "Garmin hat dir einen Bestätigungscode geschickt. Gib ihn ein, um die Anmeldung abzuschließen.",
+	modalCredMfaCode: "Code",
+	modalCredErrorInvalid: "Falsche E-Mail oder falsches Passwort.",
+	modalCredErrorMfa: "Falscher oder abgelaufener Code. Versuche es erneut.",
+	modalCredErrorBlocked: "Garmin hat diesen Anmeldeversuch blockiert. Nutze stattdessen die Browser-Anmeldung oder versuche es später erneut.",
+	modalCredErrorGeneric: "Die Anmeldung wurde nicht abgeschlossen. Nutze die Browser-Anmeldung oder kopiere die Diagnose für einen Fehlerbericht.",
+	modalCredCopyDiagnostics: "Diagnose kopieren",
+	modalCredDiagnosticsCopied: "Diagnose kopiert",
+	modalCredRetry: "Erneut versuchen",
 };

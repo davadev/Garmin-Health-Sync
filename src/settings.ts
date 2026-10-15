@@ -259,7 +259,7 @@ export class HealthSyncSettingTab extends PluginSettingTab {
 				btn.setButtonText(t("settingsGarminLogin", lang))
 					.setCta()
 					.onClick(async () => {
-						await this.plugin.loginViaBrowser();
+						await this.plugin.loginViaBrowser(() => this.update());
 						this.update();
 					});
 			});

@@ -118,4 +118,22 @@ export const zh: Record<TranslationKeys, string> = {
 	modalManualLoginSubmit: "登录",
 	modalManualLoginPasteButton: "从剪贴板登录",
 	modalManualLoginPasteEmpty: "剪贴板中未找到 ST-… 票据 —— 请先复制结果页面的网址。",
+
+	// Credential login modal (mobile sign-in without a browser)
+	modalCredTitle: "登录 Garmin",
+	modalCredIntro: "你的密码只会发送给 Garmin，插件不会保存。",
+	modalCredEmail: "邮箱",
+	modalCredPassword: "密码",
+	modalCredSubmit: "登录",
+	modalCredBrowserFallback: "使用浏览器登录",
+	modalCredMfaTitle: "验证码",
+	modalCredMfaIntro: "Garmin 已向你发送验证码，请输入以完成登录。",
+	modalCredMfaCode: "验证码",
+	modalCredErrorInvalid: "邮箱或密码错误。",
+	modalCredErrorMfa: "验证码错误或已过期，请重试。",
+	modalCredErrorBlocked: "Garmin 拦截了此次登录尝试。请改用浏览器登录，或稍后再试。",
+	modalCredErrorGeneric: "登录未完成。请改用浏览器登录，或复制诊断信息用于反馈问题。",
+	modalCredCopyDiagnostics: "复制诊断信息",
+	modalCredDiagnosticsCopied: "诊断信息已复制",
+	modalCredRetry: "重试",
 };
