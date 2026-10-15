@@ -136,4 +136,6 @@ export const fr: Record<TranslationKeys, string> = {
 	modalCredCopyDiagnostics: "Copier le diagnostic",
 	modalCredDiagnosticsCopied: "Diagnostic copié",
 	modalCredRetry: "Réessayer",
+	modalCredErrorRateLimited: "Garmin limite les tentatives de connexion depuis cet appareil. Attendez le minuteur ci-dessous ou utilisez la connexion par navigateur.",
+	modalCredCooldown: "Prochaine tentative possible dans environ {time} (estimation).",
 };

@@ -39,7 +39,7 @@ export interface MfaChallenge {
 export type MobileSsoResult =
 	| { kind: "ticket"; ticket: string }
 	| { kind: "mfa"; challenge: MfaChallenge }
-	| { kind: "error"; reason: MobileSsoFailure; detail: string };
+	| { kind: "error"; reason: MobileSsoFailure; detail: string; retryAfter?: number };
 
 /** CAS `service` the mobile client signs in for; ticket exchange must use the same value. */
 export function getMobileServiceUrl(domain: string): string {
@@ -104,7 +104,16 @@ async function post(
 
 	collectCookies(res.headers, jar);
 
-	if (res.status === 429) return { kind: "error", reason: "rate_limited", detail: `${path}: HTTP 429` };
+	if (res.status === 429) {
+		const key = Object.keys(res.headers).find((k) => k.toLowerCase() === "retry-after");
+		const hint = key ? Number(res.headers[key]) : NaN;
+		return {
+			kind: "error",
+			reason: "rate_limited",
+			detail: `${path}: HTTP 429${Number.isFinite(hint) ? `, retry-after=${hint}s` : ""}`,
+			...(Number.isFinite(hint) ? { retryAfter: hint } : {}),
+		};
+	}
 	if (res.status === 403) return { kind: "error", reason: "blocked", detail: `${path}: HTTP 403` };
 
 	let json: Record<string, unknown> | null = null;

@@ -136,4 +136,6 @@ export const ja: Record<TranslationKeys, string> = {
 	modalCredCopyDiagnostics: "診断情報をコピー",
 	modalCredDiagnosticsCopied: "診断情報をコピーしました",
 	modalCredRetry: "再試行",
+	modalCredErrorRateLimited: "Garmin がこのデバイスからのサインイン試行を制限しています。下のタイマーが終わるまで待つか、ブラウザでのサインインをお使いください。",
+	modalCredCooldown: "次の試行まで約 {time}（推定）。",
 };

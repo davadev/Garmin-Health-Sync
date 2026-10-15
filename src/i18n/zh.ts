@@ -136,4 +136,6 @@ export const zh: Record<TranslationKeys, string> = {
 	modalCredCopyDiagnostics: "复制诊断信息",
 	modalCredDiagnosticsCopied: "诊断信息已复制",
 	modalCredRetry: "重试",
+	modalCredErrorRateLimited: "Garmin 正在限制此设备的登录尝试。请等待下方计时结束，或使用浏览器登录。",
+	modalCredCooldown: "约 {time} 后可再次尝试（估算）。",
 };
