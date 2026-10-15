@@ -139,4 +139,6 @@ export const de: Record<TranslationKeys, string> = {
 	modalCredRetry: "Erneut versuchen",
 	modalCredErrorRateLimited: "Garmin begrenzt Anmeldeversuche von diesem Gerät. Warte auf den Timer unten oder nutze die Browser-Anmeldung.",
 	modalCredCooldown: "Nächster Versuch in etwa {time} möglich (geschätzt).",
+	modalManualLoginStep2Mobile: "Nach der Anmeldung zeigt die Seite eine kurze Textzeile mit 'serviceTicket: ST-…'.",
+	modalManualLoginStep3Mobile: "Halte den Text gedrückt, wähle „Alles auswählen“ und dann „Kopieren“. Wechsle zurück zu Obsidian und tippe sofort auf „Aus Zwischenablage anmelden“ — das Ticket läuft nach wenigen Sekunden ab.",
 };

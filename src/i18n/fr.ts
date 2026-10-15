@@ -138,4 +138,6 @@ export const fr: Record<TranslationKeys, string> = {
 	modalCredRetry: "Réessayer",
 	modalCredErrorRateLimited: "Garmin limite les tentatives de connexion depuis cet appareil. Attendez le minuteur ci-dessous ou utilisez la connexion par navigateur.",
 	modalCredCooldown: "Prochaine tentative possible dans environ {time} (estimation).",
+	modalManualLoginStep2Mobile: "Après la connexion, la page affiche une courte ligne de texte contenant « serviceTicket: ST-… ».",
+	modalManualLoginStep3Mobile: "Maintenez le texte appuyé, choisissez « Tout sélectionner », puis « Copier ». Revenez dans Obsidian et appuyez tout de suite sur « Se connecter depuis le presse-papiers » — le ticket expire après quelques secondes.",
 };

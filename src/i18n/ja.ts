@@ -138,4 +138,6 @@ export const ja: Record<TranslationKeys, string> = {
 	modalCredRetry: "再試行",
 	modalCredErrorRateLimited: "Garmin がこのデバイスからのサインイン試行を制限しています。下のタイマーが終わるまで待つか、ブラウザでのサインインをお使いください。",
 	modalCredCooldown: "次の試行まで約 {time}（推定）。",
+	modalManualLoginStep2Mobile: "サインイン後、ページに「serviceTicket: ST-…」を含む短い1行のテキストが表示されます。",
+	modalManualLoginStep3Mobile: "そのテキストを長押しして「すべてを選択」→「コピー」を選び、Obsidian に戻ってすぐに「クリップボードからログイン」をタップしてください。チケットは数秒で期限切れになります。",
 };
