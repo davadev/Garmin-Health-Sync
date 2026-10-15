@@ -3,9 +3,11 @@ import type { App } from "obsidian";
 /** Client-side pause between credential sign-in attempts after Garmin pushed back
  *  (HTTP 429 / 403 / CAPTCHA). Garmin publishes no cooldown length and its bot protection
  *  also reacts to client fingerprint, so these waits are estimates: escalating and persisted
- *  per device so repeated retries do not dig the hole deeper. */
+ *  per device so repeated retries do not dig the hole deeper. Observed on a real device: a
+ *  429 from the sign-in endpoint was still active more than 8 minutes after the first block,
+ *  so the first step is deliberately long. */
 const STORAGE_KEY = "garmin-health-sync-login-cooldown";
-const STEPS_SECONDS = [60, 180, 600, 1800];
+const STEPS_SECONDS = [300, 900, 1800, 3600];
 const MAX_WAIT_SECONDS = 3600;
 /** Strikes older than this are forgotten. */
 const STRIKE_MEMORY_MS = 2 * 60 * 60 * 1000;
@@ -22,7 +24,7 @@ const EMPTY: CooldownState = { until: 0, strikes: 0, lastAttemptAt: 0, lastStrik
 /** Escalating wait for the n-th consecutive block (1-based), in seconds. */
 export function backoffSeconds(strikes: number): number {
 	const i = Math.min(Math.max(strikes, 1), STEPS_SECONDS.length) - 1;
-	return STEPS_SECONDS[i] ?? 1800;
+	return STEPS_SECONDS[i] ?? 3600;
 }
 
 export function formatCountdown(totalSeconds: number): string {
