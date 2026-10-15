@@ -139,6 +139,8 @@ export const en = {
 	modalCredCooldown: "Next attempt possible in about {time} (estimated).",
 	modalManualLoginStep2Mobile: "After signing in, the page shows one short line of text containing 'serviceTicket: ST-…'.",
 	modalManualLoginStep3Mobile: "Touch and hold that text, choose select all, then copy. Switch back to Obsidian and tap the clipboard button below right away — the ticket expires after a few seconds.",
+	modalManualLoginTicketFound: "Ticket found: {ticket}",
+	modalManualLoginTicketNone: "No ticket found yet",
 };
 
 export type TranslationKeys = keyof typeof en;

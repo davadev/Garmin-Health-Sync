@@ -43,6 +43,7 @@ export class CredentialLoginModal extends Modal {
 	}
 
 	onOpen(): void {
+		this.contentEl.addClass("ghs-modal");
 		this.renderCredentials();
 	}
 
@@ -88,11 +89,17 @@ export class CredentialLoginModal extends Modal {
 
 		let email = "";
 		let password = "";
+		const submit = (): void => {
+			if (!email.trim() || !password || this.busy || this.handlers.cooldown.remainingSeconds() > 0) return;
+			void this.run(() => this.handlers.login(email, password)).finally(() => { password = ""; });
+		};
 		new Setting(contentEl)
 			.setName(t("modalCredEmail", this.lang))
 			.addText((text) => {
 				text.inputEl.type = "email";
 				text.inputEl.autocomplete = "username";
+				text.inputEl.setAttr("autocapitalize", "off");
+				text.inputEl.spellcheck = false;
 				text.onChange((v) => { email = v; });
 			});
 		new Setting(contentEl)
@@ -100,19 +107,19 @@ export class CredentialLoginModal extends Modal {
 			.addText((text) => {
 				text.inputEl.type = "password";
 				text.inputEl.autocomplete = "current-password";
+				text.inputEl.enterKeyHint = "go";
 				text.onChange((v) => { password = v; });
+				text.inputEl.addEventListener("keydown", (ev: KeyboardEvent) => {
+					if (ev.key === "Enter") { ev.preventDefault(); submit(); }
+				});
 			});
 
-		const submit = (): void => {
-			if (!email.trim() || !password || this.busy || this.handlers.cooldown.remainingSeconds() > 0) return;
-			void this.run(() => this.handlers.login(email, password)).finally(() => { password = ""; });
-		};
-		const submitRow = new Setting(contentEl);
+		const submitRow = new Setting(contentEl).setClass("ghs-action-row");
 		submitRow.addButton((btn) => {
 			btn.setButtonText(t("modalCredSubmit", this.lang)).setCta().onClick(submit);
 			this.startCountdown(submitRow, btn);
 		});
-		new Setting(contentEl).addButton((btn) => btn
+		new Setting(contentEl).setClass("ghs-action-row").addButton((btn) => btn
 			.setButtonText(t("modalCredBrowserFallback", this.lang))
 			.onClick(() => {
 				this.close();
@@ -136,6 +143,7 @@ export class CredentialLoginModal extends Modal {
 				text.onChange((v) => { code = v; });
 			});
 		new Setting(contentEl)
+			.setClass("ghs-action-row")
 			.addButton((btn) => btn
 				.setButtonText(t("modalCredSubmit", this.lang))
 				.setCta()
@@ -151,19 +159,19 @@ export class CredentialLoginModal extends Modal {
 		contentEl.empty();
 		contentEl.createEl("h2", { text: t("modalCredTitle", this.lang) });
 		contentEl.createEl("p", { text: message, cls: "mod-warning" });
-		new Setting(contentEl).addButton((btn) => btn
+		new Setting(contentEl).setClass("ghs-action-row").addButton((btn) => btn
 			.setButtonText(t("modalCredBrowserFallback", this.lang))
 			.setCta()
 			.onClick(() => {
 				this.close();
 				this.handlers.onBrowserFallback();
 			}));
-		const retryRow = new Setting(contentEl);
+		const retryRow = new Setting(contentEl).setClass("ghs-action-row");
 		retryRow.addButton((btn) => {
 			btn.setButtonText(t("modalCredRetry", this.lang)).onClick(() => this.renderCredentials());
 			this.startCountdown(retryRow, btn);
 		});
-		new Setting(contentEl).addButton((btn) => btn
+		new Setting(contentEl).setClass("ghs-action-row").addButton((btn) => btn
 			.setButtonText(t("modalCredCopyDiagnostics", this.lang))
 			.onClick(async () => {
 				try {

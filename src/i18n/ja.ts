@@ -140,4 +140,6 @@ export const ja: Record<TranslationKeys, string> = {
 	modalCredCooldown: "次の試行まで約 {time}（推定）。",
 	modalManualLoginStep2Mobile: "サインイン後、ページに「serviceTicket: ST-…」を含む短い1行のテキストが表示されます。",
 	modalManualLoginStep3Mobile: "そのテキストを長押しして「すべてを選択」→「コピー」を選び、Obsidian に戻ってすぐに「クリップボードからログイン」をタップしてください。チケットは数秒で期限切れになります。",
+	modalManualLoginTicketFound: "チケットを検出しました: {ticket}",
+	modalManualLoginTicketNone: "チケットはまだ見つかっていません",
 };
