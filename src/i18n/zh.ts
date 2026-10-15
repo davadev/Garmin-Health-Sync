@@ -138,4 +138,6 @@ export const zh: Record<TranslationKeys, string> = {
 	modalCredRetry: "重试",
 	modalCredErrorRateLimited: "Garmin 正在限制此设备的登录尝试。请等待下方计时结束，或使用浏览器登录。",
 	modalCredCooldown: "约 {time} 后可再次尝试（估算）。",
+	modalManualLoginStep2Mobile: "登录后，页面会显示一行包含 'serviceTicket: ST-…' 的短文本。",
+	modalManualLoginStep3Mobile: "长按该文本，选择“全选”，再选择“拷贝”。立即切回 Obsidian 并点击“从剪贴板登录”——票据几秒后就会过期。",
 };

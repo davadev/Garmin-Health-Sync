@@ -138,4 +138,6 @@ export const es: Record<TranslationKeys, string> = {
 	modalCredRetry: "Reintentar",
 	modalCredErrorRateLimited: "Garmin está limitando los intentos de inicio de sesión desde este dispositivo. Espera al temporizador de abajo o usa el inicio de sesión en el navegador.",
 	modalCredCooldown: "Podrás intentarlo de nuevo en aproximadamente {time} (estimado).",
+	modalManualLoginStep2Mobile: "Tras iniciar sesión, la página muestra una línea corta de texto con «serviceTicket: ST-…».",
+	modalManualLoginStep3Mobile: "Mantén pulsado el texto, elige «Seleccionar todo» y luego «Copiar». Vuelve a Obsidian y pulsa enseguida «Iniciar sesión desde el portapapeles»: el ticket caduca en unos segundos.",
 };

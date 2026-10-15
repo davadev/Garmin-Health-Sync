@@ -1,4 +1,4 @@
-import { App, Modal, Notice, Setting } from "obsidian";
+import { App, Modal, Notice, Platform, Setting } from "obsidian";
 import { t } from "../i18n/t";
 
 /** Manual-ticket login fallback (issue #6): some Garmin SSO widget variants
@@ -30,8 +30,8 @@ export class ManualLoginModal extends Modal {
 
 		const steps = contentEl.createEl("ol");
 		steps.createEl("li", { text: t("modalManualLoginStep1", this.lang) });
-		steps.createEl("li", { text: t("modalManualLoginStep2", this.lang) });
-		steps.createEl("li", { text: t("modalManualLoginStep3", this.lang) });
+		steps.createEl("li", { text: t(Platform.isDesktopApp ? "modalManualLoginStep2" : "modalManualLoginStep2Mobile", this.lang) });
+		steps.createEl("li", { text: t(Platform.isDesktopApp ? "modalManualLoginStep3" : "modalManualLoginStep3Mobile", this.lang) });
 
 		new Setting(contentEl)
 			.setName(t("modalManualLoginOpenUrl", this.lang))
