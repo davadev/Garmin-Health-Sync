@@ -141,4 +141,6 @@ export const de: Record<TranslationKeys, string> = {
 	modalCredCooldown: "Nächster Versuch in etwa {time} möglich (geschätzt).",
 	modalManualLoginStep2Mobile: "Nach der Anmeldung zeigt die Seite eine kurze Textzeile mit 'serviceTicket: ST-…'.",
 	modalManualLoginStep3Mobile: "Halte den Text gedrückt, wähle „Alles auswählen“ und dann „Kopieren“. Wechsle zurück zu Obsidian und tippe sofort auf „Aus Zwischenablage anmelden“ — das Ticket läuft nach wenigen Sekunden ab.",
+	modalManualLoginTicketFound: "Ticket gefunden: {ticket}",
+	modalManualLoginTicketNone: "Noch kein Ticket gefunden",
 };

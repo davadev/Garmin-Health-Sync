@@ -244,6 +244,7 @@ export class HealthSyncSettingTab extends PluginSettingTab {
 	private renderGarminLogin(setting: Setting, hasSavedSession: boolean): () => void {
 		const lang = this.plugin.settings.language;
 		const buttonEls: HTMLButtonElement[] = [];
+		setting.settingEl.addClass("ghs-login-row");
 
 		if (hasSavedSession) {
 			setting.addButton((btn) => {
@@ -275,6 +276,9 @@ export class HealthSyncSettingTab extends PluginSettingTab {
 			});
 		}
 
-		return () => buttonEls.forEach((el) => el.remove());
+		return () => {
+			buttonEls.forEach((el) => el.remove());
+			setting.settingEl.removeClass("ghs-login-row");
+		};
 	}
 }

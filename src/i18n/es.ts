@@ -140,4 +140,6 @@ export const es: Record<TranslationKeys, string> = {
 	modalCredCooldown: "Podrás intentarlo de nuevo en aproximadamente {time} (estimado).",
 	modalManualLoginStep2Mobile: "Tras iniciar sesión, la página muestra una línea corta de texto con «serviceTicket: ST-…».",
 	modalManualLoginStep3Mobile: "Mantén pulsado el texto, elige «Seleccionar todo» y luego «Copiar». Vuelve a Obsidian y pulsa enseguida «Iniciar sesión desde el portapapeles»: el ticket caduca en unos segundos.",
+	modalManualLoginTicketFound: "Ticket encontrado: {ticket}",
+	modalManualLoginTicketNone: "Aún no se ha encontrado ningún ticket",
 };
