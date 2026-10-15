@@ -138,7 +138,7 @@ export const en = {
 	modalCredErrorRateLimited: "Garmin is limiting sign-in attempts from this device. Wait for the timer below, or use the browser login.",
 	modalCredCooldown: "Next attempt possible in about {time} (estimated).",
 	modalManualLoginStep2Mobile: "After signing in, the page shows one short line of text containing 'serviceTicket: ST-…'.",
-	modalManualLoginStep3Mobile: "Touch and hold that text, choose Select all, then Copy. Switch back to Obsidian and tap 'Sign in from clipboard' right away — the ticket expires after a few seconds.",
+	modalManualLoginStep3Mobile: "Touch and hold that text, choose select all, then copy. Switch back to Obsidian and tap the clipboard button below right away — the ticket expires after a few seconds.",
 };
 
 export type TranslationKeys = keyof typeof en;
