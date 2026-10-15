@@ -7,6 +7,7 @@ import { matchDailyNoteDate } from "./daily-note";
 import { GarminProvider } from "./providers/garmin/garmin-provider";
 import type { OAuth1Token, OAuth2Token } from "./providers/garmin/garmin-oauth";
 import { t } from "./i18n/t";
+import { readStoredTokens, writeStoredTokens } from "./token-store";
 import { isLoginRequiredError } from "./errors";
 
 const AUTO_SYNC_TRIGGER_DEBOUNCE_MS = 30 * 1000;
@@ -87,7 +88,7 @@ export default class HealthSyncPlugin extends Plugin {
 		this.applyServerRegion();
 
 		// Restore persisted OAuth tokens; migrate legacy cookie users (M6)
-		this.restoreTokens();
+		await this.restoreTokens();
 		await this.migrateLegacySession();
 
 		this.syncManager = new SyncManager(this.app, this.garminProvider);
@@ -503,6 +504,7 @@ export default class HealthSyncPlugin extends Plugin {
 		this.settings.garminSession = "";
 		this.settings.garminOAuth1 = "";
 		this.settings.garminOAuth2 = "";
+		writeStoredTokens(this.app, null, null);
 		await this.saveSettings();
 	}
 
@@ -567,20 +569,39 @@ export default class HealthSyncPlugin extends Plugin {
 		await this.saveData(this.settings);
 	}
 
-	/** Restore persisted OAuth tokens into the provider on startup. */
-	private restoreTokens(): void {
+	/** Restore persisted OAuth tokens into the provider on startup. Tokens live in Obsidian's
+	 *  secret storage; tokens left in data.json by earlier versions are moved there once. */
+	private async restoreTokens(): Promise<void> {
 		const parse = <T>(raw: string): T | null => {
 			if (!raw) return null;
 			try { return JSON.parse(raw) as T; } catch { return null; }
 		};
-		const oauth1 = parse<OAuth1Token>(this.settings.garminOAuth1);
-		const oauth2 = parse<OAuth2Token>(this.settings.garminOAuth2);
+		const stored = readStoredTokens(this.app);
+		const legacy1 = parse<OAuth1Token>(this.settings.garminOAuth1);
+		const legacy2 = parse<OAuth2Token>(this.settings.garminOAuth2);
+		const oauth1 = stored.oauth1 ?? legacy1;
+		const oauth2 = stored.oauth1 ? stored.oauth2 : legacy2;
 		if (oauth1) this.garminProvider.setTokens(oauth1, oauth2);
+
+		// One-time move out of data.json: clear the plaintext copy only after the secret
+		// store returned exactly what was written, so a failure never logs the user out.
+		if (this.settings.garminOAuth1 || this.settings.garminOAuth2) {
+			if (!stored.oauth1 && legacy1 && !writeStoredTokens(this.app, legacy1, legacy2)) return;
+			this.settings.garminOAuth1 = "";
+			this.settings.garminOAuth2 = "";
+			await this.saveSettings();
+		}
 	}
 
-	/** Persist the provider's current OAuth tokens (they may have been refreshed). */
+	/** Persist the provider's current OAuth tokens (they may have been refreshed). Falls back
+	 *  to data.json only where secret storage is unavailable. */
 	private saveTokens(): void {
 		const { oauth1, oauth2 } = this.garminProvider.getTokens();
+		if (writeStoredTokens(this.app, oauth1, oauth2)) {
+			this.settings.garminOAuth1 = "";
+			this.settings.garminOAuth2 = "";
+			return;
+		}
 		this.settings.garminOAuth1 = oauth1 ? JSON.stringify(oauth1) : "";
 		this.settings.garminOAuth2 = oauth2 ? JSON.stringify(oauth2) : "";
 	}
@@ -589,7 +610,7 @@ export default class HealthSyncPlugin extends Plugin {
 	 *  log in again once, and clear the legacy field so the notice does not
 	 *  reappear. The re-login then goes through the new OAuth flow. */
 	private async migrateLegacySession(): Promise<void> {
-		if (this.settings.garminSession && !this.settings.garminOAuth1) {
+		if (this.settings.garminSession && !this.garminProvider.isSessionValid()) {
 			new Notice(t("noticeMigrationReloginRequired", this.settings.language), 0);
 			this.settings.garminSession = "";
 			// F10: await so the disk write completes — otherwise the migration notice

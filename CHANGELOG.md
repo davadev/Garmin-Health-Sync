@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Mobile support (iOS and Android). On mobile the plugin signs in with your Garmin email and password (plus a verification code if your account uses two-step verification) instead of the desktop login window. If Garmin blocks that attempt, the existing browser sign-in is offered, and a copyable diagnostics log (no password or tokens) helps with bug reports.
+
+### Changed
+
+- Garmin sign-in tokens are now stored in Obsidian's secret storage instead of `data.json`, so they are no longer synced to other devices or committed with the vault. Existing desktop sessions are moved over automatically on first start, with no new login. Each device signs in separately.
+
 ## 0.10.4
 
 ### Added
