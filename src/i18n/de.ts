@@ -143,4 +143,5 @@ export const de: Record<TranslationKeys, string> = {
 	modalManualLoginStep3Mobile: "Halte den Text gedrückt, wähle „Alles auswählen“ und dann „Kopieren“. Wechsle zurück zu Obsidian und tippe sofort auf „Aus Zwischenablage anmelden“ — das Ticket läuft nach wenigen Sekunden ab.",
 	modalManualLoginTicketFound: "Ticket gefunden: {ticket}",
 	modalManualLoginTicketNone: "Noch kein Ticket gefunden",
+	modalManualLoginClipboardBlocked: "Zwischenablage konnte nicht gelesen werden — füge das Ticket stattdessen in das Feld unten ein.",
 };

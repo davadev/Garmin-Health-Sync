@@ -141,6 +141,7 @@ export const en = {
 	modalManualLoginStep3Mobile: "Touch and hold that text, choose select all, then copy. Switch back to Obsidian and tap the clipboard button below right away — the ticket expires after a few seconds.",
 	modalManualLoginTicketFound: "Ticket found: {ticket}",
 	modalManualLoginTicketNone: "No ticket found yet",
+	modalManualLoginClipboardBlocked: "Could not read the clipboard — paste the ticket into the field below instead.",
 };
 
 export type TranslationKeys = keyof typeof en;

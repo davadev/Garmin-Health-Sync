@@ -13,17 +13,24 @@ export function isSecretStorageAvailable(app: App): boolean {
 	return typeof store?.getSecret === "function" && typeof store?.setSecret === "function";
 }
 
-function parse<T>(raw: string | null | undefined): T | null {
+function parse<T>(raw: string | null | undefined, isValid: (v: Record<string, unknown>) => boolean): T | null {
 	if (!raw) return null;
-	try { return JSON.parse(raw) as T; } catch { return null; }
+	try {
+		const v: unknown = JSON.parse(raw);
+		return v && typeof v === "object" && isValid(v as Record<string, unknown>) ? (v as T) : null;
+	} catch { return null; }
 }
+
+const isOAuth1 = (v: Record<string, unknown>): boolean =>
+	typeof v["oauth_token"] === "string" && typeof v["oauth_token_secret"] === "string";
+const isOAuth2 = (v: Record<string, unknown>): boolean => typeof v["access_token"] === "string";
 
 export function readStoredTokens(app: App): { oauth1: OAuth1Token | null; oauth2: OAuth2Token | null } {
 	if (!isSecretStorageAvailable(app)) return { oauth1: null, oauth2: null };
 	try {
 		return {
-			oauth1: parse<OAuth1Token>(app.secretStorage.getSecret(OAUTH1_ID)),
-			oauth2: parse<OAuth2Token>(app.secretStorage.getSecret(OAUTH2_ID)),
+			oauth1: parse<OAuth1Token>(app.secretStorage.getSecret(OAUTH1_ID), isOAuth1),
+			oauth2: parse<OAuth2Token>(app.secretStorage.getSecret(OAUTH2_ID), isOAuth2),
 		};
 	} catch {
 		return { oauth1: null, oauth2: null };
@@ -39,7 +46,8 @@ export function writeStoredTokens(app: App, oauth1: OAuth1Token | null, oauth2: 
 		const v2 = oauth2 ? JSON.stringify(oauth2) : "";
 		app.secretStorage.setSecret(OAUTH1_ID, v1);
 		app.secretStorage.setSecret(OAUTH2_ID, v2);
-		return app.secretStorage.getSecret(OAUTH1_ID) === v1 && app.secretStorage.getSecret(OAUTH2_ID) === v2;
+		// getSecret may return null for an empty value, so compare null-safely.
+		return (app.secretStorage.getSecret(OAUTH1_ID) ?? "") === v1 && (app.secretStorage.getSecret(OAUTH2_ID) ?? "") === v2;
 	} catch {
 		return false;
 	}

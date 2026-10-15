@@ -106,7 +106,13 @@ export class ManualLoginModal extends Modal {
 				.setCta()
 				.onClick(async () => {
 					let clip = "";
-					try { clip = await navigator.clipboard.readText(); } catch { /* clipboard unavailable */ }
+					try {
+						clip = await navigator.clipboard.readText();
+					} catch {
+						// Some mobile WebViews block clipboard reads: point to the field instead.
+						new Notice(t("modalManualLoginClipboardBlocked", this.lang));
+						return;
+					}
 					showPreview(clip);
 					if (!/ST-[0-9A-Za-z._-]+/.test(clip)) {
 						new Notice(t("modalManualLoginPasteEmpty", this.lang));

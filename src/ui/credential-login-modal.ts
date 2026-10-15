@@ -12,6 +12,8 @@ export interface CredentialLoginHandlers {
 	/** Opens the guided browser (paste-ticket) login instead. */
 	onBrowserFallback: () => void;
 	getDiagnostics: () => string;
+	/** Called once when the modal closes (lets the caller avoid stacking modals). */
+	onClosed?: () => void;
 	/** Pause between attempts after Garmin pushed back (429/403/CAPTCHA). */
 	cooldown: {
 		remainingSeconds: () => number;
@@ -34,6 +36,8 @@ export class CredentialLoginModal extends Modal {
 	private lang: string;
 	private handlers: CredentialLoginHandlers;
 	private busy = false;
+	private closed = false;
+	private lastEmail = "";
 	private timer: number | null = null;
 
 	constructor(app: App, lang: string, handlers: CredentialLoginHandlers) {
@@ -48,8 +52,10 @@ export class CredentialLoginModal extends Modal {
 	}
 
 	onClose(): void {
+		this.closed = true;
 		this.stopCountdown();
 		this.contentEl.empty();
+		this.handlers.onClosed?.();
 	}
 
 	private stopCountdown(): void {
@@ -63,6 +69,7 @@ export class CredentialLoginModal extends Modal {
 	 *  ends. No-op when no cooldown is active. */
 	private startCountdown(setting: Setting, button: ButtonComponent): void {
 		this.stopCountdown();
+		if (this.closed) return;
 		const tick = (): void => {
 			const left = this.handlers.cooldown.remainingSeconds();
 			if (left <= 0) {
@@ -87,7 +94,7 @@ export class CredentialLoginModal extends Modal {
 		contentEl.createEl("p", { text: t("modalCredIntro", this.lang) });
 		if (error) contentEl.createEl("p", { text: error, cls: "mod-warning" });
 
-		let email = "";
+		let email = this.lastEmail;
 		let password = "";
 		const submit = (): void => {
 			if (!email.trim() || !password || this.busy || this.handlers.cooldown.remainingSeconds() > 0) return;
@@ -100,7 +107,8 @@ export class CredentialLoginModal extends Modal {
 				text.inputEl.autocomplete = "username";
 				text.inputEl.setAttr("autocapitalize", "off");
 				text.inputEl.spellcheck = false;
-				text.onChange((v) => { email = v; });
+				text.setValue(email);
+				text.onChange((v) => { email = v; this.lastEmail = v; });
 			});
 		new Setting(contentEl)
 			.setName(t("modalCredPassword", this.lang))
@@ -177,7 +185,13 @@ export class CredentialLoginModal extends Modal {
 				try {
 					await navigator.clipboard.writeText(this.handlers.getDiagnostics());
 					new Notice(t("modalCredDiagnosticsCopied", this.lang));
-				} catch { /* clipboard unavailable */ }
+				} catch {
+					// Clipboard write blocked: show the text so it can be selected and copied by hand.
+					const area = this.contentEl.createEl("textarea", { text: this.handlers.getDiagnostics() });
+					area.readOnly = true;
+					area.rows = 6;
+					area.addClass("ghs-diagnostics");
+				}
 			}));
 	}
 
@@ -190,8 +204,16 @@ export class CredentialLoginModal extends Modal {
 			}
 			if (outcome.status === "ok") {
 				this.handlers.cooldown.reset();
-				await this.handlers.onSuccess();
+				// A failure while saving/starting the first sync must not look like a failed sign-in.
+				try {
+					await this.handlers.onSuccess();
+				} catch (e: unknown) {
+					console.error("Garmin Health Sync: post-login step failed", e);
+				}
 				this.close();
+			} else if (this.closed) {
+				// Modal was dismissed while the request was in flight: nothing to render.
+				return;
 			} else if (outcome.status === "mfa") {
 				this.renderMfa();
 			} else if (outcome.reason === "invalid_credentials") {
