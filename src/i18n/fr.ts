@@ -142,4 +142,5 @@ export const fr: Record<TranslationKeys, string> = {
 	modalManualLoginStep3Mobile: "Maintenez le texte appuyé, choisissez « Tout sélectionner », puis « Copier ». Revenez dans Obsidian et appuyez tout de suite sur « Se connecter depuis le presse-papiers » — le ticket expire après quelques secondes.",
 	modalManualLoginTicketFound: "Ticket trouvé : {ticket}",
 	modalManualLoginTicketNone: "Aucun ticket trouvé pour l’instant",
+	modalManualLoginClipboardBlocked: "Impossible de lire le presse-papiers — collez plutôt le ticket dans le champ ci-dessous.",
 };

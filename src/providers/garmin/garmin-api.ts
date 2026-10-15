@@ -620,9 +620,11 @@ export class GarminApi {
 	): Promise<{ ok: boolean; detail: string }> {
 		const consumer = await this.getConsumerCached();
 		const oauth1 = await getOAuth1(ticket, consumer, this.urls.domain, loginUrl);
-		this.oauth1 = oauth1;
 		console.debug("Garmin Health Sync: OAuth1 token obtained (oauth_token:", oauth1.oauth_token.slice(0, 10) + "…)");
 		const oauth2 = await exchange(oauth1, consumer, this.urls.domain, { login: true });
+		// Only replace the working session once BOTH exchanges succeeded, so a failed
+		// re-login cannot leave a half-set (OAuth1 without OAuth2) state behind.
+		this.oauth1 = oauth1;
 		this.oauth2 = oauth2;
 		this.displayName = "";          // resolve fresh on (re-)login
 		this.authState.onLogin();        // fresh login → ready, reset backoff

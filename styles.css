@@ -43,3 +43,9 @@
 .ghs-ticket-preview.is-found {
 	color: var(--text-success);
 }
+
+.ghs-diagnostics {
+	width: 100%;
+	font-family: var(--font-monospace);
+	font-size: var(--font-smaller);
+}

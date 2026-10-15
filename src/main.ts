@@ -79,6 +79,7 @@ export default class HealthSyncPlugin extends Plugin {
 	private lastAutoSyncAttempt = 0;
 	private loginRequiredNotice: Notice | null = null;
 	private lastLoginNoticeAt = 0;
+	private credentialModalOpen = false;
 
 	async onload() {
 		await this.loadSettings();
@@ -444,10 +445,13 @@ export default class HealthSyncPlugin extends Plugin {
 
 	/** Browser-free sign-in (email + password, optional MFA code). Used on mobile. */
 	openCredentialLogin(onSuccess?: () => void): void {
+		if (this.credentialModalOpen) return;
+		this.credentialModalOpen = true;
 		const cooldown = new LoginCooldown(this.app);
 		let previousAttemptAgo: number | null = null;
 		new CredentialLoginModal(this.app, this.settings.language, {
 			cooldown,
+			onClosed: () => { this.credentialModalOpen = false; },
 			login: (email, password) => {
 				previousAttemptAgo = cooldown.noteAttempt();
 				return this.garminProvider.loginWithCredentials(email, password);
@@ -512,7 +516,9 @@ export default class HealthSyncPlugin extends Plugin {
 		this.settings.garminSession = "";
 		this.settings.garminOAuth1 = "";
 		this.settings.garminOAuth2 = "";
-		writeStoredTokens(this.app, null, null);
+		if (!writeStoredTokens(this.app, null, null)) {
+			console.warn("Garmin Health Sync: could not clear the stored Garmin tokens");
+		}
 		await this.saveSettings();
 	}
 
@@ -588,13 +594,13 @@ export default class HealthSyncPlugin extends Plugin {
 		const legacy1 = parse<OAuth1Token>(this.settings.garminOAuth1);
 		const legacy2 = parse<OAuth2Token>(this.settings.garminOAuth2);
 		const oauth1 = stored.oauth1 ?? legacy1;
-		const oauth2 = stored.oauth1 ? stored.oauth2 : legacy2;
+		const oauth2 = stored.oauth2 ?? legacy2;
 		if (oauth1) this.garminProvider.setTokens(oauth1, oauth2);
 
 		// One-time move out of data.json: clear the plaintext copy only after the secret
 		// store returned exactly what was written, so a failure never logs the user out.
 		if (this.settings.garminOAuth1 || this.settings.garminOAuth2) {
-			if (!stored.oauth1 && legacy1 && !writeStoredTokens(this.app, legacy1, legacy2)) return;
+			if (oauth1 && !writeStoredTokens(this.app, oauth1, oauth2)) return;
 			this.settings.garminOAuth1 = "";
 			this.settings.garminOAuth2 = "";
 			await this.saveSettings();

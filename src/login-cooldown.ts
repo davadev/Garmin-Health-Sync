@@ -56,7 +56,8 @@ export class LoginCooldown {
 	}
 
 	remainingSeconds(): number {
-		return Math.max(0, Math.ceil((this.load().until - this.now()) / 1000));
+		// Clamp so a clock that moved backwards (or a bad stored value) cannot lock sign-in for long.
+		return Math.min(MAX_WAIT_SECONDS, Math.max(0, Math.ceil((this.load().until - this.now()) / 1000)));
 	}
 
 	strikes(): number {

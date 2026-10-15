@@ -142,4 +142,5 @@ export const es: Record<TranslationKeys, string> = {
 	modalManualLoginStep3Mobile: "Mantén pulsado el texto, elige «Seleccionar todo» y luego «Copiar». Vuelve a Obsidian y pulsa enseguida «Iniciar sesión desde el portapapeles»: el ticket caduca en unos segundos.",
 	modalManualLoginTicketFound: "Ticket encontrado: {ticket}",
 	modalManualLoginTicketNone: "Aún no se ha encontrado ningún ticket",
+	modalManualLoginClipboardBlocked: "No se pudo leer el portapapeles: pega el ticket en el campo de abajo.",
 };

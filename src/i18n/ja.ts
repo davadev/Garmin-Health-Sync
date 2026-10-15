@@ -142,4 +142,5 @@ export const ja: Record<TranslationKeys, string> = {
 	modalManualLoginStep3Mobile: "そのテキストを長押しして「すべてを選択」→「コピー」を選び、Obsidian に戻ってすぐに「クリップボードからログイン」をタップしてください。チケットは数秒で期限切れになります。",
 	modalManualLoginTicketFound: "チケットを検出しました: {ticket}",
 	modalManualLoginTicketNone: "チケットはまだ見つかっていません",
+	modalManualLoginClipboardBlocked: "クリップボードを読み取れませんでした。代わりに下の欄にチケットを貼り付けてください。",
 };

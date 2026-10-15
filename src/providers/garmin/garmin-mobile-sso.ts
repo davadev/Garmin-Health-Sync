@@ -187,5 +187,11 @@ export async function mobileVerifyMfa(domain: string, challenge: MfaChallenge, c
 	const type = statusType(r.json);
 	const ticket = ticketOf(r.json);
 	if (type === "SUCCESSFUL" && ticket) return { kind: "ticket", ticket };
-	return { kind: "error", reason: "mfa_failed", detail: `mfa: HTTP ${r.status}, responseStatus=${type || "none"}` };
+	// No session cookie visible on this platform: the code can't be verified, which is not a typo.
+	const noCookies = Object.keys(challenge.cookies).length === 0;
+	return {
+		kind: "error",
+		reason: noCookies ? "unexpected" : "mfa_failed",
+		detail: `mfa: HTTP ${r.status}, responseStatus=${type || "none"}${noCookies ? ", no session cookies" : ""}`,
+	};
 }

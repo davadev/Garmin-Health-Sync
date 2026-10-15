@@ -142,4 +142,5 @@ export const zh: Record<TranslationKeys, string> = {
 	modalManualLoginStep3Mobile: "长按该文本，选择“全选”，再选择“拷贝”。立即切回 Obsidian 并点击“从剪贴板登录”——票据几秒后就会过期。",
 	modalManualLoginTicketFound: "已找到票据：{ticket}",
 	modalManualLoginTicketNone: "尚未找到票据",
+	modalManualLoginClipboardBlocked: "无法读取剪贴板 —— 请改为将票据粘贴到下方输入框。",
 };
