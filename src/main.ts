@@ -2,6 +2,7 @@ import { App, Modal, Notice, Platform, Plugin, Setting, TAbstractFile, TFile } f
 import { DEFAULT_SETTINGS, HealthSyncSettings, HealthSyncSettingTab } from "./settings";
 import { ManualLoginModal } from "./ui/manual-login-modal";
 import { CredentialLoginModal } from "./ui/credential-login-modal";
+import { LoginCooldown } from "./login-cooldown";
 import { SyncManager } from "./sync";
 import { matchDailyNoteDate } from "./daily-note";
 import { GarminProvider } from "./providers/garmin/garmin-provider";
@@ -443,15 +444,22 @@ export default class HealthSyncPlugin extends Plugin {
 
 	/** Browser-free sign-in (email + password, optional MFA code). Used on mobile. */
 	openCredentialLogin(onSuccess?: () => void): void {
+		const cooldown = new LoginCooldown(this.app);
+		let previousAttemptAgo: number | null = null;
 		new CredentialLoginModal(this.app, this.settings.language, {
-			login: (email, password) => this.garminProvider.loginWithCredentials(email, password),
+			cooldown,
+			login: (email, password) => {
+				previousAttemptAgo = cooldown.noteAttempt();
+				return this.garminProvider.loginWithCredentials(email, password);
+			},
 			verifyMfa: (code) => this.garminProvider.completeMfaLogin(code),
 			onSuccess: async () => {
 				await this.handleLoginResult(true, "noticeLoginFailed");
 				onSuccess?.();
 			},
 			onBrowserFallback: () => this.openManualLogin(onSuccess),
-			getDiagnostics: () => this.garminProvider.getLoginDiagnostics(),
+			// Attempt timing helps work out how long Garmin's limit really lasts.
+			getDiagnostics: () => `${this.garminProvider.getLoginDiagnostics()}\nprevious attempt: ${previousAttemptAgo === null ? "none" : `${previousAttemptAgo}s ago`}, blocks in a row: ${cooldown.strikes()}`,
 		}).open();
 	}
 

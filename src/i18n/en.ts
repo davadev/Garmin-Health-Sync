@@ -135,6 +135,8 @@ export const en = {
 	modalCredCopyDiagnostics: "Copy diagnostics",
 	modalCredDiagnosticsCopied: "Diagnostics copied",
 	modalCredRetry: "Try again",
+	modalCredErrorRateLimited: "Garmin is limiting sign-in attempts from this device. Wait for the timer below, or use the browser login.",
+	modalCredCooldown: "Next attempt possible in about {time} (estimated).",
 };
 
 export type TranslationKeys = keyof typeof en;

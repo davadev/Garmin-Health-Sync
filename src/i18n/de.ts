@@ -137,4 +137,6 @@ export const de: Record<TranslationKeys, string> = {
 	modalCredCopyDiagnostics: "Diagnose kopieren",
 	modalCredDiagnosticsCopied: "Diagnose kopiert",
 	modalCredRetry: "Erneut versuchen",
+	modalCredErrorRateLimited: "Garmin begrenzt Anmeldeversuche von diesem Gerät. Warte auf den Timer unten oder nutze die Browser-Anmeldung.",
+	modalCredCooldown: "Nächster Versuch in etwa {time} möglich (geschätzt).",
 };

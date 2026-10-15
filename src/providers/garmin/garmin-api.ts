@@ -158,7 +158,7 @@ function getLoginUserAgent(): string {
 export type CredentialLoginOutcome =
 	| { status: "ok" }
 	| { status: "mfa"; method: string }
-	| { status: "error"; reason: MobileSsoFailure | "exchange_failed"; detail: string };
+	| { status: "error"; reason: MobileSsoFailure | "exchange_failed"; detail: string; retryAfter?: number };
 
 export class GarminApi {
 	// OAuth tokens (M1/M2): long-lived OAuth1 + short-lived OAuth2. Persisted via main.ts.
@@ -664,7 +664,12 @@ export class GarminApi {
 		}
 		if (result.kind === "error") {
 			this.diag(`sso: ${result.detail}`);
-			return { status: "error", reason: result.reason, detail: this.getLoginDiagnostics() };
+			return {
+				status: "error",
+				reason: result.reason,
+				detail: this.getLoginDiagnostics(),
+				...(result.retryAfter !== undefined ? { retryAfter: result.retryAfter } : {}),
+			};
 		}
 		this.pendingMfa = null;
 		this.diag("sso: ticket received");

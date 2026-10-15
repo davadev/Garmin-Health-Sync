@@ -1,7 +1,8 @@
-import { App, Modal, Notice, Setting } from "obsidian";
+import { App, ButtonComponent, Modal, Notice, Setting } from "obsidian";
 import { t } from "../i18n/t";
 import type { TranslationKeys } from "../i18n/en";
 import type { CredentialLoginOutcome } from "../providers/garmin/garmin-api";
+import { formatCountdown } from "../login-cooldown";
 
 export interface CredentialLoginHandlers {
 	login: (email: string, password: string) => Promise<CredentialLoginOutcome>;
@@ -11,12 +12,18 @@ export interface CredentialLoginHandlers {
 	/** Opens the guided browser (paste-ticket) login instead. */
 	onBrowserFallback: () => void;
 	getDiagnostics: () => string;
+	/** Pause between attempts after Garmin pushed back (429/403/CAPTCHA). */
+	cooldown: {
+		remainingSeconds: () => number;
+		registerBlock: (retryAfterSeconds?: number) => number;
+		reset: () => void;
+	};
 }
 
 const ERROR_KEYS: Record<string, TranslationKeys> = {
 	invalid_credentials: "modalCredErrorInvalid",
 	blocked: "modalCredErrorBlocked",
-	rate_limited: "modalCredErrorBlocked",
+	rate_limited: "modalCredErrorRateLimited",
 	captcha: "modalCredErrorBlocked",
 	mfa_failed: "modalCredErrorMfa",
 };
@@ -27,6 +34,7 @@ export class CredentialLoginModal extends Modal {
 	private lang: string;
 	private handlers: CredentialLoginHandlers;
 	private busy = false;
+	private timer: number | null = null;
 
 	constructor(app: App, lang: string, handlers: CredentialLoginHandlers) {
 		super(app);
@@ -39,7 +47,36 @@ export class CredentialLoginModal extends Modal {
 	}
 
 	onClose(): void {
+		this.stopCountdown();
 		this.contentEl.empty();
+	}
+
+	private stopCountdown(): void {
+		if (this.timer !== null) {
+			window.clearInterval(this.timer);
+			this.timer = null;
+		}
+	}
+
+	/** Disables `button` and shows a live "try again in m:ss" in `setting` until the cooldown
+	 *  ends. No-op when no cooldown is active. */
+	private startCountdown(setting: Setting, button: ButtonComponent): void {
+		this.stopCountdown();
+		const tick = (): void => {
+			const left = this.handlers.cooldown.remainingSeconds();
+			if (left <= 0) {
+				this.stopCountdown();
+				button.setDisabled(false);
+				setting.setDesc("");
+				return;
+			}
+			button.setDisabled(true);
+			setting.setDesc(t("modalCredCooldown", this.lang).replace("{time}", formatCountdown(left)));
+		};
+		tick();
+		if (this.handlers.cooldown.remainingSeconds() > 0) {
+			this.timer = window.setInterval(tick, 1000);
+		}
 	}
 
 	private renderCredentials(error?: string): void {
@@ -67,17 +104,20 @@ export class CredentialLoginModal extends Modal {
 			});
 
 		const submit = (): void => {
-			if (!email.trim() || !password || this.busy) return;
+			if (!email.trim() || !password || this.busy || this.handlers.cooldown.remainingSeconds() > 0) return;
 			void this.run(() => this.handlers.login(email, password)).finally(() => { password = ""; });
 		};
-		new Setting(contentEl)
-			.addButton((btn) => btn.setButtonText(t("modalCredSubmit", this.lang)).setCta().onClick(submit))
-			.addButton((btn) => btn
-				.setButtonText(t("modalCredBrowserFallback", this.lang))
-				.onClick(() => {
-					this.close();
-					this.handlers.onBrowserFallback();
-				}));
+		const submitRow = new Setting(contentEl);
+		submitRow.addButton((btn) => {
+			btn.setButtonText(t("modalCredSubmit", this.lang)).setCta().onClick(submit);
+			this.startCountdown(submitRow, btn);
+		});
+		new Setting(contentEl).addButton((btn) => btn
+			.setButtonText(t("modalCredBrowserFallback", this.lang))
+			.onClick(() => {
+				this.close();
+				this.handlers.onBrowserFallback();
+			}));
 	}
 
 	private renderMfa(error?: string): void {
@@ -107,35 +147,41 @@ export class CredentialLoginModal extends Modal {
 
 	private renderFailure(message: string): void {
 		const { contentEl } = this;
+		this.stopCountdown();
 		contentEl.empty();
 		contentEl.createEl("h2", { text: t("modalCredTitle", this.lang) });
 		contentEl.createEl("p", { text: message, cls: "mod-warning" });
-		new Setting(contentEl)
-			.addButton((btn) => btn
-				.setButtonText(t("modalCredBrowserFallback", this.lang))
-				.setCta()
-				.onClick(() => {
-					this.close();
-					this.handlers.onBrowserFallback();
-				}))
-			.addButton((btn) => btn
-				.setButtonText(t("modalCredCopyDiagnostics", this.lang))
-				.onClick(async () => {
-					try {
-						await navigator.clipboard.writeText(this.handlers.getDiagnostics());
-						new Notice(t("modalCredDiagnosticsCopied", this.lang));
-					} catch { /* clipboard unavailable */ }
-				}))
-			.addButton((btn) => btn
-				.setButtonText(t("modalCredRetry", this.lang))
-				.onClick(() => this.renderCredentials()));
+		new Setting(contentEl).addButton((btn) => btn
+			.setButtonText(t("modalCredBrowserFallback", this.lang))
+			.setCta()
+			.onClick(() => {
+				this.close();
+				this.handlers.onBrowserFallback();
+			}));
+		const retryRow = new Setting(contentEl);
+		retryRow.addButton((btn) => {
+			btn.setButtonText(t("modalCredRetry", this.lang)).onClick(() => this.renderCredentials());
+			this.startCountdown(retryRow, btn);
+		});
+		new Setting(contentEl).addButton((btn) => btn
+			.setButtonText(t("modalCredCopyDiagnostics", this.lang))
+			.onClick(async () => {
+				try {
+					await navigator.clipboard.writeText(this.handlers.getDiagnostics());
+					new Notice(t("modalCredDiagnosticsCopied", this.lang));
+				} catch { /* clipboard unavailable */ }
+			}));
 	}
 
 	private async run(action: () => Promise<CredentialLoginOutcome>): Promise<void> {
 		this.busy = true;
 		try {
 			const outcome = await action();
+			if (outcome.status === "error" && ["blocked", "rate_limited", "captcha"].includes(outcome.reason)) {
+				this.handlers.cooldown.registerBlock(outcome.retryAfter);
+			}
 			if (outcome.status === "ok") {
+				this.handlers.cooldown.reset();
 				await this.handlers.onSuccess();
 				this.close();
 			} else if (outcome.status === "mfa") {
