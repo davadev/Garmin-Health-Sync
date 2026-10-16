@@ -57,16 +57,22 @@ function endpoint(domain: string, path: string): string {
 	return `https://sso.${domain}/mobile/api/${path}?${qs.toString()}`;
 }
 
-/** Merges Set-Cookie headers into `jar`. requestUrl may fold several cookies into one
- *  comma-joined header; the lookahead avoids splitting inside `Expires=Thu, 01 Jan …`. */
-function collectCookies(headers: Record<string, string>, jar: Record<string, string>): void {
+/** Merges Set-Cookie headers into `jar`. Depending on the platform requestUrl exposes the
+ *  header as one string (several cookies folded into one comma-joined value) or as an array
+ *  of strings (Node-based desktop stack). The lookahead avoids splitting inside
+ *  `Expires=Thu, 01 Jan …`. */
+export function collectCookies(headers: Record<string, unknown> | undefined, jar: Record<string, string>): void {
+	if (!headers) return;
 	const key = Object.keys(headers).find((k) => k.toLowerCase() === "set-cookie");
 	const raw = key ? headers[key] : undefined;
-	if (!raw) return;
-	for (const part of raw.split(/,(?=\s*[A-Za-z0-9_.-]+=)/)) {
-		const pair = part.split(";")[0] ?? "";
-		const i = pair.indexOf("=");
-		if (i > 0) jar[pair.slice(0, i).trim()] = pair.slice(i + 1).trim();
+	const values = Array.isArray(raw) ? raw : typeof raw === "string" ? [raw] : [];
+	for (const value of values) {
+		if (typeof value !== "string") continue;
+		for (const part of value.split(/,(?=\s*[A-Za-z0-9_.-]+=)/)) {
+			const pair = part.split(";")[0] ?? "";
+			const i = pair.indexOf("=");
+			if (i > 0) jar[pair.slice(0, i).trim()] = pair.slice(i + 1).trim();
+		}
 	}
 }
 
@@ -102,7 +108,9 @@ async function post(
 		return { kind: "error", reason: "network", detail: `${path}: network error (${msg})` };
 	}
 
-	collectCookies(res.headers, jar);
+	try {
+		collectCookies(res.headers, jar);
+	} catch { /* a cookie we cannot parse must not abort the sign-in */ }
 
 	if (res.status === 429) {
 		const key = Object.keys(res.headers).find((k) => k.toLowerCase() === "retry-after");
