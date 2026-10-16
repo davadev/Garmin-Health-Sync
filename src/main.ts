@@ -1,4 +1,4 @@
-import { App, Modal, Notice, Platform, Plugin, Setting, TAbstractFile, TFile } from "obsidian";
+import { App, Modal, Notice, Plugin, Setting, TAbstractFile, TFile } from "obsidian";
 import { DEFAULT_SETTINGS, HealthSyncSettings, HealthSyncSettingTab } from "./settings";
 import { ManualLoginModal } from "./ui/manual-login-modal";
 import { CredentialLoginModal } from "./ui/credential-login-modal";
@@ -418,34 +418,6 @@ export default class HealthSyncPlugin extends Plugin {
 		return Promise.resolve();
 	}
 
-	/** Desktop fallback: Garmin's own login page in an embedded window (needs Electron). */
-	private async loginViaLoginWindow(onSuccess?: () => void): Promise<void> {
-		try {
-			const result = await this.garminProvider.authenticate();
-			if (result.ok) {
-				await this.handleLoginResult(true, "noticeLoginFailed");
-				onSuccess?.();
-				return;
-			}
-			if (result.cancelled) {
-				// User deliberately closed the login window — not a stall/escape. Don't
-				// nag with a fallback notice or auto-open the guided browser login.
-				console.debug("Garmin Health Sync: login window closed by user — no fallback prompt");
-				return;
-			}
-			// Issue #6: genuine no_ticket (the hand-off escapes to the system browser or
-			// stalls on the form). Instead of a dead-end failure notice, guide to the
-			// browser login — it uses a real browser and completes where the window cannot.
-			console.debug("Garmin Health Sync: in-window login produced no ticket → guided browser login");
-			new Notice(t("noticeLoginFallbackToBrowser", this.settings.language));
-			this.openManualLogin(onSuccess);
-		} catch (error) {
-			console.error("Garmin Health Sync: OAuth login failed", error);
-			new Notice(t("noticeLoginFallbackToBrowser", this.settings.language));
-			this.openManualLogin(onSuccess);
-		}
-	}
-
 	/** Browser-free sign-in (email + password, optional MFA code). Used on mobile. */
 	openCredentialLogin(onSuccess?: () => void): void {
 		if (this.credentialModalOpen) return;
@@ -464,11 +436,8 @@ export default class HealthSyncPlugin extends Plugin {
 				await this.handleLoginResult(true, "noticeLoginFailed");
 				onSuccess?.();
 			},
-			// Backup path: desktop opens Garmin's login window, mobile the paste-ticket login.
-			onBrowserFallback: () => {
-				if (Platform.isDesktopApp) void this.loginViaLoginWindow(onSuccess);
-				else this.openManualLogin(onSuccess);
-			},
+			// Backup on every platform: sign in on Garmin's page in the browser, paste the ticket back.
+			onBrowserFallback: () => this.openManualLogin(onSuccess),
 			// Attempt timing helps work out how long Garmin's limit really lasts.
 			getDiagnostics: () => `${this.garminProvider.getLoginDiagnostics()}\nprevious attempt: ${previousAttemptAgo === null ? "none" : `${previousAttemptAgo}s ago`}, blocks in a row: ${cooldown.strikes()}`,
 		}).open();

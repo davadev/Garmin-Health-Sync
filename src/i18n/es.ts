@@ -104,10 +104,10 @@ export const es: Record<TranslationKeys, string> = {
 
 	// Manual Login Modal (issue #6 fallback)
 	modalManualLoginTitle: "Inicio de sesión manual de Garmin",
-	modalManualLoginIntro: "Si la ventana de inicio de sesión normal no se completa (se queda en el formulario o abre el navegador del sistema), puedes terminar el inicio de sesión manualmente:",
+	modalManualLoginIntro: "La página de inicio de sesión de Garmin se abre en tu navegador. Después de iniciar sesión, trae el ticket de un solo uso de vuelta al plugin:",
 	modalManualLoginStep1: "Abre la página de inicio de sesión de Garmin en tu navegador web e inicia sesión.",
-	modalManualLoginStep2: "Tras iniciar sesión, el navegador muestra una página casi vacía cuya dirección contiene 'ticket=ST-…'.",
-	modalManualLoginStep3: "Copia esa dirección completa (o solo la parte ST-…) y pégala abajo de inmediato — el ticket expira en unos segundos.",
+	modalManualLoginStep2: "Tras iniciar sesión, el navegador muestra una página casi vacía. Su texto contiene 'serviceTicket: ST-…' (o su dirección contiene 'ticket=ST-…').",
+	modalManualLoginStep3: "Selecciona y copia ese texto (o la dirección completa) y pégalo abajo de inmediato — el ticket expira en unos segundos.",
 	modalManualLoginOpenUrl: "Página de inicio de sesión de Garmin",
 	modalManualLoginOpenButton: "Abrir en el navegador",
 	modalManualLoginCopyTooltip: "Copiar enlace",
@@ -138,7 +138,6 @@ export const es: Record<TranslationKeys, string> = {
 	modalCredRetry: "Reintentar",
 	modalCredErrorRateLimited: "Garmin está limitando los intentos de inicio de sesión desde este dispositivo. Espera al temporizador de abajo o usa el inicio de sesión en el navegador.",
 	modalCredCooldown: "Podrás intentarlo de nuevo en aproximadamente {time} (estimado).",
-	modalManualLoginStep2Mobile: "Tras iniciar sesión, la página muestra una línea corta de texto con «serviceTicket: ST-…».",
 	modalManualLoginStep3Mobile: "Mantén pulsado el texto, elige «Seleccionar todo» y luego «Copiar». Vuelve a Obsidian y pulsa enseguida «Iniciar sesión desde el portapapeles»: el ticket caduca en unos segundos.",
 	modalManualLoginTicketFound: "Ticket encontrado: {ticket}",
 	modalManualLoginTicketNone: "Aún no se ha encontrado ningún ticket",

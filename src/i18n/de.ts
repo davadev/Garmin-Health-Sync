@@ -105,10 +105,10 @@ export const de: Record<TranslationKeys, string> = {
 
 	// Manual Login Modal (issue #6 fallback)
 	modalManualLoginTitle: "Manuelle Garmin-Anmeldung",
-	modalManualLoginIntro: "Wenn das normale Login-Fenster nicht zum Abschluss kommt (es bleibt auf dem Anmeldeformular stehen oder öffnet den System-Browser), kannst du die Anmeldung manuell abschließen:",
+	modalManualLoginIntro: "Garmins Anmeldeseite öffnet sich in deinem Browser. Bringe das einmalige Ticket nach der Anmeldung zurück ins Plugin:",
 	modalManualLoginStep1: "Öffne die Garmin-Anmeldeseite in deinem Webbrowser und melde dich an.",
-	modalManualLoginStep2: "Nach der Anmeldung zeigt der Browser eine fast leere Seite, deren Adresse 'ticket=ST-…' enthält.",
-	modalManualLoginStep3: "Kopiere diese vollständige Adresse (oder nur den ST-…-Teil) und füge sie sofort unten ein — das Ticket läuft nach wenigen Sekunden ab.",
+	modalManualLoginStep2: "Nach der Anmeldung zeigt der Browser eine fast leere Seite. Ihr Text enthält 'serviceTicket: ST-…' (oder ihre Adresse enthält 'ticket=ST-…').",
+	modalManualLoginStep3: "Markiere und kopiere diesen Text (oder die vollständige Adresse) und füge ihn sofort unten ein — das Ticket läuft nach wenigen Sekunden ab.",
 	modalManualLoginOpenUrl: "Garmin-Anmeldeseite",
 	modalManualLoginOpenButton: "Im Browser öffnen",
 	modalManualLoginCopyTooltip: "Link kopieren",
@@ -139,7 +139,6 @@ export const de: Record<TranslationKeys, string> = {
 	modalCredRetry: "Erneut versuchen",
 	modalCredErrorRateLimited: "Garmin begrenzt Anmeldeversuche von diesem Gerät. Warte auf den Timer unten oder nutze die Browser-Anmeldung.",
 	modalCredCooldown: "Nächster Versuch in etwa {time} möglich (geschätzt).",
-	modalManualLoginStep2Mobile: "Nach der Anmeldung zeigt die Seite eine kurze Textzeile mit 'serviceTicket: ST-…'.",
 	modalManualLoginStep3Mobile: "Halte den Text gedrückt, wähle „Alles auswählen“ und dann „Kopieren“. Wechsle zurück zu Obsidian und tippe sofort auf „Aus Zwischenablage anmelden“ — das Ticket läuft nach wenigen Sekunden ab.",
 	modalManualLoginTicketFound: "Ticket gefunden: {ticket}",
 	modalManualLoginTicketNone: "Noch kein Ticket gefunden",

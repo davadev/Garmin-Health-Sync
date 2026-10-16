@@ -4,7 +4,7 @@
 
 ### Added
 
-- Mobile support (iOS and Android). The plugin now signs in with your Garmin email and password (plus a verification code if your account uses two-step verification) on every platform, without a browser. If Garmin blocks or rate-limits that attempt, a countdown shows when you can retry and a browser sign-in is offered as a backup: on desktop Garmin's own login window, on mobile the guided paste-ticket login. A copyable diagnostics log (no password or tokens) helps with bug reports.
+- Mobile support (iOS and Android). The plugin now signs in with your Garmin email and password (plus a verification code if your account uses two-step verification) on every platform, without a browser. If Garmin blocks or rate-limits that attempt, a countdown shows when you can retry and a guided browser sign-in (sign in on Garmin's page, paste the one-time ticket back) is offered as a backup on every platform. A copyable diagnostics log (no password or tokens) helps with bug reports.
 
 ### Changed
 
