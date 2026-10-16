@@ -18,7 +18,7 @@ export const es: Record<TranslationKeys, string> = {
 	settingsGarminLogout: "Cerrar sesión",
 	settingsGarminManualLogin: "Iniciar sesión con el navegador",
 	settingsGarminManualLoginTooltip: "Alternativa fiable: completa el inicio de sesión en tu navegador real si la ventana integrada no termina.",
-	settingsGarminSessionPrivacyDesc: "Tus tokens de inicio de sesión de Garmin se guardan en los datos locales del plugin de Obsidian para restaurar la conexión; trátalos como un token de inicio de sesión",
+	settingsGarminSessionPrivacyDesc: "Tus tokens de inicio de sesión de Garmin se guardan en el almacén de secretos de Obsidian en este dispositivo para restaurar la conexión; trátalos como un token de inicio de sesión",
 	settingsAutoSync: "Sincronizar nota diaria automáticamente",
 	settingsAutoSyncDesc: "Sincronizar datos de salud una vez al iniciar Obsidian",
 	settingsAutoSyncPaused: "Pausado por error de autenticación — reactivar tras iniciar sesión",

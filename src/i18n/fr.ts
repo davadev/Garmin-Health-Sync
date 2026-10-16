@@ -18,7 +18,7 @@ export const fr: Record<TranslationKeys, string> = {
 	settingsGarminLogout: "Déconnexion",
 	settingsGarminManualLogin: "Se connecter via le navigateur",
 	settingsGarminManualLoginTooltip: "Solution fiable — termine la connexion dans votre vrai navigateur si la fenêtre intégrée n'aboutit pas.",
-	settingsGarminSessionPrivacyDesc: "Vos jetons de connexion Garmin sont stockés dans les données locales du plugin Obsidian pour restaurer la connexion ; traitez-les comme un jeton de connexion",
+	settingsGarminSessionPrivacyDesc: "Vos jetons de connexion Garmin sont stockés dans le stockage de secrets d’Obsidian sur cet appareil pour restaurer la connexion ; traitez-les comme un jeton de connexion",
 	settingsAutoSync: "Synchroniser la note quotidienne automatiquement",
 	settingsAutoSyncDesc: "Synchroniser les données de santé une fois au démarrage d'Obsidian",
 	settingsAutoSyncPaused: "En pause suite à une erreur d'authentification — réactiver après reconnexion",

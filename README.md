@@ -4,7 +4,7 @@
 
 Sync steps, sleep, heart rate, stress, activities and more from Garmin Connect into Obsidian Daily Notes — as frontmatter properties you can query with Dataview.
 
-> **Note:** This plugin uses Garmin Connect's internal API — there is no official third-party API available. On desktop you sign in through an embedded Garmin login window; on mobile you sign in with your Garmin email and password (and a verification code if you use two-step verification).
+> **Works on desktop and mobile** (Windows, macOS, Linux, iOS, Android). This plugin uses Garmin Connect's internal API — there is no official third-party API available. You sign in with your Garmin email and password (plus the verification code if you use two-step verification). If Garmin blocks that attempt, an alternative browser sign-in is available.
 
 ## Features
 
@@ -99,6 +99,12 @@ trainings:
 
 ## Usage
 
+### Signing in
+
+Open the plugin settings and select **Garmin Connect**, then enter your Garmin email and password (and the verification code if you use two-step verification). The same sign-in works on desktop and mobile.
+
+Garmin may limit repeated sign-in attempts from one device; the plugin then shows a countdown before you can try again. If sign-in is blocked, use **Use browser login** instead: on desktop Garmin's own login page opens in a window; on mobile you sign in in your browser, copy the page text that contains `ST-…` and tap the clipboard button in the plugin. Once signed in, the plugin renews the connection by itself, so you rarely need to sign in again.
+
 ### Where notes are stored
 
 The **daily notes path** is the folder, the **daily note format** is the filename in [moment.js](https://momentjs.com/docs/#/displaying/format/) syntax — the same convention as the core Daily Notes plugin. The format itself may contain `/` to nest notes into date-based subfolders, and square brackets keep text literal:
@@ -168,7 +174,7 @@ Each activity is assigned a category:
 
 This plugin makes network requests to two external services:
 
-- **Garmin Connect** — on desktop a browser window authenticates with Garmin Connect; on mobile you enter your email and password (and a verification code if required) in the plugin, and they are sent only to Garmin's sign-in servers (`sso.garmin.com`, or `sso.garmin.cn` for China). Your password is never stored or logged by the plugin. After sign-in the plugin keeps Garmin sign-in tokens in Obsidian's secret storage, which stays on the device, so they are not synced to other devices or included in vault backups and Git. Only if secret storage is unavailable or rejects the write does the plugin fall back to keeping them in `data.json`. The public OAuth client keys needed for sign-in are fetched from `thegarth.s3.amazonaws.com` (with bundled fallback keys if that host is unreachable). Treat these tokens like a login: their lifetime is controlled by Garmin. Each device signs in separately. Using **Logout** clears the stored tokens on this device.
+- **Garmin Connect** — you enter your email and password (and a verification code if required) in the plugin. They are sent only to Garmin's sign-in servers (`sso.garmin.com`, or `sso.garmin.cn` for China) and are never stored or logged by the plugin. After sign-in the plugin keeps Garmin sign-in tokens in Obsidian's secret storage, which stays on the device, so they are not synced to other devices or included in vault backups and Git. Only if secret storage is unavailable or rejects the write does the plugin fall back to keeping them in `data.json`. Treat these tokens like a login: their lifetime is controlled by Garmin. Each device signs in separately. If Garmin blocks or rate-limits the sign-in, a browser sign-in is offered (on desktop Garmin's own login page opens in a window; on mobile you sign in in your browser and paste the one-time ticket back). The public OAuth client keys needed for sign-in are fetched from `thegarth.s3.amazonaws.com` (with bundled fallback keys if that host is unreachable). Using **Logout** clears the stored tokens on this device.
 - **Nominatim (OpenStreetMap)** — if the "Workout location" feature is enabled, the GPS coordinates of your first activity are sent to `nominatim.openstreetmap.org` for reverse geocoding. You can disable this in settings under *Workout location*.
 
 No data is sent to any other server.

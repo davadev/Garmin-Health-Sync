@@ -18,7 +18,7 @@ export const ja: Record<TranslationKeys, string> = {
 	settingsGarminLogout: "ログアウト",
 	settingsGarminManualLogin: "ブラウザでログイン",
 	settingsGarminManualLoginTooltip: "確実な代替手段 — アプリ内ウィンドウが完了しない場合、実際のブラウザでログインを完了します。",
-	settingsGarminSessionPrivacyDesc: "接続を復元するため、GarminのログイントークンはローカルのObsidianプラグインデータに保存されます。ログイントークンとして扱ってください",
+	settingsGarminSessionPrivacyDesc: "接続を復元するため、Garmin のサインイントークンはこのデバイスの Obsidian シークレットストレージに保存されます。ログイントークンとして扱ってください",
 	settingsAutoSync: "デイリーノートを自動同期",
 	settingsAutoSyncDesc: "Obsidian 起動時にヘルスデータを一度同期",
 	settingsAutoSyncPaused: "認証エラーにより一時停止中 — 再ログイン後に再開",

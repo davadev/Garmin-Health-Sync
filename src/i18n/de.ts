@@ -18,7 +18,7 @@ export const de: Record<TranslationKeys, string> = {
 	settingsGarminLogout: "Abmelden",
 	settingsGarminManualLogin: "Im Browser anmelden",
 	settingsGarminManualLoginTooltip: "Zuverlässiger Weg — schließt die Anmeldung in deinem echten Browser ab, falls das In-App-Fenster scheitert.",
-	settingsGarminSessionPrivacyDesc: "Deine Garmin-Login-Token werden lokal in den Obsidian-Plugin-Daten gespeichert, damit die Verbindung wiederhergestellt werden kann; behandle sie wie ein Login-Token",
+	settingsGarminSessionPrivacyDesc: "Deine Garmin-Anmeldetokens werden im Secret Storage von Obsidian auf diesem Gerät gespeichert, damit die Verbindung wiederhergestellt werden kann; behandle sie wie ein Login-Token",
 	settingsAutoSync: "Gesundheitsdaten automatisch synchronisieren",
 	settingsAutoSyncDesc: "Automatisch die letzten 7 Tage abrufen beim Start von Obsidian",
 	settingsAutoSyncPaused: "Pausiert wegen Auth-Fehler — nach erneutem Login wieder aktivieren",
