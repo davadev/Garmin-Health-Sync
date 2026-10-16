@@ -412,16 +412,19 @@ export default class HealthSyncPlugin extends Plugin {
 	}
 
 	/** Interactive OAuth login from settings (opens the Garmin login window). */
-	async loginViaBrowser(onSuccess?: () => void): Promise<void> {
-		// No Electron BrowserWindow on mobile: sign in with email + password instead.
-		if (!Platform.isDesktopApp) {
-			this.openCredentialLogin(onSuccess);
-			return;
-		}
+	loginViaBrowser(onSuccess?: () => void): Promise<void> {
+		// Primary sign-in on every platform: email + password (+ MFA code) without a browser.
+		this.openCredentialLogin(onSuccess);
+		return Promise.resolve();
+	}
+
+	/** Desktop fallback: Garmin's own login page in an embedded window (needs Electron). */
+	private async loginViaLoginWindow(onSuccess?: () => void): Promise<void> {
 		try {
 			const result = await this.garminProvider.authenticate();
 			if (result.ok) {
 				await this.handleLoginResult(true, "noticeLoginFailed");
+				onSuccess?.();
 				return;
 			}
 			if (result.cancelled) {
@@ -435,11 +438,11 @@ export default class HealthSyncPlugin extends Plugin {
 			// browser login — it uses a real browser and completes where the window cannot.
 			console.debug("Garmin Health Sync: in-window login produced no ticket → guided browser login");
 			new Notice(t("noticeLoginFallbackToBrowser", this.settings.language));
-			this.openManualLogin();
+			this.openManualLogin(onSuccess);
 		} catch (error) {
 			console.error("Garmin Health Sync: OAuth login failed", error);
 			new Notice(t("noticeLoginFallbackToBrowser", this.settings.language));
-			this.openManualLogin();
+			this.openManualLogin(onSuccess);
 		}
 	}
 
@@ -461,7 +464,11 @@ export default class HealthSyncPlugin extends Plugin {
 				await this.handleLoginResult(true, "noticeLoginFailed");
 				onSuccess?.();
 			},
-			onBrowserFallback: () => this.openManualLogin(onSuccess),
+			// Backup path: desktop opens Garmin's login window, mobile the paste-ticket login.
+			onBrowserFallback: () => {
+				if (Platform.isDesktopApp) void this.loginViaLoginWindow(onSuccess);
+				else this.openManualLogin(onSuccess);
+			},
 			// Attempt timing helps work out how long Garmin's limit really lasts.
 			getDiagnostics: () => `${this.garminProvider.getLoginDiagnostics()}\nprevious attempt: ${previousAttemptAgo === null ? "none" : `${previousAttemptAgo}s ago`}, blocks in a row: ${cooldown.strikes()}`,
 		}).open();
