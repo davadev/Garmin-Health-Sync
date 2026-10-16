@@ -18,7 +18,7 @@ export const zh: Record<TranslationKeys, string> = {
 	settingsGarminLogout: "退出登录",
 	settingsGarminManualLogin: "通过浏览器登录",
 	settingsGarminManualLoginTooltip: "可靠的备用方式——如果应用内窗口无法完成，可在真实浏览器中完成登录。",
-	settingsGarminSessionPrivacyDesc: "您的 Garmin 登录令牌会保存在本地 Obsidian 插件数据中以便恢复连接；请像登录令牌一样保护它们",
+	settingsGarminSessionPrivacyDesc: "您的 Garmin 登录令牌会保存在本设备的 Obsidian 密钥存储中以便恢复连接；请像登录令牌一样保护它们",
 	settingsAutoSync: "自动同步每日笔记",
 	settingsAutoSyncDesc: "Obsidian 启动时自动同步一次健康数据",
 	settingsAutoSyncPaused: "因认证错误已暂停 — 重新登录后恢复",

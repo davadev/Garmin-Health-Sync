@@ -16,7 +16,7 @@ export const en = {
 	settingsGarminLogout: "Logout",
 	settingsGarminManualLogin: "Sign in via browser",
 	settingsGarminManualLoginTooltip: "Reliable fallback — finishes the login in your real browser if the in-app window doesn't complete.",
-	settingsGarminSessionPrivacyDesc: "Your Garmin login tokens are stored in local Obsidian plugin data so the connection can be restored; treat them like a login token",
+	settingsGarminSessionPrivacyDesc: "Your Garmin sign-in tokens are stored in Obsidian's secret storage on this device so the connection can be restored; treat them like a login token",
 	settingsAutoSync: "Auto-sync health data",
 	settingsAutoSyncDesc: "Automatically sync the last 7 days when Obsidian starts",
 	settingsAutoSyncPaused: "Paused due to auth error — re-enable after logging in",
