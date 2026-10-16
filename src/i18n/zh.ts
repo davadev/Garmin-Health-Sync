@@ -104,10 +104,10 @@ export const zh: Record<TranslationKeys, string> = {
 
 	// Manual Login Modal (issue #6 fallback)
 	modalManualLoginTitle: "手动 Garmin 登录",
-	modalManualLoginIntro: "如果常规登录窗口无法完成登录（停留在登录表单或打开了系统浏览器），可以手动完成登录：",
+	modalManualLoginIntro: "Garmin 的登录页面会在浏览器中打开。登录后，请把一次性票据带回插件：",
 	modalManualLoginStep1: "在网页浏览器中打开 Garmin 登录页面并登录。",
-	modalManualLoginStep2: "登录后浏览器会显示一个几乎空白的页面，其地址包含 'ticket=ST-…'。",
-	modalManualLoginStep3: "复制完整地址（或仅 ST-… 部分）并立即粘贴到下方 — 票据几秒后即失效。",
+	modalManualLoginStep2: "登录后浏览器会显示一个几乎空白的页面，其文字包含 'serviceTicket: ST-…'（或地址包含 'ticket=ST-…'）。",
+	modalManualLoginStep3: "选中并复制该文字（或完整地址），然后立即粘贴到下方 — 票据几秒后即失效。",
 	modalManualLoginOpenUrl: "Garmin 登录页面",
 	modalManualLoginOpenButton: "在浏览器中打开",
 	modalManualLoginCopyTooltip: "复制链接",
@@ -138,7 +138,6 @@ export const zh: Record<TranslationKeys, string> = {
 	modalCredRetry: "重试",
 	modalCredErrorRateLimited: "Garmin 正在限制此设备的登录尝试。请等待下方计时结束，或使用浏览器登录。",
 	modalCredCooldown: "约 {time} 后可再次尝试（估算）。",
-	modalManualLoginStep2Mobile: "登录后，页面会显示一行包含 'serviceTicket: ST-…' 的短文本。",
 	modalManualLoginStep3Mobile: "长按该文本，选择“全选”，再选择“拷贝”。立即切回 Obsidian 并点击“从剪贴板登录”——票据几秒后就会过期。",
 	modalManualLoginTicketFound: "已找到票据：{ticket}",
 	modalManualLoginTicketNone: "尚未找到票据",

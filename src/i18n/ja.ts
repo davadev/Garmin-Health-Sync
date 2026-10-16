@@ -104,10 +104,10 @@ export const ja: Record<TranslationKeys, string> = {
 
 	// Manual Login Modal (issue #6 fallback)
 	modalManualLoginTitle: "手動 Garmin ログイン",
-	modalManualLoginIntro: "通常のログインウィンドウが完了しない場合（サインインフォームのまま止まる、またはシステムブラウザが開く場合）、手動でログインを完了できます：",
+	modalManualLoginIntro: "Garmin のサインインページがブラウザで開きます。サインイン後、1回限りのチケットをプラグインに持ち帰ってください：",
 	modalManualLoginStep1: "ウェブブラウザで Garmin のサインインページを開いてログインします。",
-	modalManualLoginStep2: "サインイン後、ブラウザにはほぼ空白のページが表示され、そのアドレスに 'ticket=ST-…' が含まれます。",
-	modalManualLoginStep3: "そのアドレス全体（または ST-… の部分のみ）をコピーして、すぐ下に貼り付けてください — チケットは数秒で失効します。",
+	modalManualLoginStep2: "サインイン後、ブラウザにはほぼ空白のページが表示されます。そのテキストに 'serviceTicket: ST-…' が含まれます（またはアドレスに 'ticket=ST-…' が含まれます）。",
+	modalManualLoginStep3: "そのテキスト（またはアドレス全体）を選択してコピーし、すぐ下に貼り付けてください — チケットは数秒で失効します。",
 	modalManualLoginOpenUrl: "Garmin サインインページ",
 	modalManualLoginOpenButton: "ブラウザで開く",
 	modalManualLoginCopyTooltip: "リンクをコピー",
@@ -138,7 +138,6 @@ export const ja: Record<TranslationKeys, string> = {
 	modalCredRetry: "再試行",
 	modalCredErrorRateLimited: "Garmin がこのデバイスからのサインイン試行を制限しています。下のタイマーが終わるまで待つか、ブラウザでのサインインをお使いください。",
 	modalCredCooldown: "次の試行まで約 {time}（推定）。",
-	modalManualLoginStep2Mobile: "サインイン後、ページに「serviceTicket: ST-…」を含む短い1行のテキストが表示されます。",
 	modalManualLoginStep3Mobile: "そのテキストを長押しして「すべてを選択」→「コピー」を選び、Obsidian に戻ってすぐに「クリップボードからログイン」をタップしてください。チケットは数秒で期限切れになります。",
 	modalManualLoginTicketFound: "チケットを検出しました: {ticket}",
 	modalManualLoginTicketNone: "チケットはまだ見つかっていません",

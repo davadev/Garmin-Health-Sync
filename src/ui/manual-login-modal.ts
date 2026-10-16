@@ -45,7 +45,7 @@ export class ManualLoginModal extends Modal {
 
 		const steps = contentEl.createEl("ol");
 		steps.createEl("li", { text: t("modalManualLoginStep1", this.lang) });
-		steps.createEl("li", { text: t(Platform.isDesktopApp ? "modalManualLoginStep2" : "modalManualLoginStep2Mobile", this.lang) });
+		steps.createEl("li", { text: t("modalManualLoginStep2", this.lang) });
 		steps.createEl("li", { text: t(Platform.isDesktopApp ? "modalManualLoginStep3" : "modalManualLoginStep3Mobile", this.lang) });
 
 		new Setting(contentEl)

@@ -104,10 +104,10 @@ export const fr: Record<TranslationKeys, string> = {
 
 	// Manual Login Modal (issue #6 fallback)
 	modalManualLoginTitle: "Connexion Garmin manuelle",
-	modalManualLoginIntro: "Si la fenêtre de connexion normale n'aboutit pas (elle reste sur le formulaire ou ouvre le navigateur du système), vous pouvez terminer la connexion manuellement :",
+	modalManualLoginIntro: "La page de connexion de Garmin s’ouvre dans votre navigateur. Après la connexion, rapportez le ticket à usage unique dans le plugin :",
 	modalManualLoginStep1: "Ouvrez la page de connexion Garmin dans votre navigateur web et connectez-vous.",
-	modalManualLoginStep2: "Après la connexion, le navigateur affiche une page presque vide dont l'adresse contient 'ticket=ST-…'.",
-	modalManualLoginStep3: "Copiez cette adresse complète (ou seulement la partie ST-…) et collez-la ci-dessous immédiatement — le ticket expire après quelques secondes.",
+	modalManualLoginStep2: "Après la connexion, le navigateur affiche une page presque vide. Son texte contient 'serviceTicket: ST-…' (ou son adresse contient 'ticket=ST-…').",
+	modalManualLoginStep3: "Sélectionnez et copiez ce texte (ou l’adresse complète) et collez-le ci-dessous immédiatement — le ticket expire après quelques secondes.",
 	modalManualLoginOpenUrl: "Page de connexion Garmin",
 	modalManualLoginOpenButton: "Ouvrir dans le navigateur",
 	modalManualLoginCopyTooltip: "Copier le lien",
@@ -138,7 +138,6 @@ export const fr: Record<TranslationKeys, string> = {
 	modalCredRetry: "Réessayer",
 	modalCredErrorRateLimited: "Garmin limite les tentatives de connexion depuis cet appareil. Attendez le minuteur ci-dessous ou utilisez la connexion par navigateur.",
 	modalCredCooldown: "Prochaine tentative possible dans environ {time} (estimation).",
-	modalManualLoginStep2Mobile: "Après la connexion, la page affiche une courte ligne de texte contenant « serviceTicket: ST-… ».",
 	modalManualLoginStep3Mobile: "Maintenez le texte appuyé, choisissez « Tout sélectionner », puis « Copier ». Revenez dans Obsidian et appuyez tout de suite sur « Se connecter depuis le presse-papiers » — le ticket expire après quelques secondes.",
 	modalManualLoginTicketFound: "Ticket trouvé : {ticket}",
 	modalManualLoginTicketNone: "Aucun ticket trouvé pour l’instant",
