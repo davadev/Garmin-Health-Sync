@@ -648,14 +648,30 @@ export class GarminApi {
 		this.pendingMfa = null;
 		const platform = Platform.isIosApp ? "ios" : Platform.isAndroidApp ? "android" : Platform.isDesktopApp ? "desktop" : "other";
 		this.loginDiagnostics = [`plugin v${this.pluginVersion || "?"}, platform=${platform}, region=${this.urls.domain}`];
-		return this.handleSsoResult(await mobileLogin(this.urls.domain, email.trim(), password));
+		try {
+			return await this.handleSsoResult(await mobileLogin(this.urls.domain, email.trim(), password));
+		} catch (e: unknown) {
+			return this.crashOutcome(e);
+		}
+	}
+
+	/** An exception escaped the sign-in code: keep its type/message (never the password) in the diagnostics. */
+	private crashOutcome(e: unknown): CredentialLoginOutcome {
+		const name = e instanceof Error ? e.name : "error";
+		const msg = e instanceof Error ? e.message : String(e);
+		this.diag(`unexpected error: ${name}: ${msg}`);
+		console.error("Garmin Health Sync: credential login crashed", e);
+		return { status: "error", reason: "unexpected", detail: this.getLoginDiagnostics() };
 	}
 
 	/** Second step after loginWithCredentials() returned `mfa`. */
 	async completeMfaLogin(code: string): Promise<CredentialLoginOutcome> {
 		if (!this.pendingMfa) return { status: "error", reason: "unexpected", detail: "no_pending_mfa" };
-		const result = await mobileVerifyMfa(this.urls.domain, this.pendingMfa, code);
-		return this.handleSsoResult(result);
+		try {
+			return await this.handleSsoResult(await mobileVerifyMfa(this.urls.domain, this.pendingMfa, code));
+		} catch (e: unknown) {
+			return this.crashOutcome(e);
+		}
 	}
 
 	private async handleSsoResult(result: MobileSsoResult): Promise<CredentialLoginOutcome> {
@@ -684,7 +700,8 @@ export class GarminApi {
 			const status = isGarminAuthError(e) ? e.status : undefined;
 			const msg = e instanceof Error ? e.message : String(e);
 			this.diag(`token exchange failed${status != null ? ` (HTTP ${status})` : ""}: ${msg}`);
-			return { status: "error", reason: "exchange_failed", detail: this.getLoginDiagnostics() };
+			// 429 from the token endpoints is the same rate limit: give it the cooldown + message.
+			return { status: "error", reason: status === 429 ? "rate_limited" : "exchange_failed", detail: this.getLoginDiagnostics() };
 		}
 	}
 
