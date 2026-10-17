@@ -23,7 +23,26 @@ jobs:
                   cache: "npm"
 
             - run: npm ci
+
+            # Beta tags only: the committed manifest.json stays on the current stable
+            # version (the community directory reads it from main), so the beta version
+            # is stamped into the working tree here and ships only in the release assets,
+            # which is where BRAT reads it. Nothing is committed.
+            - name: Stamp beta version into working tree
+              if: contains(github.ref_name, '-beta.')
+              run: node stamp-prerelease.mjs "${{ github.ref_name }}"
+
             - run: npm run build
+
+            # The uploaded manifest must carry exactly the tag's version (stable: the
+            # committed one, beta: the stamped one).
+            - name: Check manifest version matches tag
+              run: |
+                  asset_version=$(node -p "require('./manifest.json').version")
+                  if [ "$asset_version" != "${{ github.ref_name }}" ]; then
+                      echo "::error::manifest.json says '$asset_version' but the tag is '${{ github.ref_name }}'"
+                      exit 1
+                  fi
 
             - name: Attest release assets
               uses: actions/attest-build-provenance@v4

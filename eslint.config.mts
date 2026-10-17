@@ -96,8 +96,9 @@ export default tseslint.config(
 		"esbuild.config.mjs",
 		"eslint.config.js",
 		"version-bump.mjs",
+		"stamp-prerelease.mjs",
 		"versions.json",
 		"main.js",
-		"tools", // Dev-Referenz-Skripte (Node), kein Plugin-Source; tsc deckt via include nur src/ ab
+		"tools", // dev reference scripts (Node), not plugin source; tsc only covers src/ via include
 	]),
 );
