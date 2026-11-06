@@ -18,6 +18,7 @@ import { shiftDate } from "../dates";
 import type { DayIndex } from "./index";
 import { bodyInsights, floorsInsights, intensityInsights, stepsInsights, vo2Insights } from "./insights/activity";
 import { batteryInsights, stressInsights } from "./insights/energy";
+import { withHistory } from "./insights/history";
 import { hydrationInsights } from "./insights/hydration";
 import { computeHydration, renderHydration } from "./cards/hydration-card";
 import { computeHabitsCard, renderHabits } from "./cards/habits-card";
@@ -105,7 +106,7 @@ const range = (spec: RangeCardSpec, section: SectionId, needs: TranslationKeys, 
 	extra,
 	needs,
 	half: spec.half,
-	render: (c) => renderRange(c.parent, spec, { ...computeRange(spec, c.index, c.date), insights: RANGE_INSIGHTS[spec.id]!(signals(c)) }, c.lang, c.explainOpen, c.onToggleExplain),
+	render: (c) => renderRange(c.parent, spec, { ...computeRange(spec, c.index, c.date), insights: withHistory(signals(c), spec.key, RANGE_INSIGHTS[spec.id]!(signals(c))) }, c.lang, c.explainOpen, c.onToggleExplain),
 });
 
 /** Every card of the panel in display order. Ids are stable: they are stored in the settings. */
@@ -118,10 +119,10 @@ export const PANEL_CARDS: PanelCard[] = [
 	{ id: "habits", title: "panelHabitsTitle", section: "recovery", metrics: ["lifestyle_log"], extra: ["hrv", "resting_hr"], needs: "panelNeedsHabits", render: (c) => renderHabits(c.parent, computeHabitsCard(c.index, c.date, knownHabits(c.habits, c.index.habitsInNotes()), c.hiddenHabits), c.lang, c.explainOpen, c.onToggleExplain, c.onHideHabit) },
 	{ id: "sleep", title: "panelSleepTitle", section: "sleep", metrics: ["sleep_duration"], needs: "panelNeedsSleep", extra: ["sleep_score", "sleep_start", "sleep_end"], render: (c) => renderSleep(c.parent, { ...computeSleep(c.index, c.date, c.birthYear), insights: sleepInsights(signals(c)) }, c.lang, c.explainOpen, c.onToggleExplain) },
 	{ id: "stages", title: "panelStagesTitle", section: "sleep", metrics: ["sleep_deep", "sleep_rem", "sleep_light", "sleep_awake"], needs: "panelNeedsStages", render: (c) => renderStages(c.parent, { ...computeStages(c.index, c.date), insights: stagesInsights(signals(c)) }, c.lang, c.explainOpen, c.onToggleExplain) },
-	{ id: "battery", title: "panelBatteryTitle", section: "energy", metrics: ["body_battery_max"], needs: "panelNeedsBattery", extra: ["body_battery_min", "body_battery"], render: (c) => renderBattery(c.parent, { ...computeBattery(c.index, c.date), insights: batteryInsights(signals(c)) }, c.lang, c.explainOpen, c.onToggleExplain) },
-	{ id: "stress", title: "panelStressTitle", section: "energy", metrics: ["stress"], needs: "panelNeedsStress", extra: ["stress_high", "recovery_high"], render: (c) => renderStress(c.parent, { ...computeStress(c.index, c.date), insights: stressInsights(signals(c)) }, c.lang, c.explainOpen, c.onToggleExplain) },
+	{ id: "battery", title: "panelBatteryTitle", section: "energy", metrics: ["body_battery_max"], needs: "panelNeedsBattery", extra: ["body_battery_min", "body_battery"], render: (c) => renderBattery(c.parent, { ...computeBattery(c.index, c.date), insights: withHistory(signals(c), "body_battery_max", batteryInsights(signals(c))) }, c.lang, c.explainOpen, c.onToggleExplain) },
+	{ id: "stress", title: "panelStressTitle", section: "energy", metrics: ["stress"], needs: "panelNeedsStress", extra: ["stress_high", "recovery_high"], render: (c) => renderStress(c.parent, { ...computeStress(c.index, c.date), insights: withHistory(signals(c), "stress", stressInsights(signals(c))) }, c.lang, c.explainOpen, c.onToggleExplain) },
 	{ id: "hydration", title: "panelHydrationTitle", section: "energy", metrics: ["hydration_ml"], needs: "panelNeedsHydration", extra: ["hydration_goal_ml"], render: (c) => renderHydration(c.parent, { ...computeHydration(c.index, c.date), insights: hydrationInsights(signals(c)) }, c.lang, c.explainOpen, c.onToggleExplain) },
-	{ id: "steps", title: "panelStepsTitle", section: "movement", metrics: ["steps"], needs: "panelNeedsSteps", extra: ["distance_km", "calories_active", "calories_total"], render: (c) => renderSteps(c.parent, { ...computeSteps(c.index, c.date), insights: stepsInsights(signals(c)) }, c.lang, c.explainOpen, c.onToggleExplain) },
+	{ id: "steps", title: "panelStepsTitle", section: "movement", metrics: ["steps"], needs: "panelNeedsSteps", extra: ["distance_km", "calories_active", "calories_total"], render: (c) => renderSteps(c.parent, { ...computeSteps(c.index, c.date), insights: withHistory(signals(c), "steps", stepsInsights(signals(c))) }, c.lang, c.explainOpen, c.onToggleExplain) },
 	{ id: "intensity", title: "panelIntensityTitle", section: "movement", metrics: ["intensity_min"], needs: "panelNeedsIntensity", render: (c) => renderIntensity(c.parent, { ...computeIntensity(c.index, c.date, c.birthYear), insights: intensityInsights(signals(c)) }, c.lang, c.explainOpen, c.onToggleExplain) },
 	{ id: "floors", title: "panelFloorsTitle", section: "movement", metrics: ["floors"], needs: "panelNeedsFloors", render: (c) => renderFloors(c.parent, { ...computeFloors(c.index, c.date), insights: floorsInsights(signals(c)) }, c.lang, c.explainOpen, c.onToggleExplain) },
 	{ id: "vo2", title: "panelVo2Title", section: "fitness", metrics: ["vo2_max"], needs: "panelNeedsVo2", render: (c) => renderVo2(c.parent, { ...computeVo2(c.index, c.date), insights: vo2Insights(signals(c)) }, c.lang, c.explainOpen, c.onToggleExplain) },

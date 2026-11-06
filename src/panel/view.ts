@@ -12,7 +12,7 @@ import { DayIndex } from "./index";
 export const VIEW_TYPE_HEALTH_PANEL = "garmin-health-panel";
 const RENDER_DEBOUNCE_MS = 300;
 const MIDNIGHT_CHECK_MS = 60_000;
-/** How far back the history notes are read for the shown day: the long view of a card looks at a year, and compares the last 90 days with the 90 before. */
+/** How far back the history notes are read at least for the shown day: the long view of a card looks at a year, and compares the last 90 days with the 90 before. Beyond that all history notes are read, for the personal best and the rank among all days. */
 const HISTORY_DAYS = 400;
 
 /** Read-only side panel. Cards are computed from the daily notes' frontmatter; nothing is written or fetched. */
@@ -185,7 +185,9 @@ export class HealthPanelView extends ItemView {
 
 	/** Reads the history notes the shown day needs; a note that was read changes the cards, so they are drawn again. */
 	private readHistory(): void {
-		const from = shiftDate(this.date, -HISTORY_DAYS);
+		const year = shiftDate(this.date, -HISTORY_DAYS);
+		const first = this.history.firstMonth();
+		const from = first !== null && `${first}-01` < year ? `${first}-01` : year;
 		if (this.history.covers(from, this.date)) return;
 		void this.history.warm(from, this.date).then((found) => {
 			if (found) {

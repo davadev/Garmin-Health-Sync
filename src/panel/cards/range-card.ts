@@ -5,7 +5,8 @@ import type { DayIndex } from "../index";
 import { rangeBar } from "../range-bar";
 import { renderCard } from "./shell";
 import { computeTrend, type Trend } from "../trend";
-import { longFacts, longView, type LongView } from "../longview";
+import { historyFacts, longFacts, longView, type LongView } from "../longview";
+import { historyView, type HistoryView } from "../best-days";
 import { baseline, windowValues, zScore, type Baseline } from "../stats";
 import type { Insight } from "../insights/registry";
 
@@ -81,19 +82,20 @@ export interface RangeModel {
 	trend: Trend | null;
 	/** The last year of the metric, null with fewer than 60 days of values. */
 	long: LongView | null;
+	history: HistoryView;
 }
 
 export function computeRange(spec: RangeCardSpec, index: DayIndex, date: string): RangeModel {
 	const values = windowValues(index, spec.key, date, RANGE_WINDOW_DAYS);
 	const b = baseline(values, RANGE_EARLY_MIN_DAYS, spec.sdFloor);
 	const value = index.value(spec.key, date);
-	return { insights: [], value, have: values.length, baseline: b, early: values.length < RANGE_MIN_DAYS, z: value !== null && b ? zScore(value, b) : null, trend: computeTrend((d) => index.value(spec.key, d), date), long: longView((d) => index.value(spec.key, d), date) };
+	return { insights: [], value, have: values.length, baseline: b, early: values.length < RANGE_MIN_DAYS, z: value !== null && b ? zScore(value, b) : null, trend: computeTrend((d) => index.value(spec.key, d), date), long: longView((d) => index.value(spec.key, d), date), history: historyView(index, date, spec.key) };
 }
 
 /** A range card: the day's value against the personal range, with the explanation behind a light bulb button. */
 export function renderRange(parent: HTMLElement, spec: RangeCardSpec, model: RangeModel, lang: string, explainOpen: boolean, onToggleExplain: () => void): void {
 	const value = model.value === null ? null : formatNumber(model.value, lang, spec.digits);
-	renderCard(parent, { title: t(spec.title, lang), value, unit: spec.unit, explain: t(spec.explain, lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: longFacts(model.long, (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}`, lang), trend: { trend: model.trend, format: (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}` } }, (card) => {
+	renderCard(parent, { title: t(spec.title, lang), value, unit: spec.unit, explain: t(spec.explain, lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: [...longFacts(model.long, (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}`, lang), ...historyFacts(model.history.rank, model.history.best, (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}`, lang)], trend: { trend: model.trend, format: (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}` } }, (card) => {
 		const b = model.baseline;
 		if (!b) {
 			card.createDiv({
@@ -108,7 +110,7 @@ export function renderRange(parent: HTMLElement, spec: RangeCardSpec, model: Ran
 			.replace("{unit}", spec.unit);
 		if (model.value !== null) {
 			const tone = spec.tone(model.value, b);
-			rangeBar(card, { value: model.value, mean: b.mean, sd: b.sd, sided: spec.sided, tone, label, lang, labels: !spec.half });
+			rangeBar(card, { value: model.value, mean: b.mean, sd: b.sd, sided: spec.sided, tone, label, lang, labels: !spec.half, best: model.history.best === null ? undefined : { value: model.history.best, label: t("panelBestLabel", lang).replace("{value}", `${formatNumber(model.history.best, lang, spec.digits)} ${spec.unit}`) } });
 			if (spec.half) {
 				const word = tone === "ok" ? "panelInRange" : model.value > b.mean ? "panelHigh" : "panelLow";
 				card.createDiv({ cls: `ghs-status ghs-status-${tone}`, text: t(word, lang) });

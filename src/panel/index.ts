@@ -108,6 +108,19 @@ export class DayIndex {
 		return this.days.size > 0 || !(this.history?.empty ?? true);
 	}
 
+	private datesCache: { revision: number; dates: string[] } | null = null;
+
+	/** Every day with a note or a history record, oldest first. */
+	dates(): string[] {
+		this.build();
+		if (this.datesCache?.revision === this.revision) return this.datesCache.dates;
+		const all = new Set(this.days.keys());
+		this.history?.forEachRecord((date) => all.add(date));
+		const dates = [...all].sort();
+		this.datesCache = { revision: this.revision, dates };
+		return dates;
+	}
+
 	/** Whether the day has a note or a history record. */
 	hasDay(date: string): boolean {
 		return this.hasNote(date) || (this.history?.has(date) ?? false);

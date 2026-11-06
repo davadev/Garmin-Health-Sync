@@ -5,6 +5,9 @@ import { formatMinutes } from "./sleep-card";
 import type { DayIndex } from "../index";
 import { average } from "../stats";
 import { computeTrend, type Trend } from "../trend";
+import { historyFacts, longFacts, longView, type LongView } from "../longview";
+import { historyView, type HistoryView } from "../best-days";
+import { bestMarker } from "../range-bar";
 import { renderCard } from "./shell";
 import type { Insight } from "../insights/registry";
 
@@ -32,6 +35,8 @@ export interface StressModel {
 	recovering: number | null;
 	/** The usual share of stressed minutes in stressed plus recovering minutes (0 to 1): the 7 days before, null with fewer than STRESS_MIN_DAYS of each. */
 	usualShare: number | null;
+	long: LongView | null;
+	history: HistoryView;
 }
 
 export function computeStress(index: DayIndex, date: string): StressModel {
@@ -45,6 +50,8 @@ export function computeStress(index: DayIndex, date: string): StressModel {
 		week: average(index, "stress", date, WINDOW_DAYS, STRESS_MIN_DAYS),
 		stressed: index.value("stress_high", date),
 		recovering: index.value("recovery_high", date),
+		long: longView((d) => index.value("stress", d), date),
+		history: historyView(index, date, "stress"),
 		usualShare: usualStressed === null || usualRecovering === null || usualTotal === 0 ? null : usualStressed / usualTotal,
 	};
 }
@@ -55,11 +62,12 @@ export function renderStress(parent: HTMLElement, model: StressModel, lang: stri
 	const level = model.level;
 	const band = level === null ? null : (BANDS.find((b) => level <= b.upTo) ?? BANDS[BANDS.length - 1]!);
 	const value = level === null ? null : formatNumber(level, lang, 0);
-	renderCard(parent, { title: t("panelStressTitle", lang), value, unit: band ? t(band.label, lang) : undefined, explain: t("panelStressExplain", lang), explainOpen, onToggleExplain, lang, insights: model.insights, trend: { trend: model.trend, format: (n) => formatNumber(n, lang, 0) } }, (card) => {
+	renderCard(parent, { title: t("panelStressTitle", lang), value, unit: band ? t(band.label, lang) : undefined, explain: t("panelStressExplain", lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: [...longFacts(model.long, (n) => formatNumber(n, lang, 0), lang), ...historyFacts(model.history.rank, model.history.best, (n) => formatNumber(n, lang, 0), lang)], trend: { trend: model.trend, format: (n) => formatNumber(n, lang, 0) } }, (card) => {
 		if (level === null) return;
 		const bar = card.createDiv({ cls: "ghs-range ghs-stress-bar", attr: { role: "img", "aria-label": `${Math.round(level)}` } });
 		bar.createDiv({ cls: "ghs-range-track ghs-range-track-stress" });
 		if (model.week !== null) bar.createDiv({ cls: "ghs-tick ghs-tick-solid" }).setCssProps({ "--ghs-x": `${pct(model.week)}%` });
+		if (model.history.best !== null) bestMarker(bar, model.history.best, t("panelBestLabel", lang).replace("{value}", formatNumber(model.history.best, lang, 0)));
 		bar.createDiv({ cls: "ghs-dot ghs-dot-neutral" }).setCssProps({ "--ghs-x": `${pct(level)}%` });
 		if (model.week !== null) card.createDiv({ cls: "ghs-card-note", text: t("panelStressWeek", lang).replace("{n}", formatNumber(model.week, lang, 0)) });
 		if (model.stressed !== null && model.recovering !== null && model.stressed + model.recovering > 0) {

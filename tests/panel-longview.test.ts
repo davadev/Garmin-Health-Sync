@@ -74,6 +74,7 @@ describe("the long view under the light bulb", () => {
 		expect(facts()).toEqual([
 			expect.stringMatching(/^Last year \(300 days with data\): average 4\d ms, lowest 40 ms, highest 46 ms$/),
 			"Average of the last 90 days 46 ms, of the 90 days before 40 ms",
+			"Better than 85% of your 299 days with data since 2025-12",
 		]);
 	});
 

@@ -387,6 +387,18 @@
 	box-shadow: 0 0 0 1px var(--ghs-card);
 }
 
+/* The personal best: a small diamond on the track, no text; the ring is the day */
+.ghs-best {
+	position: absolute;
+	top: 6px;
+	left: var(--ghs-x, 50%);
+	width: 8px;
+	height: 8px;
+	background: var(--color-yellow);
+	transform: translate(-50%, -50%) rotate(45deg);
+	box-shadow: 0 0 0 1px var(--ghs-card);
+}
+
 /* Steps below the usual are not a warning: a dark ring that shows on the accent coloured bar */
 .ghs-steps-bar .ghs-dot {
 	border-color: var(--text-normal);

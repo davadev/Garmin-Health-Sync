@@ -141,6 +141,17 @@ describe("health panel view", () => {
 		expect(view.contentEl.querySelector(".ghs-card-value")?.textContent).toBe("65 ms");
 	});
 
+	it("reads history notes from years back, not only the last 400 days", async () => {
+		const app = new App();
+		app.vault.seed("Garmin history/Garmin history 2022-03.md", serializeMonth("2022-03", new Map([["2022-03-05", { hrv: 51 }]])));
+		app.vault.seed("Garmin history/Garmin history 2026-10.md", serializeMonth("2026-10", new Map([["2026-10-22", { hrv: 64 }]])));
+		const view = new HealthPanelView(new WorkspaceLeaf(app) as never, { settings: { ...DEFAULT_SETTINGS, panelCards: { today: false } } } as never);
+		await view.onOpen();
+		await vi.advanceTimersByTimeAsync(0);
+		const index = (view as unknown as { index: { value: (k: string, d: string) => number | null } }).index;
+		expect(index.value("hrv", "2022-03-05")).toBe(51);
+	});
+
 	it("does not redraw when a note that is no daily note or history note changes or is deleted", async () => {
 		const { app, view } = await open();
 		const draws = vi.spyOn(view as unknown as { render(): void }, "render");

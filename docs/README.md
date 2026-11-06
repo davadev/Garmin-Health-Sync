@@ -6,6 +6,7 @@
 | [metrics.md](metrics.md) | Every property written to your daily notes: key, format, default, group and the cards that use it |
 | [panel-cards.md](panel-cards.md) | Each card of the side panel: what it shows, which daily decision it helps with, how it is calculated and drawn |
 | [panel-insights.md](panel-insights.md) | The statements under the light bulb: when each appears, what it rests on, the studies cited |
+| [personal-best.md](personal-best.md) | How the personal best marker and the rank among all your days are worked out |
 | [history.md](history.md) | The history notes and the backfill |
 | [troubleshooting.md](troubleshooting.md) | Sign-in, missing metrics, the panel, notes and backfill |
 | [release-process.md](release-process.md) | How a release is made (for maintainers) |
