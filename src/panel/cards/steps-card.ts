@@ -4,7 +4,7 @@ import { formatNumber } from "../format";
 import type { DayIndex } from "../index";
 import { average } from "../stats";
 import { computeTrend, type Trend } from "../trend";
-import { historyFacts, longFacts, longView, type LongView } from "../longview";
+import { bestFact, historyFacts, longFacts, longView, type LongView } from "../longview";
 import { historyView, type HistoryView } from "../best-days";
 import { bestMarker } from "../range-bar";
 import { renderCard } from "./shell";
@@ -81,7 +81,7 @@ function chip(parent: HTMLElement, label: string, value: string, delta: number |
 
 export function renderSteps(parent: HTMLElement, model: StepsModel, lang: string, explainOpen: boolean, onToggleExplain: () => void): void {
 	const value = model.steps === null ? null : formatNumber(model.steps, lang, 0);
-	renderCard(parent, { title: t("panelStepsTitle", lang), value, explain: t("panelStepsExplain", lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: [...longFacts(model.long, (n) => formatNumber(n, lang, 0), lang), ...historyFacts(model.history.rank, model.history.best, (n) => formatNumber(n, lang, 0), lang)], trend: { trend: model.trend, format: (n) => formatNumber(n, lang, 0) } }, (card) => {
+	renderCard(parent, { title: t("panelStepsTitle", lang), value, explain: t("panelStepsExplain", lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: [...longFacts(model.long, (n) => formatNumber(n, lang, 0), lang), ...historyFacts(model.history.rank, lang)], bestFact: bestFact(model.history.best, (n) => formatNumber(n, lang, 0), lang), trend: { trend: model.trend, format: (n) => formatNumber(n, lang, 0) } }, (card) => {
 		if (model.base === null) {
 			card.createDiv({ cls: "ghs-card-note", text: t("panelLocked", lang).replace("{need}", String(STEPS_MIN_DAYS)).replace("{have}", String(model.have)) });
 			return;

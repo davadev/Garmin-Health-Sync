@@ -23,6 +23,8 @@ export interface CardShell {
 	explain: string;
 	/** The card's own numbers that are too much for the card, listed in the same box after the interpretation. */
 	facts?: string[];
+	/** The line that explains the diamond of the personal best, drawn with the diamond's colour on its edge. */
+	bestFact?: string;
 	explainOpen: boolean;
 	onToggleExplain: () => void;
 	lang: string;
@@ -53,12 +55,14 @@ export function renderCard(parent: HTMLElement, shell: CardShell, details: (card
 	if (shell.trend) renderTrend(card, shell.trend, shell.lang);
 	if (shell.explainOpen) {
 		const facts = shell.facts ?? [];
+		const best = shell.bestFact === undefined ? [] : [shell.bestFact];
 		const groups = shell.groups ?? [];
-		if (shell.insights.length > 0 || facts.length > 0 || groups.length > 0) {
+		if (shell.insights.length > 0 || facts.length > 0 || best.length > 0 || groups.length > 0) {
 			const box = card.createDiv({ cls: "ghs-insight" });
 			box.createDiv({ cls: "ghs-insight-title", text: t("panelInsightTitle", shell.lang) });
 			for (const insight of shell.insights) box.createDiv({ cls: `ghs-insight-item ghs-insight-${INSIGHTS[insight.id].kind}`, text: insightText(insight, shell.lang) });
 			for (const fact of facts) box.createDiv({ cls: "ghs-insight-item ghs-fact", text: fact });
+			for (const fact of best) box.createDiv({ cls: "ghs-insight-item ghs-fact ghs-fact-best", text: fact });
 			for (const group of groups) {
 				const details = box.createEl("details", { cls: "ghs-insight-group" });
 				const watch = group.insights.some((i) => INSIGHTS[i.id].kind === "watch");

@@ -12,7 +12,7 @@ import { historyRank, historyView, personalBest } from "../src/panel/best-days";
 import { Signals } from "../src/panel/insights/signals";
 import { withHistory } from "../src/panel/insights/history";
 import { insightText } from "../src/panel/insights/registry";
-import { historyFacts } from "../src/panel/longview";
+import { bestFact, historyFacts } from "../src/panel/longview";
 import { computeRange, renderRange, HRV_CARD, RESTING_HR_CARD, SPO2_CARD } from "../src/panel/cards/range-card";
 import { computeStress, renderStress } from "../src/panel/cards/stress-card";
 import { computeSteps, renderSteps } from "../src/panel/cards/steps-card";
@@ -155,9 +155,10 @@ describe("the lines under the light bulb", () => {
 
 	it("says where the day ranks and what the best days average, in the plugin language", () => {
 		const rank = { share: 0.644, n: 1540, since: "2022-03-05" };
-		expect(historyFacts(rank, 71, format, "en")).toEqual(["Better than 64% of your 1540 days with data since 2022-03", "Your best days average 71 ms (diamond on the bar)"]);
-		expect(historyFacts(null, null, format, "en")).toEqual([]);
-		expect(historyFacts(null, 71, format, "de")).toHaveLength(1);
+		expect(historyFacts(rank, "en")).toEqual(["Better than 64% of your 1540 days with data since 2022-03"]);
+		expect(bestFact(71, format, "en")).toBe("Your best days average 71 ms (diamond on the bar)");
+		expect(historyFacts(null, "en")).toEqual([]);
+		expect(bestFact(null, format, "de")).toBeUndefined();
 	});
 
 	async function signalsOf(days: number, today: number): Promise<Signals> {
@@ -196,7 +197,8 @@ describe("the diamond on the bars", () => {
 		expect(diamond()!.getAttribute("title")).toBe("Best days: 100 ms");
 		expect(root.querySelector(".ghs-range")!.getAttribute("aria-label")).toContain("Best days: 100 ms");
 		expect(diamond()!.style.getPropertyValue("--ghs-x")).toMatch(/%$/);
-		expect(Array.from(root.querySelectorAll(".ghs-fact")).map((e) => e.textContent)).toContain("Your best days average 100 ms (diamond on the bar)");
+		// the line that explains the diamond is marked, so it can carry the diamond's colour
+		expect(root.querySelector(".ghs-fact-best")!.textContent).toBe("Your best days average 100 ms (diamond on the bar)");
 		for (const spec of [RESTING_HR_CARD, SPO2_CARD]) {
 			root.replaceChildren();
 			renderRange(root, spec, computeRange(spec, index, END), "en", false, () => undefined);

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.0-beta.3
+
+### Changed
+
+- Under the light bulb, the line that explains the personal best diamond ("Your best days average …") has the diamond's dark green on its left edge instead of grey.
+
 ## 0.13.0-beta.2
 
 ### Changed
