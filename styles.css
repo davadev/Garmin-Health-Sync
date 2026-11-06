@@ -1138,6 +1138,11 @@
 	border-left-color: var(--ghs-best);
 }
 
+/* the dark green of the diamond hardly shows on a dark card: the plain green of the good end of the scales there */
+.theme-dark .ghs-fact-best {
+	border-left-color: var(--color-green);
+}
+
 /* How to read this: folded by default, the title is the button; a block, because a folded flex container keeps the gap of its hidden content */
 .ghs-about {
 	display: block;

@@ -1,5 +1,6 @@
 import { shiftDate } from "../dates";
 import { t } from "../i18n/t";
+import { formatNumber } from "./format";
 import type { HistoryRank } from "./best-days";
 
 /** The year looked at, and the two windows compared inside it. */
@@ -53,7 +54,7 @@ export function longFacts(view: LongView | null, format: (value: number) => stri
 
 /** The line about all the days of the person for the box under the light bulb: where the shown day ranks. */
 export function historyFacts(rank: HistoryRank | null, lang: string): string[] {
-	return rank ? [t("panelHistoryRank", lang).replace("{pct}", String(Math.round(rank.share * 100))).replace("{n}", String(rank.n)).replace("{since}", rank.since.slice(0, 7))] : [];
+	return rank ? [t("panelHistoryRank", lang).replace("{pct}", String(Math.round(rank.share * 100))).replace("{n}", formatNumber(rank.n, lang, 0)).replace("{since}", rank.since.slice(0, 7))] : [];
 }
 
 /** What the best days average, as the line that explains the diamond (it carries the diamond's colour). `format` writes a value with its unit. */
