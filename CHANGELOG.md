@@ -2,6 +2,10 @@
 
 ## 0.13.0-beta.4
 
+### Added
+
+- The "what's new" window of 0.13.0 shows a small HRV card with the personal best diamond on its bar next to the ring of the day, drawn with the real panel code.
+
 ### Fixed
 
 - A stray note named like a history note for a year before 2000 ("Garmin history 0001-01") no longer makes the panel read thousands of empty months, which could freeze it: history is read from the oldest note of the year 2000 or later.
