@@ -45,10 +45,13 @@ export class HistoryStore {
 
 	/** Months whose note changed after they were read: still served, until they are read again. */
 	private stale = new Set<string>();
+	/** The oldest month with a history note (null: none); undefined = not looked up since the last change. */
+	private first: string | null | undefined;
 
 	/** Forget what was read: all of it, or the month of one changed note, which is read again but meanwhile still answers (the panel does not flash empty while a sync writes). */
 	invalidate(file?: TAbstractFile): void {
 		this.generation++;
+		this.first = undefined;
 		const month = file ? monthOfName(file.name) : null;
 		if (month) this.stale.add(month);
 		else {
@@ -90,11 +93,14 @@ export class HistoryStore {
 
 	/** The month ("2022-03") of the oldest history note in the vault, or null without any. A note named for a year before Garmin Connect existed is a stray file, not history: reading from it would mean reading thousands of empty months. */
 	firstMonth(): string | null {
+		// the panel asks on every draw and the answer needs a look at every file name of the vault: kept until a history note changes
+		if (this.first !== undefined) return this.first;
 		let first: string | null = null;
 		for (const file of this.app.vault.getMarkdownFiles()) {
 			const month = monthOfName(file.name);
 			if (month !== null && month >= EARLIEST_MONTH && (first === null || month < first)) first = month;
 		}
+		this.first = first;
 		return first;
 	}
 
