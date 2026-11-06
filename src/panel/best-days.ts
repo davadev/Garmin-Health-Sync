@@ -24,8 +24,8 @@ const MAX_TOP = 30;
 const MIN_RANKED = 180;
 export const RANK_TAIL = 0.1;
 
-/** Metrics that are not complete until the day is over (a peak, a sum): the day in progress is not ranked. */
-const GROWS_THROUGH_DAY = new Set(["steps", "body_battery_max"]);
+/** Metrics that are not complete until the day is over (a sum, a peak, a day average): the day in progress is not ranked. */
+const GROWS_THROUGH_DAY = new Set(["steps", "body_battery_max", "stress"]);
 
 export interface HistoryRank {
 	/** The share (0 to 1) of the person's earlier days that the shown day beats, in the direction that is better for the metric. */

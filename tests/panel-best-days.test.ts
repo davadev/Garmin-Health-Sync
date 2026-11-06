@@ -125,12 +125,13 @@ describe("rank among all days", () => {
 		expect(historyRank(index, END, "respiration_rate")).toBeNull();
 	});
 
-	it("does not rank steps and the body battery peak of a day that is not over", async () => {
+	it("does not rank steps, the body battery peak and stress of a day that is not over", async () => {
 		vi.useFakeTimers();
 		vi.setSystemTime(new Date(2026, 9, 22, 10, 0, 0));
 		try {
-			const index = await indexOf(200, (ago) => ({ steps: ago === 0 ? 100 : 8000 + ago, hrv: ago === 0 ? 20 : 50 + (ago % 5) }));
+			const index = await indexOf(200, (ago) => ({ steps: ago === 0 ? 100 : 8000 + ago, stress: ago === 0 ? 5 : 40 + (ago % 9), hrv: ago === 0 ? 20 : 50 + (ago % 5) }));
 			expect(historyRank(index, END, "steps")).toBeNull();
+			expect(historyRank(index, END, "stress")).toBeNull();
 			expect(historyRank(index, END, "hrv")).not.toBeNull();
 			expect(historyRank(index, shiftDate(END, -1), "steps")).not.toBeNull();
 		} finally {

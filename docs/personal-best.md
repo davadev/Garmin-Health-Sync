@@ -25,7 +25,7 @@ All history notes are read for this, not only the last year ([history](history.m
 
 ## Rank among all your days
 
-The light bulb also says where the shown day stands among all of your days ("Better than 64% of your 1,540 days with data since 2022-03"), from 180 days of data on. A day in the best or weakest tenth gets an interpretation of its own (`history_top`, `history_bottom` in [panel-insights.md](panel-insights.md)). Steps and the body battery peak of a day that is not over are not ranked, because they are still growing.
+The light bulb also says where the shown day stands among all of your days ("Better than 64% of your 1,540 days with data since 2022-03"), from 180 days of data on. A day in the best or weakest tenth gets an interpretation of its own (`history_top`, `history_bottom` in [panel-insights.md](panel-insights.md)). Steps, the body battery peak and the stress of a day that is not over are not ranked, because they are still changing.
 
 This compares you with yourself only. It is no medical statement and no goal: a best day is a reference, not a target to hit every day.
 

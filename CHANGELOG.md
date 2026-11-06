@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.13.0-beta.2
+
+### Changed
+
+- The personal best diamond is a darker green, so it stands out on the green part of the bars.
+
+### Fixed
+
+- The stress of a day that is not over is no longer ranked among your days (an early morning average could be called one of your best days).
+
 ## 0.13.0-beta.1
 
 ### Added
