@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.13.0-beta.4
+
+### Fixed
+
+- A stray note named like a history note for a year before 2000 ("Garmin history 0001-01") no longer makes the panel read thousands of empty months, which could freeze it: history is read from the oldest note of the year 2000 or later.
+- The history notes of all months are sorted out of the vault's file list in one pass instead of one pass per month, so reading years of history stays quick in a large vault.
+- The line about the best days under the light bulb keeps a visible green edge in a dark theme, and the number of days in "Better than …% of your N days" has a thousands separator.
+
 ## 0.13.0-beta.3
 
 ### Changed

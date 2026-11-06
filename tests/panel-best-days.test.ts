@@ -155,7 +155,7 @@ describe("the lines under the light bulb", () => {
 
 	it("says where the day ranks and what the best days average, in the plugin language", () => {
 		const rank = { share: 0.644, n: 1540, since: "2022-03-05" };
-		expect(historyFacts(rank, "en")).toEqual(["Better than 64% of your 1540 days with data since 2022-03"]);
+		expect(historyFacts(rank, "en")).toEqual(["Better than 64% of your 1,540 days with data since 2022-03"]);
 		expect(bestFact(71, format, "en")).toBe("Your best days average 71 ms (diamond on the bar)");
 		expect(historyFacts(null, "en")).toEqual([]);
 		expect(bestFact(null, format, "de")).toBeUndefined();
@@ -268,6 +268,9 @@ describe("all the days that exist", () => {
 		expect(store.firstMonth()).toBeNull();
 		for (const month of ["2026-10", "2022-03", "2024-07"]) app.vault.seed(`Garmin history/Garmin history ${month}.md`, serializeMonth(month, new Map()));
 		app.vault.seed("Notes/Garmin history 2019-01 notes.txt", "x");
+		expect(store.firstMonth()).toBe("2022-03");
+		// a stray note named for a year that cannot be history is not where the history starts
+		app.vault.seed("Notes/Garmin history 0001-01.md", "x");
 		expect(store.firstMonth()).toBe("2022-03");
 	});
 });

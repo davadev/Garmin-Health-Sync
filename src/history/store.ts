@@ -3,6 +3,8 @@ import { ensureFolderExists } from "../daily-note";
 import { mergeRecord, parseMonth, sameRecord, serializeMonth, type DayRecord } from "./format";
 
 export const HISTORY_FOLDER = "Garmin history";
+/** History notes cannot be older than this: no Garmin device has data from before. */
+const EARLIEST_MONTH = "2000-01";
 const FILE_NAME = /^Garmin history (\d{4}-\d{2})(?!\d)/;
 
 /** "2026-10" of a note name like "Garmin history 2026-10.md" (also of a sync conflict copy), or null. */
@@ -64,12 +66,16 @@ export class HistoryStore {
 	async warm(from: string, to: string): Promise<boolean> {
 		const generation = this.generation;
 		let found = false;
-		// one look at the vault for all the months, not one per month
-		const all = this.app.vault.getMarkdownFiles();
+		// one look at the vault for all the months, not one per month, and the files sorted into their months in one pass
+		const byMonth = new Map<string, TFile[]>();
+		for (const file of this.app.vault.getMarkdownFiles()) {
+			const month = monthOfName(file.name);
+			if (month !== null) byMonth.set(month, [...(byMonth.get(month) ?? []), file]);
+		}
 		for (const month of monthsBetween(from, to)) {
 			if (this.cache.has(month) && !this.stale.has(month)) continue;
 			const days = new Map<string, DayRecord>();
-			for (const file of this.filesOf(month, all)) {
+			for (const file of this.ordered(byMonth.get(month) ?? [])) {
 				found = true;
 				for (const [date, record] of parseMonth(await this.app.vault.cachedRead(file))) days.set(date, mergeRecord(days.get(date), record));
 			}
@@ -82,12 +88,12 @@ export class HistoryStore {
 		return found;
 	}
 
-	/** The month ("2022-03") of the oldest history note in the vault, or null without any. */
+	/** The month ("2022-03") of the oldest history note in the vault, or null without any. A note named for a year before Garmin Connect existed is a stray file, not history: reading from it would mean reading thousands of empty months. */
 	firstMonth(): string | null {
 		let first: string | null = null;
 		for (const file of this.app.vault.getMarkdownFiles()) {
 			const month = monthOfName(file.name);
-			if (month !== null && (first === null || month < first)) first = month;
+			if (month !== null && month >= EARLIEST_MONTH && (first === null || month < first)) first = month;
 		}
 		return first;
 	}
@@ -141,9 +147,13 @@ export class HistoryStore {
 	}
 
 	/** The notes of a month, the one in the history folder first. */
-	private filesOf(month: string, all: TFile[] = this.app.vault.getMarkdownFiles()): TFile[] {
+	private filesOf(month: string): TFile[] {
+		return this.ordered(this.app.vault.getMarkdownFiles().filter((file) => monthOfName(file.name) === month));
+	}
+
+	/** The notes of one month, the one in the history folder first, then the one with the shortest path. */
+	private ordered(files: TFile[]): TFile[] {
 		const home = `${this.folder()}/`;
-		const files = all.filter((file) => monthOfName(file.name) === month);
 		return files.sort((a, b) => Number(b.path.startsWith(home)) - Number(a.path.startsWith(home)) || a.path.length - b.path.length);
 	}
 
