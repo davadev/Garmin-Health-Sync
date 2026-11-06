@@ -5,7 +5,7 @@ import { formatMinutes } from "./sleep-card";
 import type { DayIndex } from "../index";
 import { average } from "../stats";
 import { computeTrend, type Trend } from "../trend";
-import { historyFacts, longFacts, longView, type LongView } from "../longview";
+import { bestFact, historyFacts, longFacts, longView, type LongView } from "../longview";
 import { historyView, type HistoryView } from "../best-days";
 import { bestMarker } from "../range-bar";
 import { renderCard } from "./shell";
@@ -62,7 +62,7 @@ export function renderStress(parent: HTMLElement, model: StressModel, lang: stri
 	const level = model.level;
 	const band = level === null ? null : (BANDS.find((b) => level <= b.upTo) ?? BANDS[BANDS.length - 1]!);
 	const value = level === null ? null : formatNumber(level, lang, 0);
-	renderCard(parent, { title: t("panelStressTitle", lang), value, unit: band ? t(band.label, lang) : undefined, explain: t("panelStressExplain", lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: [...longFacts(model.long, (n) => formatNumber(n, lang, 0), lang), ...historyFacts(model.history.rank, model.history.best, (n) => formatNumber(n, lang, 0), lang)], trend: { trend: model.trend, format: (n) => formatNumber(n, lang, 0) } }, (card) => {
+	renderCard(parent, { title: t("panelStressTitle", lang), value, unit: band ? t(band.label, lang) : undefined, explain: t("panelStressExplain", lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: [...longFacts(model.long, (n) => formatNumber(n, lang, 0), lang), ...historyFacts(model.history.rank, lang)], bestFact: bestFact(model.history.best, (n) => formatNumber(n, lang, 0), lang), trend: { trend: model.trend, format: (n) => formatNumber(n, lang, 0) } }, (card) => {
 		if (level === null) return;
 		const bar = card.createDiv({ cls: "ghs-range ghs-stress-bar", attr: { role: "img", "aria-label": `${Math.round(level)}` } });
 		bar.createDiv({ cls: "ghs-range-track ghs-range-track-stress" });

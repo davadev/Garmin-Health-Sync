@@ -3,7 +3,7 @@ import { formatNumber } from "../format";
 import type { DayIndex } from "../index";
 import { average, windowValues } from "../stats";
 import { computeTrend, type Trend } from "../trend";
-import { historyFacts, longFacts, longView, type LongView } from "../longview";
+import { bestFact, historyFacts, longFacts, longView, type LongView } from "../longview";
 import { historyView, type HistoryView } from "../best-days";
 import { bestMarker } from "../range-bar";
 import { renderCard } from "./shell";
@@ -55,7 +55,7 @@ const pct = (v: number): number => Math.min(100, Math.max(0, v));
 
 export function renderBattery(parent: HTMLElement, model: BatteryModel, lang: string, explainOpen: boolean, onToggleExplain: () => void): void {
 	const value = model.max === null ? null : formatNumber(model.max, lang, 0);
-	renderCard(parent, { title: t("panelBatteryTitle", lang), value, unit: t("panelBatteryUnit", lang), explain: t("panelBatteryExplain", lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: [...longFacts(model.long, (n) => formatNumber(n, lang, 0), lang), ...historyFacts(model.history.rank, model.history.best, (n) => formatNumber(n, lang, 0), lang)], trend: { trend: model.trend, format: (n) => formatNumber(n, lang, 0) } }, (card) => {
+	renderCard(parent, { title: t("panelBatteryTitle", lang), value, unit: t("panelBatteryUnit", lang), explain: t("panelBatteryExplain", lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: [...longFacts(model.long, (n) => formatNumber(n, lang, 0), lang), ...historyFacts(model.history.rank, lang)], bestFact: bestFact(model.history.best, (n) => formatNumber(n, lang, 0), lang), trend: { trend: model.trend, format: (n) => formatNumber(n, lang, 0) } }, (card) => {
 		if (model.max === null) return;
 		// Two bars on the same 0 to 100 scale: where your daily peaks usually fall, and today.
 		if (model.usualRange !== null && model.usualPeak !== null) {

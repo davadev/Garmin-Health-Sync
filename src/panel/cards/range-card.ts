@@ -5,7 +5,7 @@ import type { DayIndex } from "../index";
 import { rangeBar } from "../range-bar";
 import { renderCard } from "./shell";
 import { computeTrend, type Trend } from "../trend";
-import { historyFacts, longFacts, longView, type LongView } from "../longview";
+import { bestFact, historyFacts, longFacts, longView, type LongView } from "../longview";
 import { historyView, type HistoryView } from "../best-days";
 import { baseline, windowValues, zScore, type Baseline } from "../stats";
 import type { Insight } from "../insights/registry";
@@ -95,7 +95,7 @@ export function computeRange(spec: RangeCardSpec, index: DayIndex, date: string)
 /** A range card: the day's value against the personal range, with the explanation behind a light bulb button. */
 export function renderRange(parent: HTMLElement, spec: RangeCardSpec, model: RangeModel, lang: string, explainOpen: boolean, onToggleExplain: () => void): void {
 	const value = model.value === null ? null : formatNumber(model.value, lang, spec.digits);
-	renderCard(parent, { title: t(spec.title, lang), value, unit: spec.unit, explain: t(spec.explain, lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: [...longFacts(model.long, (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}`, lang), ...historyFacts(model.history.rank, model.history.best, (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}`, lang)], trend: { trend: model.trend, format: (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}` } }, (card) => {
+	renderCard(parent, { title: t(spec.title, lang), value, unit: spec.unit, explain: t(spec.explain, lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: [...longFacts(model.long, (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}`, lang), ...historyFacts(model.history.rank, lang)], bestFact: bestFact(model.history.best, (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}`, lang), trend: { trend: model.trend, format: (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}` } }, (card) => {
 		const b = model.baseline;
 		if (!b) {
 			card.createDiv({

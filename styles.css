@@ -1133,6 +1133,11 @@
 	border-left-color: var(--color-green);
 }
 
+/* The line about the personal best has the colour of the diamond it explains */
+.ghs-fact-best {
+	border-left-color: var(--ghs-best);
+}
+
 /* How to read this: folded by default, the title is the button; a block, because a folded flex container keeps the gap of its hidden content */
 .ghs-about {
 	display: block;

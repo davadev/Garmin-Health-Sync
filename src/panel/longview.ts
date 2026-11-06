@@ -51,12 +51,14 @@ export function longFacts(view: LongView | null, format: (value: number) => stri
 	return lines;
 }
 
-/** The lines about all the days of the person for the box under the light bulb: where the shown day ranks, and what the best days average. `format` writes a value with its unit. */
-export function historyFacts(rank: HistoryRank | null, best: number | null, format: (value: number) => string, lang: string): string[] {
-	const lines: string[] = [];
-	if (rank) lines.push(t("panelHistoryRank", lang).replace("{pct}", String(Math.round(rank.share * 100))).replace("{n}", String(rank.n)).replace("{since}", rank.since.slice(0, 7)));
-	if (best !== null) lines.push(t("panelBestDays", lang).replace("{value}", format(best)));
-	return lines;
+/** The line about all the days of the person for the box under the light bulb: where the shown day ranks. */
+export function historyFacts(rank: HistoryRank | null, lang: string): string[] {
+	return rank ? [t("panelHistoryRank", lang).replace("{pct}", String(Math.round(rank.share * 100))).replace("{n}", String(rank.n)).replace("{since}", rank.since.slice(0, 7))] : [];
+}
+
+/** What the best days average, as the line that explains the diamond (it carries the diamond's colour). `format` writes a value with its unit. */
+export function bestFact(best: number | null, format: (value: number) => string, lang: string): string | undefined {
+	return best === null ? undefined : t("panelBestDays", lang).replace("{value}", format(best));
 }
 
 /** Weeks looked back for the pattern of a weekday, and the days it must rest on. */
