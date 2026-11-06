@@ -28,11 +28,11 @@ The command **Import history from daily notes** copies the Garmin values of the 
 
 ## How the panel uses it
 
-`DayIndex` takes a value from the daily note first and falls back to the history record for the same day (key by key). Weeks count as having data when they have a note or a record. The months of the last 400 days before the shown day are read when the panel is drawn and again when a history note changes.
+`DayIndex` takes a value from the daily note first and falls back to the history record for the same day (key by key). Weeks count as having data when they have a note or a record. All history notes, from the oldest month to the shown day, are read when the panel is drawn and again when a history note changes: the [personal best](personal-best.md) and the rank among all your days need every year, not only the last one.
 
 ### The long view
 
-With at least 60 days of values in the last year, the box under the light bulb of the HRV, resting heart rate, SpO2, breathing, sleep, steps and VO2 max cards adds a line with the year (days with data, average, lowest, highest) and, when each of the last 90 days and the 90 days before have at least 20 values, the average of both. These are plain figures from the data, not interpretations, so they have no text in `docs/panel-insights.md`. The usual range of a card still comes from the last 30 days only, because a new watch measures HRV and resting heart rate differently from an old one and a year-long baseline would mix the two.
+With at least 60 days of values in the last year, the box under the light bulb of the HRV, resting heart rate, SpO2, breathing, sleep, stress, body battery, steps, floors and VO2 max cards adds a line with the year (days with data, average, lowest, highest) and, when each of the last 90 days and the 90 days before have at least 20 values, the average of both. These are plain figures from the data, not interpretations, so they have no text in `docs/panel-insights.md`. The usual range of a card still comes from the last 30 days only, because a new watch measures HRV and resting heart rate differently from an old one and a year-long baseline would mix the two.
 
 ## Backfill
 

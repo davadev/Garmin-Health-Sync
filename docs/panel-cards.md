@@ -15,6 +15,7 @@ The light bulb on every card opens two boxes: **What your data suggests** (at mo
 - **Birth year (optional).** Only the year. It gives heart rate zones (Tanaka: 208 − 0.7 × age), age-based sleep need (9 h for ages 10 to 13, 8 h for 14 to 17, 7 h for adults) and the 420 minute weekly activity goal for under 18s.
 - **Trend line.** Cards with a daily value show 14 tiny bars and "↑ +3 ms vs the week before": the mean of the last 7 days against the 7 before, shown with at least 4 values in each week. Within 2 % it reads "steady". It is neutral in colour, because up is not always good.
 - **The year view.** With at least 60 days of values in the last 365, the bulb also lists the year's average and range, and the last 90 days against the 90 before once each has 20 values (history notes feed it, see [history.md](history.md)).
+- **The personal best.** HRV, resting heart rate, SpO2, stress, body battery and steps carry a small green diamond on their bar: what you average on your best days, found over all your history. The bulb says it in words and ranks the shown day among all your days. How it is worked out: [personal-best.md](personal-best.md).
 
 ## The cards
 
