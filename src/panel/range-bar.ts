@@ -46,7 +46,8 @@ export function rangeBar(parent: HTMLElement, o: RangeBarOptions): HTMLElement {
 		wrap.createDiv({ cls: "ghs-tick" }).setCssProps({ "--ghs-x": x });
 		labels?.createSpan({ cls: "ghs-tick-label", text: formatNumber(edge, o.lang, 0) }).setCssProps({ "--ghs-x": x });
 	}
-	if (o.best) bestMarker(wrap, pct(o.best.value, o.mean, o.sd), o.best.label);
+	// on a bar where too high is flagged as well (HRV) the diamond stops at the edge of the usual range: further out the track is orange or red, which would read as a warning
+	if (o.best) bestMarker(wrap, pct(o.sided === "both" ? Math.min(high, Math.max(low, o.best.value)) : o.best.value, o.mean, o.sd), o.best.label);
 	wrap.addClass(o.labels === false ? "ghs-range-compact" : "ghs-range-labelled");
 	wrap.createDiv({ cls: `ghs-dot ghs-dot-${o.tone}` }).setCssProps({ "--ghs-x": `${pct(o.value, o.mean, o.sd)}%` });
 	return wrap;
