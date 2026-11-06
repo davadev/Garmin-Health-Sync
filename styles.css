@@ -104,6 +104,8 @@
 	/* The card colour: the theme's secondary background with a hint of the accent, so the cards sit in the theme instead of beside it */
 	--ghs-card: var(--background-secondary);
 	--ghs-edge: var(--interactive-accent);
+	/* The personal best diamond: the green of the good end of the scales, darkened where the browser can mix colours so it stands out on the green track */
+	--ghs-best: var(--color-green);
 	/* Plain colours where the browser (an old Android WebView) cannot mix colours; the mixes follow in the @supports block below */
 	--ghs-shade-1: var(--ghs-data);
 	--ghs-shade-2: var(--ghs-data);
@@ -123,6 +125,7 @@
 @supports (color: color-mix(in oklab, red, blue)) {
 	.ghs-panel {
 		--ghs-card: color-mix(in oklab, var(--background-secondary), var(--interactive-accent) 2%);
+		--ghs-best: color-mix(in srgb, var(--color-green) 60%, black);
 		--ghs-shade-2: color-mix(in oklab, var(--ghs-data) 70%, var(--ghs-card));
 		--ghs-shade-3: color-mix(in oklab, var(--ghs-data) 45%, var(--ghs-card));
 		--ghs-shade-4: color-mix(in oklab, var(--ghs-data) 25%, var(--ghs-card));
@@ -394,7 +397,7 @@
 	left: var(--ghs-x, 50%);
 	width: 8px;
 	height: 8px;
-	background: var(--color-green);
+	background: var(--ghs-best);
 	transform: translate(-50%, -50%) rotate(45deg);
 	box-shadow: 0 0 0 1px var(--ghs-card);
 }

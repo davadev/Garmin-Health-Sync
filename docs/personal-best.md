@@ -14,10 +14,11 @@ A best day is a day on which **all** of your metrics were good together, not a d
 
 ## The marker of one metric
 
-For one metric the search runs over the days that have that metric (and at least two others), and the marker is the average of the metric on the best of them: 5 percent of those days, at least 5 and at most 30.
+For one metric the search runs over the days that have that metric (and at least two others), and the marker is the typical value of the metric on the best of them: the middle value (median) over 5 percent of those days, at least 5 and at most 30. The middle value, not the mean, so a single sensor spike among the best days does not move it.
 
 - A metric you have for years (stress from the first watch) is searched in all those years.
 - A metric you have only since a new watch (HRV for three weeks) is searched in those weeks only, so the diamond is based on what you can show with the device you wear now. The other metrics of those days are still ranked against all of your history.
+- On a bar where a value that is too high is also flagged (HRV), the diamond stops at the upper edge of your usual range: further out the track is orange or red, which would read as a warning. The number in the tooltip is always the real one.
 - With fewer than 14 such days, no diamond is shown.
 - Only days before the shown day are used, so looking at an old day shows what you knew then.
 
@@ -25,7 +26,7 @@ All history notes are read for this, not only the last year ([history](history.m
 
 ## Rank among all your days
 
-The light bulb also says where the shown day stands among all of your days ("Better than 64% of your 1,540 days with data since 2022-03"), from 180 days of data on. A day in the best or weakest tenth gets an interpretation of its own (`history_top`, `history_bottom` in [panel-insights.md](panel-insights.md)). Steps and the body battery peak of a day that is not over are not ranked, because they are still growing.
+The light bulb also says where the shown day stands among all of your days ("Better than 64% of your 1,540 days with data since 2022-03"), from 180 days of data on. A day in the best or weakest tenth gets an interpretation of its own (`history_top`, `history_bottom` in [panel-insights.md](panel-insights.md)). Steps, the body battery peak and the stress of a day that is not over are not ranked, because they are still changing.
 
 This compares you with yourself only. It is no medical statement and no goal: a best day is a reference, not a target to hit every day.
 

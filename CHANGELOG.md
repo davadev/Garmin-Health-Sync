@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.13.0-beta.2
+
+### Changed
+
+- The personal best diamond is a darker green, so it stands out on the green part of the bars.
+
+- The personal best is the middle value (median) of the best days instead of their mean, so one sensor spike among them cannot pull it up.
+- On the HRV bar, where too high is flagged as well, the diamond stops at the upper edge of your usual range instead of sitting on the orange part of the track.
+
+### Fixed
+
+- The stress of a day that is not over is no longer ranked among your days (an early morning average could be called one of your best days).
+
 ## 0.13.0-beta.1
 
 ### Added

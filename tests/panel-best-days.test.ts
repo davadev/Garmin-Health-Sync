@@ -84,6 +84,11 @@ describe("personal best", () => {
 		expect(personalBest(index, shiftDate(END, -150), "hrv")).not.toBeNull();
 	});
 
+	it("takes the middle value of the best days, so one spike among them does not count", async () => {
+		const index = await indexOf(200, (ago) => ({ hrv: ago === 20 ? 900 : 100, resting_hr: 50, stress: 10, sleep_score: 80 }));
+		expect(personalBest(index, END, "hrv")).toBe(100);
+	});
+
 	it("takes at most the 30 best days of a long history", async () => {
 		// the days differ in HRV only, so the 30 best are the days with the highest HRV
 		const index = await indexOf(900, (ago) => ({ hrv: ago % 4 === 3 ? 10 : 100 + (ago % 97), resting_hr: 50, stress: 10, sleep_score: 80 }));
@@ -125,12 +130,13 @@ describe("rank among all days", () => {
 		expect(historyRank(index, END, "respiration_rate")).toBeNull();
 	});
 
-	it("does not rank steps and the body battery peak of a day that is not over", async () => {
+	it("does not rank steps, the body battery peak and stress of a day that is not over", async () => {
 		vi.useFakeTimers();
 		vi.setSystemTime(new Date(2026, 9, 22, 10, 0, 0));
 		try {
-			const index = await indexOf(200, (ago) => ({ steps: ago === 0 ? 100 : 8000 + ago, hrv: ago === 0 ? 20 : 50 + (ago % 5) }));
+			const index = await indexOf(200, (ago) => ({ steps: ago === 0 ? 100 : 8000 + ago, stress: ago === 0 ? 5 : 40 + (ago % 9), hrv: ago === 0 ? 20 : 50 + (ago % 5) }));
 			expect(historyRank(index, END, "steps")).toBeNull();
+			expect(historyRank(index, END, "stress")).toBeNull();
 			expect(historyRank(index, END, "hrv")).not.toBeNull();
 			expect(historyRank(index, shiftDate(END, -1), "steps")).not.toBeNull();
 		} finally {
@@ -196,6 +202,17 @@ describe("the diamond on the bars", () => {
 			renderRange(root, spec, computeRange(spec, index, END), "en", false, () => undefined);
 			expect(diamond()).not.toBeNull();
 		}
+	});
+
+	it("stops at the edge of the usual range on a bar where too high is flagged too, and goes on where it is not", async () => {
+		// the best days far above the usual HRV: the diamond waits at the upper tick instead of sitting on the orange
+		const index = await indexOf(200, (ago) => (ago < 30 ? { hrv: 50 + (ago % 2), resting_hr: 60, stress: 40, sleep_score: 50 } : ago % 3 === 0 ? { hrv: 120, resting_hr: 40, stress: 10, sleep_score: 95 } : { hrv: 50, resting_hr: 60, stress: 40, sleep_score: 50 }));
+		renderRange(root, HRV_CARD, computeRange(HRV_CARD, index, END), "en", false, () => undefined);
+		const ticks = Array.from(root.querySelectorAll<HTMLElement>(".ghs-tick")).map((t) => t.style.getPropertyValue("--ghs-x"));
+		expect(diamond()!.style.getPropertyValue("--ghs-x")).toBe(ticks[1]);
+		root.replaceChildren();
+		renderRange(root, RESTING_HR_CARD, computeRange(RESTING_HR_CARD, index, END), "en", false, () => undefined);
+		expect(parseFloat(diamond()!.style.getPropertyValue("--ghs-x"))).toBeLessThan(parseFloat(root.querySelectorAll<HTMLElement>(".ghs-tick")[0]!.style.getPropertyValue("--ghs-x")));
 	});
 
 	it("is left out of the range bar when there is no best", async () => {

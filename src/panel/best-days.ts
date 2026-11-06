@@ -24,8 +24,8 @@ const MAX_TOP = 30;
 const MIN_RANKED = 180;
 export const RANK_TAIL = 0.1;
 
-/** Metrics that are not complete until the day is over (a peak, a sum): the day in progress is not ranked. */
-const GROWS_THROUGH_DAY = new Set(["steps", "body_battery_max"]);
+/** Metrics that are not complete until the day is over (a sum, a peak, a day average): the day in progress is not ranked. */
+const GROWS_THROUGH_DAY = new Set(["steps", "body_battery_max", "stress"]);
 
 export interface HistoryRank {
 	/** The share (0 to 1) of the person's earlier days that the shown day beats, in the direction that is better for the metric. */
@@ -87,7 +87,10 @@ function analyse(index: DayIndex, date: string): Analysis {
 		const candidates = days.filter((d) => d.count >= MIN_METRICS && d.values[k] !== null);
 		if (candidates.length >= MIN_CANDIDATES) {
 			const top = candidates.sort((a, b) => b.score - a.score).slice(0, Math.min(MAX_TOP, Math.max(MIN_TOP, Math.ceil(candidates.length * TOP_SHARE))));
-			best.set(m.key, top.reduce((a, d) => a + d.values[k]!, 0) / top.length);
+			// the middle value of the best days, not their mean: one sensor spike among them does not move it
+			const values = top.map((d) => d.values[k]!).sort((a, b) => a - b);
+			const mid = values.length >> 1;
+			best.set(m.key, values.length % 2 === 1 ? values[mid]! : (values[mid - 1]! + values[mid]!) / 2);
 		}
 		const value = index.value(m.key, date);
 		if (value !== null && sorted[k]!.length >= MIN_RANKED && !(GROWS_THROUGH_DAY.has(m.key) && date === localDateString(new Date()))) {

@@ -156,7 +156,7 @@ See also: [panel-cards.md](panel-cards.md) (what each card shows and how it is c
 ### history_top
 
 - **Card:** any
-- **Trigger:** The metric of the card (HRV, resting heart rate, SpO₂, stress, body battery peak, steps) has at least 180 earlier days, and the shown day beats at least 90 percent of them in the better direction (higher HRV, lower resting heart rate or stress). A day in progress is not ranked for steps and the body battery peak. Added only while the card shows fewer than three interpretations.
+- **Trigger:** The metric of the card (HRV, resting heart rate, SpO₂, stress, body battery peak, steps) has at least 180 earlier days, and the shown day beats at least 90 percent of them in the better direction (higher HRV, lower resting heart rate or stress). A day in progress is not ranked for steps, stress and the body battery peak. Added only while the card shows fewer than three interpretations.
 - **Text (English):** One of your best days: better than {pct}% of your {n} days since {since}.
 - **Basis:** The rank of the value among all of the person's own earlier days (the values below it plus half of those equal to it), see [personal-best.md](personal-best.md). It compares the person with themselves only.
 - **References:** none (the rule is arithmetic on the user's own data or a plausibility statement worded as something to watch).
