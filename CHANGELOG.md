@@ -1,54 +1,23 @@
 # Changelog
 
-## 0.13.0-beta.5
+## 0.13.0
 
-### Changed
-
-- **Less work on every draw of the panel.** The oldest history month, which the panel needs to read all years of history, was looked up on every draw by going through every file name of the vault. It is now kept until a history note changes, which is cheaper in a large vault, most of all on a phone.
-
-## 0.13.0-beta.4
+The release of the personal best. The detail of every step is in the `0.13.0-beta.N` notes of the GitHub releases.
 
 ### Added
 
-- The "what's new" window of 0.13.0 shows a small HRV card with the personal best diamond on its bar next to the ring of the day, drawn with the real panel code.
-
-### Fixed
-
-- A stray note named like a history note for a year before 2000 ("Garmin history 0001-01") no longer makes the panel read thousands of empty months, which could freeze it: history is read from the oldest note of the year 2000 or later.
-- The history notes of all months are sorted out of the vault's file list in one pass instead of one pass per month, so reading years of history stays quick in a large vault.
-- The line about the best days under the light bulb keeps a visible green edge in a dark theme, and the number of days in "Better than …% of your N days" has a thousands separator.
-
-## 0.13.0-beta.3
-
-### Changed
-
-- Under the light bulb, the line that explains the personal best diamond ("Your best days average …") has the diamond's dark green on its left edge instead of grey.
-
-## 0.13.0-beta.2
-
-### Changed
-
-- The personal best diamond is a darker green, so it stands out on the green part of the bars.
-
-- The personal best is the middle value (median) of the best days instead of their mean, so one sensor spike among them cannot pull it up.
-- On the HRV bar, where too high is flagged as well, the diamond stops at the upper edge of your usual range instead of sitting on the orange part of the track.
-
-### Fixed
-
-- The stress of a day that is not over is no longer ranked among your days (an early morning average could be called one of your best days).
-
-## 0.13.0-beta.1
-
-### Added
-
-- **Personal best marker.** A small green diamond (no text) on the bars of HRV, resting heart rate, SpO2, stress, body battery and steps shows what you average on your best days, so you see what is reasonably possible for you; the ring is the shown day. A best day is a day that was good on all metrics together (HRV, resting heart rate, stress, sleep score, body battery peak, SpO2, steps): its score is half the average rank and half the weakest rank among your own days, so one great value on an otherwise bad day does not count. The marker is the average of the metric on the best 5 percent of those days (at least 5, at most 30). A metric you have only since a new watch is searched in those weeks only (from 14 days), one you have for years in all of them. How it works: `docs/personal-best.md`.
-- **More under the light bulb.** Every card with a marker says where the shown day ranks among all your days ("Better than 64% of your 1,540 days with data since 2022-03", from 180 days on) and what your best days average. A day in your best or weakest tenth gets an interpretation of its own (`history_top`, `history_bottom`). Stress, body battery and floors now show the last year like the other cards.
-
-- A "what's new" entry for 0.13.0 (six languages): the personal best marker, the rank under the light bulb and the full history.
+- **Personal best marker.** A small dark green diamond (no text) on the bars of HRV, resting heart rate, SpO2, stress, body battery and steps shows what you average on your best days, so you see what is reasonably possible for you; the ring is the shown day. A best day is a day that was good on all metrics together (HRV, resting heart rate, stress, sleep score, body battery peak, SpO2, steps): its score is half the average rank and half the weakest rank among your own days, so one great value on an otherwise bad day does not count. The marker is the middle value (median) of the metric on the best 5 percent of those days (at least 5, at most 30), so one sensor spike cannot pull it up. A metric you have only since a new watch is searched in those weeks only (from 14 days), one you have for years in all of them. On the HRV bar the diamond stops at the upper edge of your usual range instead of sitting on the orange part of the track. How it works: `docs/personal-best.md`.
+- **More under the light bulb.** Every card with a marker says where the shown day ranks among all your days ("Better than 64% of your 1,540 days with data since 2022-03", from 180 days on) and what your best days average, in a line with the diamond's colour on its edge. A day in your best or weakest tenth gets an interpretation of its own (`history_top`, `history_bottom`). Stress, body battery and floors now show the last year like the other cards. The stress, steps and body battery peak of a day that is not over are not ranked.
+- A "what's new" entry for 0.13.0 (six languages) with a small HRV card that shows the diamond next to the ring of the day.
 
 ### Fixed
 
 - **Backfilled history older than 400 days now reaches the panel.** The panel only read the history notes of the last 400 days, so years of backfill were never used; it now reads all of them.
+- A stray note named like a history note for a year before 2000 ("Garmin history 0001-01") no longer makes the panel read thousands of empty months, which could freeze it.
+
+### Changed
+
+- Reading years of history stays quick in a large vault: the history notes are sorted into their months in one pass, and the oldest history month is looked up once and kept until a history note changes, instead of on every draw of the panel.
 
 ## 0.12.1
 
