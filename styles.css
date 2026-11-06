@@ -394,7 +394,7 @@
 	left: var(--ghs-x, 50%);
 	width: 8px;
 	height: 8px;
-	background: var(--color-yellow);
+	background: var(--color-green);
 	transform: translate(-50%, -50%) rotate(45deg);
 	box-shadow: 0 0 0 1px var(--ghs-card);
 }

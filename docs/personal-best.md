@@ -1,6 +1,6 @@
 # Personal best
 
-Some cards of the [side panel](panel-cards.md) show a small yellow diamond on their bar. It marks what you average on your best days, so you see what is reasonably possible for you. The diamond has no label; hold the pointer over it (or let a screen reader read the bar) for the number, and open the light bulb for the same number in words.
+Some cards of the [side panel](panel-cards.md) show a small green diamond on their bar. It marks what you average on your best days, so you see what is reasonably possible for you. The diamond has no label; hold the pointer over it (or let a screen reader read the bar) for the number, and open the light bulb for the same number in words.
 
 The cards with a diamond: HRV, resting heart rate, SpO₂, stress, body battery and steps. The ring on the bar is the shown day, the diamond is your best.
 
@@ -28,3 +28,5 @@ All history notes are read for this, not only the last year ([history](history.m
 The light bulb also says where the shown day stands among all of your days ("Better than 64% of your 1,540 days with data since 2022-03"), from 180 days of data on. A day in the best or weakest tenth gets an interpretation of its own (`history_top`, `history_bottom` in [panel-insights.md](panel-insights.md)). Steps and the body battery peak of a day that is not over are not ranked, because they are still growing.
 
 This compares you with yourself only. It is no medical statement and no goal: a best day is a reference, not a target to hit every day.
+
+See also: [the cards that show it](panel-cards.md), [the interpretations under the light bulb](panel-insights.md), [the history notes](history.md), [the README](../README.md).

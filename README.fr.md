@@ -24,6 +24,7 @@
 - [Cartes du panneau latéral](docs/panel-cards.md) — ce que montre chaque carte, quelle décision quotidienne elle aide à prendre et comment elle est calculée
 - [Interprétations sous l’ampoule](docs/panel-insights.md) — quand chaque affirmation apparaît et sur quoi elle repose
 - [Notes d’historique et remplissage](docs/history.md) — comment l’historique est conservé et construit
+- [Meilleur personnel](docs/personal-best.md) — comment sont calculés le repère des meilleurs jours et le rang parmi tous vos jours
 - [Dépannage](docs/troubleshooting.md) — connexion, mesures manquantes, panneau, notes et remplissage
 - [Journal des modifications](CHANGELOG.md) — ce qui a changé à chaque version
 

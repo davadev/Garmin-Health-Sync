@@ -24,6 +24,7 @@
 - [Side panel cards](docs/panel-cards.md) — what each card shows, which daily decision it helps with and how it is calculated
 - [Interpretations under the light bulb](docs/panel-insights.md) — when each statement appears and what it rests on
 - [History notes and backfill](docs/history.md) — how the history is kept and built
+- [Personal best](docs/personal-best.md) — how the best-day marker and the rank among all your days are worked out
 - [Troubleshooting](docs/troubleshooting.md) — sign-in, missing metrics, the panel, notes and backfill
 - [Changelog](CHANGELOG.md) — what changed in each release
 

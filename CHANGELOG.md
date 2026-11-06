@@ -4,8 +4,10 @@
 
 ### Added
 
-- **Personal best marker.** A small yellow diamond (no text) on the bars of HRV, resting heart rate, SpO2, stress, body battery and steps shows what you average on your best days, so you see what is reasonably possible for you; the ring is the shown day. A best day is a day that was good on all metrics together (HRV, resting heart rate, stress, sleep score, body battery peak, SpO2, steps): its score is half the average rank and half the weakest rank among your own days, so one great value on an otherwise bad day does not count. The marker is the average of the metric on the best 5 percent of those days (at least 5, at most 30). A metric you have only since a new watch is searched in those weeks only (from 14 days), one you have for years in all of them. How it works: `docs/personal-best.md`.
+- **Personal best marker.** A small green diamond (no text) on the bars of HRV, resting heart rate, SpO2, stress, body battery and steps shows what you average on your best days, so you see what is reasonably possible for you; the ring is the shown day. A best day is a day that was good on all metrics together (HRV, resting heart rate, stress, sleep score, body battery peak, SpO2, steps): its score is half the average rank and half the weakest rank among your own days, so one great value on an otherwise bad day does not count. The marker is the average of the metric on the best 5 percent of those days (at least 5, at most 30). A metric you have only since a new watch is searched in those weeks only (from 14 days), one you have for years in all of them. How it works: `docs/personal-best.md`.
 - **More under the light bulb.** Every card with a marker says where the shown day ranks among all your days ("Better than 64% of your 1,540 days with data since 2022-03", from 180 days on) and what your best days average. A day in your best or weakest tenth gets an interpretation of its own (`history_top`, `history_bottom`). Stress, body battery and floors now show the last year like the other cards.
+
+- A "what's new" entry for 0.13.0 (six languages): the personal best marker, the rank under the light bulb and the full history.
 
 ### Fixed
 

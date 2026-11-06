@@ -24,6 +24,7 @@
 - [Karten des Seitenpanels](docs/panel-cards.md) — was jede Karte zeigt, bei welcher Tagesentscheidung sie hilft und wie sie berechnet wird
 - [Deutungen unter der Glühbirne](docs/panel-insights.md) — wann jede Aussage erscheint und worauf sie beruht
 - [Verlaufsnotizen und Backfill](docs/history.md) — wie der Verlauf geführt und aufgebaut wird
+- [Persönliches Bestes](docs/personal-best.md) — wie die Markierung der besten Tage und der Rang unter all deinen Tagen berechnet werden
 - [Fehlersuche](docs/troubleshooting.md) — Anmeldung, fehlende Messwerte, Panel, Notizen und Backfill
 - [Änderungsprotokoll](CHANGELOG.md) — was sich in jeder Version geändert hat
 
