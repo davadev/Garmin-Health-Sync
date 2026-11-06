@@ -7,15 +7,15 @@ import { baseline } from "../panel/stats";
  * as images: they follow the user's theme and language, add nothing to the plugin's size and cannot go stale. They are
  * decoration (hidden from screen readers, not clickable); the text of the item carries the meaning.
  */
-export type FigureId = "panel" | "light-bulb" | "history" | "properties" | "backfill" | "commands";
+export type FigureId = "panel" | "light-bulb" | "history" | "properties" | "backfill" | "commands" | "best-days";
 
 const noop = (): void => undefined;
 /** Ten ordinary mornings, so the card has a usual range to draw. */
 const USUAL = [58, 62, 60, 57, 61, 59, 63, 60, 56, 62];
 
-function model(value: number, insights: RangeModel["insights"], key: "hrv" | "resting_hr"): RangeModel {
+function model(value: number, insights: RangeModel["insights"], key: "hrv" | "resting_hr", best: number | null = null): RangeModel {
 	const base = key === "hrv" ? USUAL : USUAL.map((v) => v - 7);
-	return { insights, value, have: USUAL.length, baseline: baseline(base, 5, key === "hrv" ? 2 : 1.5), early: false, z: null, trend: null, long: null, history: { rank: null, best: null } };
+	return { insights, value, have: USUAL.length, baseline: baseline(base, 5, key === "hrv" ? 2 : 1.5), early: false, z: null, trend: null, long: null, history: { rank: null, best } };
 }
 
 /** A settings row as Obsidian draws it: the name on the left, a control on the right. */
@@ -54,6 +54,11 @@ function panelFigure(fig: HTMLElement, lang: string): void {
 
 function lightBulbFigure(fig: HTMLElement, lang: string): void {
 	renderRange(fig.createDiv({ cls: "ghs-panel ghs-fig-panel" }), RESTING_HR_CARD, model(56, [{ id: "rhr_high_hydration" }], "resting_hr"), lang, true, noop);
+}
+
+/** An HRV card with the diamond of the personal best on its bar, next to the ring of the day. */
+function bestDaysFigure(fig: HTMLElement, lang: string): void {
+	renderRange(fig.createDiv({ cls: "ghs-panel ghs-fig-panel" }), HRV_CARD, model(57, [], "hrv", 61), lang, false, noop);
 }
 
 function historyFigure(fig: HTMLElement, lang: string): void {
@@ -100,6 +105,7 @@ export function renderFigure(parent: HTMLElement, id: FigureId, lang: string): H
 	const fig = parent.createDiv({ cls: `ghs-whats-new-figure ghs-fig-${id}`, attr: { "aria-hidden": "true" } });
 	if (id === "panel") panelFigure(fig, lang);
 	else if (id === "light-bulb") lightBulbFigure(fig, lang);
+	else if (id === "best-days") bestDaysFigure(fig, lang);
 	else if (id === "history") historyFigure(fig, lang);
 	else if (id === "properties") propertiesFigure(fig, lang);
 	else if (id === "backfill") backfillFigure(fig, lang);

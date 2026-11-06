@@ -10,7 +10,7 @@ import { en } from "../src/i18n/en";
 import { de } from "../src/i18n/de";
 
 /** Every figure; a new one has to be listed here, so it cannot ship undrawn. */
-const FIGURE_IDS: FigureId[] = ["panel", "light-bulb", "history", "properties", "backfill", "commands"];
+const FIGURE_IDS: FigureId[] = ["panel", "light-bulb", "history", "properties", "backfill", "commands", "best-days"];
 const draw = (id: FigureId, lang = "en"): HTMLElement => renderFigure(document.createElement("div"), id, lang);
 
 describe("what's new figures", () => {
@@ -57,6 +57,23 @@ describe("what's new figures", () => {
 		const fig = draw("light-bulb");
 		expect(fig.querySelector(".ghs-insight-item")?.textContent).toBe(en.insight_rhr_high_hydration);
 		expect(fig.querySelector(".ghs-card-title")?.textContent).toBe(en.panelRestingHrTitle);
+	});
+
+	it("shows an HRV card with the diamond of the personal best next to the ring of the day", () => {
+		const fig = draw("best-days");
+		expect(fig.querySelector(".ghs-card-title")?.textContent).toBe(en.panelHrvTitle);
+		expect(fig.querySelector(".ghs-best")).not.toBeNull();
+		expect(fig.querySelector(".ghs-dot")).not.toBeNull();
+		expect(fig.querySelector(".ghs-best")!.getAttribute("title")).toBe("Best days: 61 ms");
+		expect(draw("best-days", "de").querySelector(".ghs-best")!.getAttribute("title")).toContain("61 ms");
+	});
+
+	it("is drawn under the first item of the 0.13.0 notes", () => {
+		const notes = notesOfLine("0.13.0");
+		const modal = new WhatsNewModal(new App() as never, "en", notes);
+		modal.open();
+		expect(notes[0]!.items.map((i) => i.figure)).toEqual(["best-days", undefined, undefined]);
+		expect(modal.contentEl.querySelectorAll(".ghs-fig-best-days")).toHaveLength(1);
 	});
 
 	it("shows the setting for days without a note with the history choice", () => {

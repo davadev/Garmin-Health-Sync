@@ -18,7 +18,7 @@ const RELEASE_NOTES: ReleaseNote[] = [
 		title: "whatsNew0130Title",
 		intro: "whatsNew0130Intro",
 		items: [
-			{ title: "whatsNew0130Item1Title", text: "whatsNew0130Item1Text" },
+			{ title: "whatsNew0130Item1Title", text: "whatsNew0130Item1Text", figure: "best-days" },
 			{ title: "whatsNew0130Item2Title", text: "whatsNew0130Item2Text" },
 			{ title: "whatsNew0130Item3Title", text: "whatsNew0130Item3Text" },
 		],
