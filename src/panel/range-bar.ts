@@ -1,5 +1,11 @@
 import { formatNumber } from "./format";
 
+/** The personal best of a metric as a small diamond on a bar: no text, the label is the tooltip and is added to the description (aria-label) the bar has for screen readers. */
+export function bestMarker(bar: HTMLElement, x: number, label: string): void {
+	bar.createDiv({ cls: "ghs-best", attr: { title: label } }).setCssProps({ "--ghs-x": `${Math.min(100, Math.max(0, x))}%` });
+	bar.setAttribute("aria-label", `${bar.getAttribute("aria-label") as string}. ${label}`);
+}
+
 /** Bar domain: the personal mean ± 3 standard deviations. */
 const DOMAIN_SDS = 3;
 
@@ -20,6 +26,8 @@ export interface RangeBarOptions {
 	lang: string;
 	/** Number labels under the edges of the usual range; off for the half-width cards. */
 	labels?: boolean;
+	/** What the person averages on their best days, as a diamond on the bar. */
+	best?: { value: number; label: string };
 }
 
 /**
@@ -38,6 +46,7 @@ export function rangeBar(parent: HTMLElement, o: RangeBarOptions): HTMLElement {
 		wrap.createDiv({ cls: "ghs-tick" }).setCssProps({ "--ghs-x": x });
 		labels?.createSpan({ cls: "ghs-tick-label", text: formatNumber(edge, o.lang, 0) }).setCssProps({ "--ghs-x": x });
 	}
+	if (o.best) bestMarker(wrap, pct(o.best.value, o.mean, o.sd), o.best.label);
 	wrap.addClass(o.labels === false ? "ghs-range-compact" : "ghs-range-labelled");
 	wrap.createDiv({ cls: `ghs-dot ghs-dot-${o.tone}` }).setCssProps({ "--ghs-x": `${pct(o.value, o.mean, o.sd)}%` });
 	return wrap;

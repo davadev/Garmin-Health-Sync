@@ -32,7 +32,7 @@ In panel order. "Needs" names the metrics to switch on in the settings (every me
 - **What it shows:** last night's heart rate variability against your usual range.
 - **Decision it supports:** HRV is the clearest signal of recovery. Inside your range you can train as planned; clearly below it, especially for several days, is a reason to hold back.
 - **How it is calculated:** the mean ± sd of the 30 days before (sd floor 2 ms), from 5 days; reliable from 21. The dot is amber from 1 to 2 sd away (either side), red beyond 2. A streak of low nights is called out on the card.
-- **How it is drawn:** a bar that fades from green inside the range through orange at 2 sd to red at 3 sd (both ends are bad), a dot at today's value, dashed ticks with the numbers at the range's edges, the trend line below.
+- **How it is drawn:** a bar that fades from green inside the range through orange at 2 sd to red at 3 sd (both ends are bad), a dot at today's value, dashed ticks with the numbers at the range's edges, the trend line below. A small green diamond on the bar marks what you average on your best days ([personal best](personal-best.md)).
 - **Needs:** `hrv`; extra: `hydration_ml` (unlocks a hydration hint when HRV is low).
 - **Light bulb:** possible reasons for a low night (load, sleep, stress, illness pattern, hydration, streak) or what a high one means (`hrv_*`).
 
@@ -40,7 +40,7 @@ In panel order. "Needs" names the metrics to switch on in the settings (every me
 - **What it shows:** your resting heart rate against your usual range.
 - **Decision it supports:** a resting heart rate well above your normal comes with stress, poor sleep, illness or fatigue; a lower one is normally fine.
 - **How it is calculated:** mean ± sd of the 30 days before (sd floor 1.5 bpm). Only a high value is flagged: amber at more than 1 sd or 3 bpm above, red at more than 2 sd or 5 bpm above.
-- **How it is drawn:** the same range bar, but only the high end turns orange and red; a low value stays green.
+- **How it is drawn:** the same range bar, but only the high end turns orange and red; a low value stays green. A small green diamond on the bar marks what you average on your best days ([personal best](personal-best.md)).
 - **Needs:** `resting_hr`; extra: `hydration_ml`.
 - **Light bulb:** `rhr_*` (load, sleep, illness pattern, hydration, fitness, trend).
 
@@ -48,7 +48,7 @@ In panel order. "Needs" names the metrics to switch on in the settings (every me
 - **What it shows:** your overnight blood oxygen (SpO₂) against your usual, as a half-width card with a status word.
 - **Decision it supports:** a repeated low reading, especially with raised breathing, is worth watching; altitude lowers it.
 - **How it is calculated:** mean ± sd of 30 days (sd floor 0.7 %). Below 90 % is red whatever your history says, below 94 % amber, otherwise 1 sd below is amber and 2 sd red.
-- **How it is drawn:** a compact range bar (only the low end is bad) and the word "in range", "high" or "low".
+- **How it is drawn:** a compact range bar (only the low end is bad) and the word "in range", "high" or "low". A small green diamond on the bar marks what you average on your best days ([personal best](personal-best.md)).
 - **Needs:** `spo2`.
 - **Light bulb:** `spo2_*`.
 
@@ -89,7 +89,7 @@ In panel order. "Needs" names the metrics to switch on in the settings (every me
 - **What it shows:** your body battery peak today, the lowest value, the overnight recharge and where your daily peaks usually fall.
 - **Decision it supports:** how much energy you have to spend, and whether a low peak followed a short night, a stressful day or hard training.
 - **How it is calculated:** the usual peak is the mean of the daily peaks of the last 30 days and the usual range their lowest and highest, from 5 days (marked early below 14). The recharge is compared with the 30 day mean of the overnight charge.
-- **How it is drawn:** two bars on the same 0 to 100 scale: the top one shows where your peaks fell with a tick at the average, the bottom one today from its lowest to its highest value.
+- **How it is drawn:** two bars on the same 0 to 100 scale: the top one shows where your peaks fell with a tick at the average, the bottom one today from its lowest to its highest value. A small green diamond on the bar marks what you average on your best days ([personal best](personal-best.md)).
 - **Needs:** `body_battery_max`; extra: `body_battery_min`, `body_battery`.
 - **Light bulb:** `battery_*`.
 
@@ -97,7 +97,7 @@ In panel order. "Needs" names the metrics to switch on in the settings (every me
 - **What it shows:** the day's average stress level (Garmin's 0 to 100 from heart rate variability) with its band, your 7 day average, and the minutes stressed against the minutes recovering.
 - **Decision it supports:** a day that is more stressed than usual is a reason to protect sleep and recovery; a calm one is room for effort.
 - **How it is calculated:** bands rest (up to 25), low (to 50), medium (to 75), high (to 100). The marker for the week is the mean of the 7 days before, from 5 days. The usual split is stressed minutes (medium and high) as a share of stressed plus recovering minutes, averaged over the 7 days before, from 5 days of both.
-- **How it is drawn:** a gradient bar with a dot at today's level and a tick at the week's average; below it a two-colour bar of stressed and recovering minutes with a tick where your usual split lies.
+- **How it is drawn:** a gradient bar with a dot at today's level and a tick at the week's average; below it a two-colour bar of stressed and recovering minutes with a tick where your usual split lies. A small green diamond on the bar marks what you average on your best days ([personal best](personal-best.md)).
 - **Needs:** `stress`; extra: `stress_high`, `recovery_high` (unlock the split).
 - **Light bulb:** `stress_*`.
 
@@ -113,7 +113,7 @@ In panel order. "Needs" names the metrics to switch on in the settings (every me
 - **What it shows:** steps so far with distance, active calories, total calories and yesterday as small chips.
 - **Decision it supports:** whether a short walk is still worth it today.
 - **How it is calculated:** your zone is the mean of the 7 days before up to 10 % above it, from 5 days. Being above the zone is never a warning. Walking time assumes 100 steps a minute.
-- **How it is drawn:** a bar from 0 to 1.6 times your usual with the zone marked and a dot that is green inside or above and amber below; a foot line of the steps and minutes to the top of the zone.
+- **How it is drawn:** a bar from 0 to 1.6 times your usual with the zone marked and a dot that is green inside or above and amber below; a foot line of the steps and minutes to the top of the zone. A small green diamond on the bar marks what you average on your best days ([personal best](personal-best.md)).
 - **Needs:** `steps`; extra: `distance_km`, `calories_active`, `calories_total`.
 - **Light bulb:** `steps_*` (zone reached, below the usual for days, a quiet weekday, and on today how many steps and minutes of walking are left to the usual).
 

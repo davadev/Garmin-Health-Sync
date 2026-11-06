@@ -4,7 +4,9 @@ import { formatNumber } from "../format";
 import type { DayIndex } from "../index";
 import { average } from "../stats";
 import { computeTrend, type Trend } from "../trend";
-import { longFacts, longView, type LongView } from "../longview";
+import { historyFacts, longFacts, longView, type LongView } from "../longview";
+import { historyView, type HistoryView } from "../best-days";
+import { bestMarker } from "../range-bar";
 import { renderCard } from "./shell";
 import type { Insight } from "../insights/registry";
 
@@ -29,6 +31,7 @@ export interface StepsModel {
 	total: number | null;
 	/** The last year of daily steps, null with fewer than 60 days of values. */
 	long: LongView | null;
+	history: HistoryView;
 	/** Steps of the day before, to set an unfinished day against a whole one. */
 	dayBefore: number | null;
 	/** The shown day is today, so the day is not over. */
@@ -56,6 +59,7 @@ export function computeSteps(index: DayIndex, date: string): StepsModel {
 		total: index.value("calories_total", date),
 		dayBefore: index.value("steps", shiftDate(date, -1)),
 		long: longView((d) => index.value("steps", d), date),
+		history: historyView(index, date, "steps"),
 		today: date === localDateString(new Date()),
 	};
 }
@@ -77,7 +81,7 @@ function chip(parent: HTMLElement, label: string, value: string, delta: number |
 
 export function renderSteps(parent: HTMLElement, model: StepsModel, lang: string, explainOpen: boolean, onToggleExplain: () => void): void {
 	const value = model.steps === null ? null : formatNumber(model.steps, lang, 0);
-	renderCard(parent, { title: t("panelStepsTitle", lang), value, explain: t("panelStepsExplain", lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: longFacts(model.long, (n) => formatNumber(n, lang, 0), lang), trend: { trend: model.trend, format: (n) => formatNumber(n, lang, 0) } }, (card) => {
+	renderCard(parent, { title: t("panelStepsTitle", lang), value, explain: t("panelStepsExplain", lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: [...longFacts(model.long, (n) => formatNumber(n, lang, 0), lang), ...historyFacts(model.history.rank, model.history.best, (n) => formatNumber(n, lang, 0), lang)], trend: { trend: model.trend, format: (n) => formatNumber(n, lang, 0) } }, (card) => {
 		if (model.base === null) {
 			card.createDiv({ cls: "ghs-card-note", text: t("panelLocked", lang).replace("{need}", String(STEPS_MIN_DAYS)).replace("{have}", String(model.have)) });
 			return;
@@ -92,6 +96,7 @@ export function renderSteps(parent: HTMLElement, model: StepsModel, lang: string
 			labels.createSpan({ cls: "ghs-tick-label", text: thousands(model.base, lang) }).setCssProps({ "--ghs-x": "62.5%" });
 			labels.createSpan({ cls: "ghs-tick-label", text: thousands(zoneTop, lang) }).setCssProps({ "--ghs-x": "68.75%" });
 			const x = Math.min(100, Math.max(0, (model.steps / domain) * 100));
+			if (model.history.best !== null) bestMarker(bar, (model.history.best / domain) * 100, t("panelBestLabel", lang).replace("{value}", formatNumber(model.history.best, lang, 0)));
 			bar.createDiv({ cls: `ghs-dot ${model.steps >= model.base ? "ghs-dot-ok" : "ghs-dot-warn"}` }).setCssProps({ "--ghs-x": `${x}%` });
 			const foot = card.createDiv({ cls: "ghs-foot" });
 			foot.createSpan({ cls: "ghs-foot-label", text: t(model.today ? "panelToTopOfZoneSoFar" : "panelToTopOfZone", lang) });

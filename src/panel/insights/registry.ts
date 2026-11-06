@@ -12,6 +12,8 @@ export type InsightKind = "watch" | "good";
  */
 export const INSIGHTS = {
 	unexplained: { card: "any", kind: "watch" },
+	history_top: { card: "any", kind: "good" },
+	history_bottom: { card: "any", kind: "watch" },
 
 	today_flag_hrv: { card: "today", kind: "watch" },
 	today_flag_rhr: { card: "today", kind: "watch" },

@@ -24,6 +24,7 @@
 - [Tarjetas del panel lateral](docs/panel-cards.md) — qué muestra cada tarjeta, con qué decisión diaria ayuda y cómo se calcula
 - [Interpretaciones bajo la bombilla](docs/panel-insights.md) — cuándo aparece cada afirmación y en qué se basa
 - [Notas de historial y rellenado](docs/history.md) — cómo se guarda y se construye el historial
+- [Mejor marca personal](docs/personal-best.md) — cómo se calculan la marca de los mejores días y la posición entre todos tus días
 - [Solución de problemas](docs/troubleshooting.md) — inicio de sesión, métricas que faltan, el panel, las notas y el rellenado
 - [Registro de cambios](CHANGELOG.md) — qué cambió en cada versión
 

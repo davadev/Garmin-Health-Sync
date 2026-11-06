@@ -24,6 +24,7 @@
 - [侧边面板卡片](docs/panel-cards.md) — 每张卡片显示什么、帮助做哪项日常决定、如何计算
 - [灯泡下的解读](docs/panel-insights.md) — 每条提示何时出现及其依据
 - [历史笔记与回填](docs/history.md) — 历史如何保存与构建
+- [个人最佳](docs/personal-best.md) — 最佳日子标记和在全部日子中的排名如何计算
 - [故障排除](docs/troubleshooting.md) — 登录、缺失的指标、面板、笔记和回填
 - [更新日志](CHANGELOG.md) — 每个版本的变化
 

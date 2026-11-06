@@ -82,6 +82,16 @@ export class HistoryStore {
 		return found;
 	}
 
+	/** The month ("2022-03") of the oldest history note in the vault, or null without any. */
+	firstMonth(): string | null {
+		let first: string | null = null;
+		for (const file of this.app.vault.getMarkdownFiles()) {
+			const month = monthOfName(file.name);
+			if (month !== null && (first === null || month < first)) first = month;
+		}
+		return first;
+	}
+
 	/** Whether any day was read. */
 	get empty(): boolean {
 		for (const month of this.cache.values()) if (month.size > 0) return false;
