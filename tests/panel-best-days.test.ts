@@ -268,9 +268,20 @@ describe("all the days that exist", () => {
 		expect(store.firstMonth()).toBeNull();
 		for (const month of ["2026-10", "2022-03", "2024-07"]) app.vault.seed(`Garmin history/Garmin history ${month}.md`, serializeMonth(month, new Map()));
 		app.vault.seed("Notes/Garmin history 2019-01 notes.txt", "x");
+		// the empty answer was kept: a history note changed (here: appeared) is what makes the store look again
+		expect(store.firstMonth()).toBeNull();
+		store.invalidate();
 		expect(store.firstMonth()).toBe("2022-03");
 		// a stray note named for a year that cannot be history is not where the history starts
 		app.vault.seed("Notes/Garmin history 0001-01.md", "x");
+		store.invalidate();
 		expect(store.firstMonth()).toBe("2022-03");
+		// the answer is kept (the panel asks on every draw) until a history note changes
+		const spy = vi.spyOn(app.vault, "getMarkdownFiles");
+		app.vault.seed("Garmin history/Garmin history 2020-05.md", serializeMonth("2020-05", new Map()));
+		expect(store.firstMonth()).toBe("2022-03");
+		expect(spy).not.toHaveBeenCalled();
+		store.invalidate(app.vault.getAbstractFileByPath("Garmin history/Garmin history 2020-05.md") as never);
+		expect(store.firstMonth()).toBe("2020-05");
 	});
 });

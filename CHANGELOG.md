@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.13.0-beta.5
+
+### Changed
+
+- **Less work on every draw of the panel.** The oldest history month, which the panel needs to read all years of history, was looked up on every draw by going through every file name of the vault. It is now kept until a history note changes, which is cheaper in a large vault, most of all on a phone.
+
 ## 0.13.0-beta.4
 
 ### Added
