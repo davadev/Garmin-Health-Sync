@@ -10,7 +10,7 @@ import { historyView, type HistoryView } from "../best-days";
 import { baseline, windowValues, zScore, type Baseline } from "../stats";
 import type { Insight } from "../insights/registry";
 import { computeWeek, type WeekModel } from "../week";
-import { renderWeek } from "../week-chart";
+import { renderWeek, type LongChange } from "../week-chart";
 
 /** Window and days needed for a reliable personal range (spec: about 21 of the last 30). */
 export const RANGE_WINDOW_DAYS = 30;
@@ -100,10 +100,19 @@ export function computeRange(spec: RangeCardSpec, index: DayIndex, date: string)
 	return { insights: [], value, have: values.length, baseline: b, early: values.length < RANGE_MIN_DAYS, z: value !== null && b ? zScore(value, b) : null, trend: computeTrend((d) => index.value(spec.key, d), date), long: longView((d) => index.value(spec.key, d), date), history: historyView(index, date, spec.key), date, week: spec.week ? computeWeek(index, spec.key, date) : null };
 }
 
+/** A change of the 90 day average smaller than this share of the usual swing is no change. */
+const LONG_WORTHWHILE_SD = 0.5;
+
+function longChange(long: LongView | null, sdFloor: number): LongChange | null {
+	if (!long || long.recent === null || long.prior === null) return null;
+	const delta = long.recent - long.prior;
+	return { delta, steady: Math.abs(delta) < LONG_WORTHWHILE_SD * Math.max(long.sd, sdFloor) };
+}
+
 /** A range card: the day's value against the personal range, with the explanation behind a light bulb button. */
 export function renderRange(parent: HTMLElement, spec: RangeCardSpec, model: RangeModel, lang: string, explainOpen: boolean, onToggleExplain: () => void): void {
 	const value = model.value === null ? null : formatNumber(model.value, lang, spec.digits);
-	renderCard(parent, { title: t(spec.title, lang), value, unit: spec.unit, explain: t(spec.explain, lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: [...longFacts(model.long, (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}`, lang), ...historyFacts(model.history.rank, lang)], bestFact: bestFact(model.history.best, (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}`, lang), trend: model.week ? undefined : { trend: model.trend, format: (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}` } }, (card) => {
+	renderCard(parent, { title: t(spec.title, lang), value, unit: model.week ? `${spec.unit} · ${t("panelLastNight", lang)}` : spec.unit, unitKeepCase: model.week !== null, explain: t(spec.explain, lang), explainOpen, onToggleExplain, lang, insights: model.insights, facts: [...longFacts(model.long, (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}`, lang), ...historyFacts(model.history.rank, lang)], bestFact: bestFact(model.history.best, (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}`, lang), trend: model.week ? undefined : { trend: model.trend, format: (n) => `${formatNumber(n, lang, spec.digits)} ${spec.unit}` } }, (card) => {
 		const b = model.baseline;
 		if (!b) {
 			card.createDiv({
@@ -126,7 +135,7 @@ export function renderRange(parent: HTMLElement, spec: RangeCardSpec, model: Ran
 		} else {
 			card.createDiv({ cls: "ghs-card-note", text: label });
 		}
-		if (model.week) renderWeek(card, model.week, model.date, lang);
+		if (model.week) renderWeek(card, model.week, model.date, lang, longChange(model.long, spec.sdFloor));
 		const streak = model.insights.find((i) => i.id === "hrv_low_streak");
 		if (streak) card.createDiv({ cls: "ghs-card-note ghs-card-alert", text: t("panelHrvStreak", lang).replace("{n}", String(streak.params?.n)) });
 		if (model.early) {

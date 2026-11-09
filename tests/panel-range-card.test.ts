@@ -68,7 +68,7 @@ describe("renderHrv", () => {
 	it("shows the value, the usual range and a green dot inside it", async () => {
 		render(computeHrv(await indexWith(61), END));
 		expect(text(".ghs-card-title")).toBe("HRV");
-		expect(text(".ghs-card-value")).toBe("61 ms");
+		expect(text(".ghs-card-value")).toBe("61 ms · Last night");
 		expect(root.querySelector(".ghs-range")?.getAttribute("aria-label")).toBe("Usual range 58–62 ms");
 		expect(Array.from(root.querySelectorAll(".ghs-tick-label")).map((e) => e.textContent)).toEqual(["58", "62"]);
 		expect(root.querySelectorAll(".ghs-tick")).toHaveLength(2);
@@ -134,7 +134,7 @@ describe("renderHrv", () => {
 
 	it("formats numbers and texts in the plugin language", async () => {
 		render(computeHrv(await indexWith(61.4), END), "de");
-		expect(text(".ghs-card-value")).toBe("61 ms");
+		expect(text(".ghs-card-value")).toBe("61 ms · Letzte Nacht");
 		expect(root.querySelector(".ghs-range")?.getAttribute("aria-label")).toBe("Üblicher Bereich 58–62 ms");
 		expect(root.querySelector("button")?.getAttribute("aria-label")).toBe(de.panelInfo);
 	});
@@ -216,5 +216,31 @@ describe("the week chart on the HRV card", () => {
 		expect(m.week).toBeNull();
 		render(m, "en", false, () => undefined, RESTING_HR_CARD);
 		expect(root.querySelector(".ghs-hrvweek")).toBeNull();
+	});
+});
+
+describe("the long-term change on the HRV card", () => {
+	/** 200 days: the last 90 average `recent`, the 90 before `prior`, a night-to-night swing of 2. */
+	async function longIndex(recent: number, prior: number): Promise<DayIndex> {
+		const app = new App();
+		await seedHistory(app, { end: END, days: 200, frontmatter: (ago) => ({ hrv: (ago < 90 ? recent : prior) + (ago % 2 === 0 ? 2 : -2) }) });
+		return new DayIndex(app as never, () => settings);
+	}
+
+	it("says how far the 90 day average moved, and that the unit of the headline is last night", async () => {
+		render(computeHrv(await longIndex(64, 58), END));
+		expect(text(".ghs-hrvweek-long")).toBe("↑ 6 ms over 90 days");
+		expect(text(".ghs-card-value")).toBe("66 ms · Last night");
+		root.replaceChildren();
+		render(computeHrv(await longIndex(52, 58), END));
+		expect(text(".ghs-hrvweek-long")).toContain("↓ 6 ms");
+	});
+
+	it("calls a change within the usual swing steady and shows nothing without 60 days of data", async () => {
+		render(computeHrv(await longIndex(59, 58), END));
+		expect(text(".ghs-hrvweek-long")).toBe(en.panelWeekLongSteady);
+		root.replaceChildren();
+		render(computeHrv(await indexWith(60), END));
+		expect(root.querySelector(".ghs-hrvweek-long")).toBeNull();
 	});
 });
