@@ -1,7 +1,7 @@
 // Why it matters: the week chart is where a user tells one low night from a low week. The last night must stay a bar of
 // its own, a gap must not be bridged by the line and a missing average must say so instead of drawing a guess.
 import { describe, expect, it } from "vitest";
-import { renderWeek, type LongChange } from "../src/panel/week-chart";
+import { renderWeek, type LongChange, type WeekStyle } from "../src/panel/week-chart";
 import type { WeekModel } from "../src/panel/week";
 import { en } from "../src/i18n/en";
 import { de } from "../src/i18n/de";
@@ -21,9 +21,9 @@ function model(over: Partial<WeekModel> = {}): WeekModel {
 	};
 }
 
-function draw(week: WeekModel, lang = "en", long: LongChange | null = null): HTMLElement {
+function draw(week: WeekModel, lang = "en", long: LongChange | null = null, over: Partial<WeekStyle> = {}): HTMLElement {
 	const parent = document.createElement("div");
-	renderWeek(parent, week, "2026-10-22", lang, long);
+	renderWeek(parent, week, "2026-10-22", lang, { unit: "ms", headline: "Last night", bad: "low", long, ...over });
 	return parent;
 }
 
@@ -41,9 +41,17 @@ describe("renderWeek", () => {
 		const status = el.querySelector(".ghs-hrvweek-status")!.textContent!;
 		// last night is the headline value of the card; a complete week does not name its nights
 		expect(status).toContain("7-day avg 57 ms");
-		expect(status).not.toContain("of 7 nights");
+		expect(status).not.toContain("of 7 days");
 		expect(status).toContain(en.panelWeekIn);
 		expect(el.querySelector(".ghs-hrvweek")!.getAttribute("aria-label")).toContain("Last night 48 ms");
+	});
+
+	it("colours the high side as the bad one for a metric where high is bad", () => {
+		const high = draw(model({ average: 70 }), "en", null, { bad: "high", unit: "bpm", headline: "Today" });
+		expect(high.querySelector(".ghs-hrvweek-below")).not.toBeNull();
+		expect(high.querySelector(".ghs-hrvweek-status")!.textContent).toContain("7-day avg 70 bpm");
+		expect(draw(model({ average: 50 }), "en", null, { bad: "high" }).querySelector(".ghs-hrvweek-below")).toBeNull();
+		expect(high.querySelector(".ghs-hrvweek")!.getAttribute("aria-label")).toContain("Today 60 bpm");
 	});
 
 	it("says below or above the usual range when the average is outside the band", () => {
@@ -69,7 +77,7 @@ describe("renderWeek", () => {
 		const week = model({ nights: nights((i) => (i >= 4 && i <= 6 ? null : 60)), gaps: [{ from: 4, length: 3 }] });
 		const el = draw(week);
 		const box = el.querySelector<HTMLElement>(".ghs-hrvweek-gap")!;
-		expect(box.getAttribute("title")).toBe("Watch off · 3 nights");
+		expect(box.getAttribute("title")).toBe("Watch off · 3 days");
 		expect(box.style.getPropertyValue("--ghs-x")).toBe(`${(4 / 14) * 100}%`);
 		expect(el.querySelectorAll(".ghs-night-bar-missing")).toHaveLength(3);
 	});
@@ -88,7 +96,7 @@ describe("renderWeek", () => {
 	});
 
 	it("handles a flat week and describes the chart for screen readers in the language", () => {
-		const el = draw(model(), "de");
+		const el = draw(model(), "de", null, { headline: de.panelLastNight });
 		expect(el.querySelector(".ghs-hrvweek")!.getAttribute("role")).toBe("img");
 		expect(el.querySelector(".ghs-hrvweek")!.getAttribute("aria-label")).toContain("Letzte Nacht 60 ms");
 		expect(el.querySelector(".ghs-hrvweek")!.getAttribute("aria-label")).toContain(de.panelWeekIn);
@@ -96,7 +104,7 @@ describe("renderWeek", () => {
 
 	it("names the nights the average rests on only when the week is not complete", () => {
 		const el = draw(model({ coverage: 5 }));
-		expect(el.querySelector(".ghs-hrvweek-status")!.textContent).toContain("7-day avg 60 ms from 5 of 7 nights");
+		expect(el.querySelector(".ghs-hrvweek-status")!.textContent).toContain("7-day avg 60 ms from 5 of 7 days");
 	});
 
 	it("names the usual range inside the band instead of in a legend", () => {

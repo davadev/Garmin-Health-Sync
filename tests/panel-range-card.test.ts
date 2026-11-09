@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { App } from "../testUtils/mocks/obsidian";
 import { seedHistory } from "../testUtils/fakeHistory";
 import { DayIndex } from "../src/panel/index";
-import { computeRange, renderRange, HRV_CARD, RESTING_HR_CARD, RANGE_EARLY_MIN_DAYS as HRV_EARLY_MIN_DAYS, RANGE_MIN_DAYS as HRV_MIN_DAYS, type RangeCardSpec } from "../src/panel/cards/range-card";
+import { computeRange, renderRange, HRV_CARD, RESTING_HR_CARD, SPO2_CARD, RANGE_EARLY_MIN_DAYS as HRV_EARLY_MIN_DAYS, RANGE_MIN_DAYS as HRV_MIN_DAYS, type RangeCardSpec } from "../src/panel/cards/range-card";
 import { en } from "../src/i18n/en";
 import { de } from "../src/i18n/de";
 
@@ -176,7 +176,7 @@ describe("resting heart rate card", () => {
 	it("titles the card and shows bpm", async () => {
 		await tone(60);
 		expect(text(".ghs-card-title")).toBe(en.panelRestingHrTitle);
-		expect(text(".ghs-card-value")).toBe("60 bpm");
+		expect(text(".ghs-card-value")).toBe("60 bpm · Today");
 		expect(root.querySelector(".ghs-range")?.getAttribute("aria-label")).toBe("Usual range 58–62 bpm");
 		expect(root.querySelector(".ghs-range-track-high")).not.toBeNull();
 	});
@@ -210,11 +210,24 @@ describe("the week chart on the HRV card", () => {
 		expect(root.querySelector(".ghs-trend-text")).toBeNull();
 	});
 
-	it("leaves the other range cards on their trend line", async () => {
-		const index = await indexWith(60);
-		const m = computeRange(RESTING_HR_CARD, index, END);
-		expect(m.week).toBeNull();
+	it("draws the same chart for the resting heart rate, with the high side as the bad one", async () => {
+		const app = new App();
+		await seedHistory(app, { end: END, days: 80, frontmatter: (ago) => ({ resting_hr: ago < 7 ? 60 : 50 + (ago % 2 === 0 ? 1 : -1) }) });
+		const m = computeRange(RESTING_HR_CARD, new DayIndex(app as never, () => settings), END);
+		expect(m.week?.average).toBeCloseTo(60, 3);
 		render(m, "en", false, () => undefined, RESTING_HR_CARD);
+		expect(text(".ghs-card-value")).toBe("60 bpm · Today");
+		expect(text(".ghs-hrvweek-status")).toContain("7-day avg 60 bpm");
+		// above the usual is the bad side here, not below
+		expect(root.querySelector(".ghs-hrvweek-below")).not.toBeNull();
+		expect(root.querySelector(".ghs-trend-text")).toBeNull();
+	});
+
+	it("leaves the cards without a week chart on their trend line", async () => {
+		const index = await indexWith(60);
+		const m = computeRange(SPO2_CARD, index, END);
+		expect(m.week).toBeNull();
+		render(m, "en", false, () => undefined, SPO2_CARD);
 		expect(root.querySelector(".ghs-hrvweek")).toBeNull();
 	});
 });

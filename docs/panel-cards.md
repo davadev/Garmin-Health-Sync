@@ -38,10 +38,10 @@ In panel order. "Needs" names the metrics to switch on in the settings (every me
 - **Light bulb:** possible reasons for a low night (load, sleep, stress, illness pattern, hydration, streak) or what a high one means (`hrv_*`; after a hard session `hrv_low_hard_session` comes first).
 
 ### resting_hr
-- **What it shows:** your resting heart rate against your usual range.
+- **What it shows:** your resting heart rate against your usual range, and the last 14 days with their 7-day average against the usual range for a week.
 - **Decision it supports:** a resting heart rate well above your normal comes with stress, poor sleep, illness or fatigue; a lower one is normally fine.
 - **How it is calculated:** mean ± sd of the 30 days before (sd floor 1.5 bpm). Only a high value is flagged: amber at more than 1 sd or 3 bpm above, red at more than 2 sd or 5 bpm above.
-- **How it is drawn:** the same range bar, but only the high end turns orange and red; a low value stays green. A small green diamond on the bar marks what you average on your best days ([personal best](personal-best.md)).
+- **How it is drawn:** the same range bar, but only the high end turns orange and red; a low value stays green. Below it the same week chart as on the HRV card (14 bars with today solid, the 7-day average as a line, the usual range for the week as a band, one status row with the 90 day change); the headline unit says "Today", and only a 7-day average *above* the usual range is coloured as a warning. A small green diamond on the bar marks what you average on your best days ([personal best](personal-best.md)).
 - **Needs:** `resting_hr`; extra: `hydration_ml`.
 - **Light bulb:** `rhr_*` (hard session, load, sleep, illness pattern, hydration, fitness, trend).
 
