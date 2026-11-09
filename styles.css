@@ -132,12 +132,13 @@
 		--ghs-shade-3: color-mix(in oklab, var(--ghs-data) 45%, var(--ghs-card));
 		--ghs-shade-4: color-mix(in oklab, var(--ghs-data) 25%, var(--ghs-card));
 		--ghs-level-2: color-mix(in srgb, var(--color-green) 45%, var(--ghs-card));
-		--ghs-band: color-mix(in srgb, var(--color-green) 22%, transparent);
+		--ghs-band: color-mix(in srgb, var(--color-green) 14%, transparent);
 	}
 
 	/* On a dark theme the cards take a stronger hint of the accent and the data colour is lifted, because a dark accent barely shows on a dark card */
 	.theme-dark .ghs-panel {
 		--ghs-card: color-mix(in oklab, var(--background-secondary), var(--interactive-accent) 10%);
+		--ghs-band: color-mix(in srgb, var(--color-green) 22%, transparent);
 	}
 }
 
@@ -1902,4 +1903,10 @@
 
 .ghs-hrvweek-long {
 	color: var(--text-muted);
+}
+
+.ghs-bar-caption {
+	margin-top: var(--size-2-2);
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
 }
