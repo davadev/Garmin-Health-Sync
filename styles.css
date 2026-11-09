@@ -1827,8 +1827,8 @@
 
 .ghs-hrvweek-chart {
 	position: relative;
-	height: 72px;
-	margin-bottom: var(--size-4-5);
+	height: 56px;
+	margin: var(--size-4-4) 0 var(--size-4-5);
 }
 
 .ghs-hrvweek-bars {
@@ -1877,45 +1877,29 @@
 	vector-effect: non-scaling-stroke;
 }
 
-.ghs-hrvweek-legend {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--size-4-3);
-	color: var(--text-muted);
-	font-size: var(--font-ui-smaller);
-}
-
-.ghs-hrvweek-key::before {
-	content: "";
-	display: inline-block;
-	width: var(--size-4-3);
-	height: var(--size-4-2);
-	margin-right: var(--size-2-2);
-	border-radius: var(--radius-s);
-	vertical-align: middle;
-}
-
-.ghs-hrvweek-key-nights::before {
-	background: var(--ghs-data);
-}
-
-.ghs-hrvweek-key-average::before {
-	height: 2px;
-	background: var(--text-normal);
-}
-
-.ghs-hrvweek-key-band::before {
-	background: var(--ghs-band);
-}
-
 .ghs-hrvweek-status {
 	display: flex;
 	flex-wrap: wrap;
-	gap: var(--size-4-2);
+	justify-content: space-between;
+	gap: var(--size-2-2) var(--size-4-2);
 	margin-top: var(--size-2-2);
 	font-size: var(--font-ui-smaller);
 }
 
 .ghs-hrvweek-below {
 	color: var(--color-orange);
+}
+
+.ghs-hrvweek-band-label {
+	position: absolute;
+	bottom: 100%;
+	left: 0;
+	margin-bottom: var(--size-2-1);
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	line-height: 1;
+}
+
+.ghs-hrvweek-long {
+	color: var(--text-muted);
 }

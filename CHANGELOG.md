@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.14.0-beta.2
+
+A more compact HRV card.
+
+### Changed
+
+- The headline value of the HRV card says what it is: "37 ms · Last night". The row that repeated it is gone.
+- The legend is gone: the band is labelled "Usual" inside the chart, and the chart is 16 px lower.
+- One status row: "7-day avg 37 ms · In your usual range" (the nights it rests on only when fewer than 7), with the change of the 90 day average on the right ("↑ 3 ms over 90 days", or steady). The long-term change reuses the year view of the light bulb.
+
 ## 0.14.0-beta.1
 
 Weekly HRV on the HRV card and in Readiness. The thresholds are starting values (see `docs/panel-insights.md`, "Where the numbers come from"), please say how they feel on your own data.
