@@ -103,6 +103,10 @@ describe("health panel view", () => {
 		const infos = (): HTMLButtonElement[] => Array.from(view.contentEl.querySelectorAll(".ghs-info"));
 		const about = (): HTMLDetailsElement | null => view.contentEl.querySelector("details.ghs-about");
 		infos()[0]!.click();
+		// a redraw leaves a part that was folded folded
+		app.metadataCache.fireChanged(app.vault.getMarkdownFiles()[0]!);
+		await vi.advanceTimersByTimeAsync(300);
+		expect(about()!.open).toBe(false);
 		about()!.open = true;
 		// a note changed: the whole panel is drawn again
 		app.metadataCache.fireChanged(app.vault.getMarkdownFiles()[0]!);
