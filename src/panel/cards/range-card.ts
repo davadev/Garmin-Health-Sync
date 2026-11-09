@@ -36,7 +36,7 @@ export interface RangeCardSpec {
 	/** Smallest standard deviation used, so a very stable user does not get a razor-thin band. */
 	sdFloor: number;
 	/** Draws the last 14 nights with their 7-night average and the usual range of a week instead of the two-week trend line. */
-	week?: { headline: TranslationKeys; bad: "low" | "high" };
+	week?: { sdFloor: number; headline: TranslationKeys; bad: "low" | "high" };
 	tone: (value: number, b: Baseline) => Tone;
 }
 
@@ -52,8 +52,8 @@ function highIsBad(value: number, b: Baseline): Tone {
 	return z > 2 || delta >= 5 ? "bad" : z > 1 || delta >= 3 ? "warn" : "ok";
 }
 
-export const HRV_CARD: RangeCardSpec = { id: "hrv", key: "hrv", title: "panelHrvTitle", explain: "panelHrvExplain", unit: "ms", sided: "both", digits: 0, sdFloor: 2, week: { headline: "panelLastNight", bad: "low" }, tone: twoSided };
-export const RESTING_HR_CARD: RangeCardSpec = { id: "resting_hr", key: "resting_hr", title: "panelRestingHrTitle", explain: "panelRestingHrExplain", unit: "bpm", sided: "high", digits: 0, sdFloor: 1.5, week: { headline: "panelWeekToday", bad: "high" }, tone: highIsBad };
+export const HRV_CARD: RangeCardSpec = { id: "hrv", key: "hrv", title: "panelHrvTitle", explain: "panelHrvExplain", unit: "ms", sided: "both", digits: 0, sdFloor: 2, week: { sdFloor: 0.04, headline: "panelLastNight", bad: "low" }, tone: twoSided };
+export const RESTING_HR_CARD: RangeCardSpec = { id: "resting_hr", key: "resting_hr", title: "panelRestingHrTitle", explain: "panelRestingHrExplain", unit: "bpm", sided: "high", digits: 0, sdFloor: 1.5, week: { sdFloor: 0.03, headline: "panelWeekToday", bad: "high" }, tone: highIsBad };
 
 /** Below the personal range is a warning; below 90 percent is one regardless of history. */
 function spo2Tone(value: number, b: Baseline): Tone {
@@ -97,7 +97,7 @@ export function computeRange(spec: RangeCardSpec, index: DayIndex, date: string)
 	const values = windowValues(index, spec.key, date, RANGE_WINDOW_DAYS);
 	const b = baseline(values, RANGE_EARLY_MIN_DAYS, spec.sdFloor);
 	const value = index.value(spec.key, date);
-	return { insights: [], value, have: values.length, baseline: b, early: values.length < RANGE_MIN_DAYS, z: value !== null && b ? zScore(value, b) : null, trend: computeTrend((d) => index.value(spec.key, d), date), long: longView((d) => index.value(spec.key, d), date), history: historyView(index, date, spec.key), date, week: spec.week ? computeWeek(index, spec.key, date, spec.sdFloor) : null };
+	return { insights: [], value, have: values.length, baseline: b, early: values.length < RANGE_MIN_DAYS, z: value !== null && b ? zScore(value, b) : null, trend: computeTrend((d) => index.value(spec.key, d), date), long: longView((d) => index.value(spec.key, d), date), history: historyView(index, date, spec.key), date, week: spec.week ? computeWeek(index, spec.key, date, spec.week.sdFloor) : null };
 }
 
 /** A change of the 90 day average smaller than this share of the usual swing is no change. */
@@ -125,6 +125,8 @@ export function renderRange(parent: HTMLElement, spec: RangeCardSpec, model: Ran
 			.replace("{low}", formatNumber(b.mean - b.sd, lang, spec.digits))
 			.replace("{high}", formatNumber(b.mean + b.sd, lang, spec.digits))
 			.replace("{unit}", spec.unit);
+		// the bar and the chart answer different questions, so the bar says which one it answers
+		if (spec.week && model.value !== null) card.createDiv({ cls: "ghs-bar-caption", text: t("panelWeekBarCaption", lang).replace("{what}", t(spec.week.headline, lang)) });
 		if (model.value !== null) {
 			const tone = spec.tone(model.value, b);
 			rangeBar(card, { value: model.value, mean: b.mean, sd: b.sd, sided: spec.sided, tone, label, lang, labels: !spec.half, best: model.history.best === null ? undefined : { value: model.history.best, label: t("panelBestLabel", lang).replace("{value}", `${formatNumber(model.history.best, lang, spec.digits)} ${spec.unit}`) } });

@@ -257,3 +257,13 @@ describe("the long-term change on the HRV card", () => {
 		expect(root.querySelector(".ghs-hrvweek-long")).toBeNull();
 	});
 });
+
+describe("the caption of the bar on cards with a week chart", () => {
+	it("says which question the bar answers, so the chart below can answer another", async () => {
+		render(computeHrv(await indexWith(60), END));
+		expect(text(".ghs-bar-caption")).toBe("Last night against your usual days");
+		root.replaceChildren();
+		render(computeRange(SPO2_CARD, await indexWith(60), END), "en", false, () => undefined, SPO2_CARD);
+		expect(root.querySelector(".ghs-bar-caption")).toBeNull();
+	});
+});

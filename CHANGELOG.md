@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.14.0-beta.6
+
+The two ranges on the HRV and resting heart rate cards now say which question they answer.
+
+### Changed
+
+- **The bar** has a caption ("Last night against your usual days", "Today against your usual days") and keeps its range, the 30 days before plus or minus one standard deviation.
+- **The green band of the chart is the "Typical week"**, which follows the HRV research on 7-day averages more closely: the mean of the up to 60 days before the week (the week itself left out) plus or minus three quarters of a standard deviation, worked out on ln(value). The status says "In / Below / Above your typical week". Bar and chart answer different questions, so they can differ; the text under the light bulb explains how to read the card.
+- Readiness uses the same typical week for the HRV score and flag (flag from three quarters of a standard deviation below).
+- The green band is a little more transparent on a light theme.
+
 ## 0.14.0-beta.5
 
 ### Fixed

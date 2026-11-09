@@ -16,8 +16,8 @@ const END = "2026-10-22";
 const noop = (): void => undefined;
 type Fm = Record<string, unknown>;
 const alt = (ago: number, a: number, b: number): number => (ago % 2 === 0 ? a : b);
-/** An HRV level `z` standard deviations (2 ms) from the usual of the 58/62 nights below: the 7-night average judged by the score. The week is part of the 30 day range, so its own distance comes out a little smaller. */
-const weekZ = (z: number): number => 60 + 2 * z;
+/** An HRV level that lies `z` standard deviations of ln(HRV) (at least 0.04) from the usual of the 58/62 nights below: the 7-night average judged by the score. */
+const weekZ = (z: number): number => Math.exp(Math.log(Math.sqrt(62 * 58)) + 0.04 * z);
 const USUAL = weekZ(0);
 
 /**
@@ -38,18 +38,6 @@ const run = (ago: number, recent: number, earlier: number): Fm => ({ running: `$
 /** A high readiness band without flags: HRV far above the usual. */
 const high = { hrv: 80, resting_hr: 52 };
 
-/** The HRV level of the last week that gives exactly `score` with everything else usual: the score rises with it, so it is found by halving. */
-async function levelFor(score: number): Promise<number> {
-	let lo = 40;
-	let hi = 80;
-	for (let i = 0; i < 30; i++) {
-		const mid = (lo + hi) / 2;
-		if (computeToday(await index({ hrv: mid, resting_hr: 52 }), END, null).score! < score) lo = mid;
-		else hi = mid;
-	}
-	return hi;
-}
-
 describe("the readiness score", () => {
 	it("is 60 when HRV, resting heart rate and sleep are exactly as usual", async () => {
 		const m = computeToday(await index({ hrv: USUAL, resting_hr: 52 }), END, null);
@@ -60,9 +48,9 @@ describe("the readiness score", () => {
 
 	it("adds 10 per standard deviation of HRV and subtracts 7 per standard deviation of resting heart rate", async () => {
 		// the 7-night average counts double: +0.5 sd of HRV moves the score by 10
-		expect(computeToday(await index({ hrv: weekZ(0.5), resting_hr: 52 }), END, null).score).toBe(68);
+		expect(computeToday(await index({ hrv: weekZ(0.5), resting_hr: 52 }), END, null).score).toBe(70);
 		expect(computeToday(await index({ hrv: USUAL, resting_hr: 54 }), END, null).score).toBe(53); // +1 sd of resting heart rate
-		expect(computeToday(await index({ hrv: weekZ(0.5), resting_hr: 50 }), END, null).score).toBe(75);
+		expect(computeToday(await index({ hrv: weekZ(0.5), resting_hr: 50 }), END, null).score).toBe(77);
 	});
 
 	it("holds each z value at 2 standard deviations and the score at 100", async () => {
@@ -96,7 +84,7 @@ describe("the readiness score", () => {
 		// a young range has no baseline for the week: the night is judged against the days there are
 		const young = computeToday(await index({ resting_hr: 58 }, () => ({}), 12, { hrv: 54 }), END, null);
 		expect(young.baselineDays).toBe(11);
-		expect(young.score).toBe(49); // 60 - 34 x 11 / 21: a new watch with 12 days of HRV is not "poor"
+		expect(young.score).toBe(42); // 60 - 34 x 11 / 21: a new watch with 12 days of HRV is not "poor"
 		expect(young.band).toBe(1);
 		expect(computeToday(await index(far, () => ({}), 45), END, null).score).toBe(26); // 60 - 34
 		expect(computeToday(await index(far, () => ({}), 22), END, null).baselineDays).toBe(21);
@@ -136,7 +124,7 @@ describe("the readiness score", () => {
 		[90, 4],
 	])("puts a score of %s in band %s", async (score, band) => {
 		// the week alone between 40 and 80; below that with a higher resting heart rate, above with a lower one
-		const today = score >= 40 && score <= 80 ? { hrv: await levelFor(score), resting_hr: 52 } : score < 40 ? { hrv: weekZ(-2), resting_hr: 52 + 2 * ((40 - score) / 7) } : { hrv: weekZ(2), resting_hr: 52 - 2 * ((score - 80) / 7) };
+		const today = score >= 40 && score <= 80 ? { hrv: weekZ((score - 60) / 20), resting_hr: 52 } : score < 40 ? { hrv: weekZ(-2), resting_hr: 52 + 2 * ((40 - score) / 7) } : { hrv: weekZ(2), resting_hr: 52 - 2 * ((score - 80) / 7) };
 		const m = computeToday(await index(today), END, null);
 		expect(m.score).toBe(score);
 		expect(m.band).toBe(band);
@@ -154,9 +142,9 @@ describe("the flags", () => {
 	const flags = async (today: Fm, rest: (ago: number) => Fm = () => ({})) => computeToday(await index({ hrv: USUAL, resting_hr: 52, ...today }, rest), END, null).flags;
 
 	it("flags a low HRV and a high resting heart rate beyond one standard deviation", async () => {
-		// the 7-night average: flagged below the usual range, one standard deviation under the 30 day mean (the week itself is part of it)
-		expect(await flags({ hrv: weekZ(-2) })).toEqual(["hrv"]);
-		expect(await flags({ hrv: weekZ(-1) })).toEqual([]);
+		// the 7-night average: flagged below the typical week, three quarters of a standard deviation under the baseline
+		expect(await flags({ hrv: weekZ(-1.2) })).toEqual(["hrv"]);
+		expect(await flags({ hrv: weekZ(-0.6) })).toEqual([]);
 		expect(await flags({ resting_hr: 55 })).toEqual(["rhr"]);
 		expect(await flags({ resting_hr: 53.5 })).toEqual([]);
 	});
@@ -373,7 +361,7 @@ describe("the week, the single night and the hard session", () => {
 		expect(m.flags).toEqual(["hrv"]); // the night is 1.7 standard deviations down
 	});
 
-	it("flags a clearly low week even though it is part of the 30 day range", async () => {
+	it("is not fooled by a low week hiding in its own baseline", async () => {
 		const m = computeToday(await index({ hrv: weekZ(-1.5), resting_hr: 52 }), END, null);
 		expect(m.flags).toEqual(["hrv"]);
 		expect(m.facts.hrvWeek).toMatchObject({ nights: 7, low: true });

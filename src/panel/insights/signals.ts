@@ -64,7 +64,7 @@ export class Signals {
 
 	/** The last 14 nights of HRV with their 7-night average, judged against the nights before the week. */
 	week(): WeekModel {
-		return (this.weekModel ??= computeWeek(this.index, "hrv", this.date, SD_FLOOR.hrv));
+		return (this.weekModel ??= computeWeek(this.index, "hrv", this.date));
 	}
 
 	/** Whether yesterday held a hard session (not a recovery one): the night after it HRV and resting heart rate are expected to be off. */
