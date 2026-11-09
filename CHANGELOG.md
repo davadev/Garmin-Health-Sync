@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.14.0-beta.8
+
+### Changed
+
+- **Less work while an installer waits.** When the plugin is enabled while Obsidian is already running (BRAT, the community browser, an update), the startup work that does not need to hurry (moving history notes, the first auto-sync, looking for existing data, the what's new hint) now starts 3 seconds later instead of inside the install. At a normal Obsidian start nothing changes. Measured with a synthetic vault of up to 1,500 days, loading takes the same as in 0.13.0, so this is a precaution for slow phones, not a fix for a measured regression.
+- The what's new entry for 0.14.0 describes what the release now does: the week chart on both the HRV and resting heart rate cards, the typical week, the 90-day change, and Readiness judging the 7-day average.
+
 ## 0.14.0-beta.7
 
 ### Fixed

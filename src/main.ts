@@ -20,7 +20,7 @@ import { NoteProperties } from "./note-properties";
 import { garminKeys } from "./history/record";
 import { applyDetection, detectGarminData } from "./detect";
 import { DayIndex } from "./panel/index";
-import { showWhatsNewIfDue, showWhatsNewNotes } from "./whats-new";
+import { STARTUP_WINDOW_MS, showWhatsNewIfDue, showWhatsNewNotes } from "./whats-new";
 
 const AUTO_SYNC_TRIGGER_DEBOUNCE_MS = 30 * 1000;
 /** An unfinished backfill goes on this long after the start, so Obsidian is up before the requests begin. */
@@ -31,6 +31,9 @@ const FIRST_RESYNC_AFTER_MS = 30 * 60 * 1000; // 30min — first re-sync happens
 const NO_DATA_COOLDOWN_MS = 1 * 60 * 60 * 1000; // 1h cooldown for dates that returned no data
 const CLEANUP_AGE_MS = 8 * 24 * 60 * 60 * 1000;
 const LOGIN_NOTICE_THROTTLE_MS = 10 * 60 * 1000; // 10min: re-show login notice no more often than this
+
+/** How long the startup work waits when the plugin is enabled while Obsidian is already running. */
+const ENABLED_LATER_DELAY_MS = 3000;
 
 export default class HealthSyncPlugin extends Plugin {
 	settings: HealthSyncSettings;
@@ -141,18 +144,28 @@ export default class HealthSyncPlugin extends Plugin {
 
 		// On startup: auto-sync only — BrowserWindow opens on demand
 		this.app.workspace.onLayoutReady(() => {
-			// the folder and format of the daily notes plugin may have changed since the plugin last read them
-			this.followDailyNotesPlugin();
-			// history notes left in an earlier daily notes folder come along before anything is fetched
-			this.background(this.history.relocate(), "move history notes");
-			this.background(this.tryAutoSync(), "auto-sync");
-			this.resumeBackfill();
-			// a device without the plugin's settings but with the notes sets itself up from them
-			this.background(this.detectExistingData(), "detect existing data");
-			this.background(
-				Promise.resolve().then(() => showWhatsNewIfDue(this.app, this.settings.language, this.manifest.version, this.freshInstall, performance.now())),
-				"what's new",
-			);
+			const startupWork = (): void => {
+				// the folder and format of the daily notes plugin may have changed since the plugin last read them
+				this.followDailyNotesPlugin();
+				// history notes left in an earlier daily notes folder come along before anything is fetched
+				this.background(this.history.relocate(), "move history notes");
+				this.background(this.tryAutoSync(), "auto-sync");
+				this.resumeBackfill();
+				// a device without the plugin's settings but with the notes sets itself up from them
+				this.background(this.detectExistingData(), "detect existing data");
+				this.background(
+					Promise.resolve().then(() => showWhatsNewIfDue(this.app, this.settings.language, this.manifest.version, this.freshInstall, performance.now())),
+					"what's new",
+				);
+			};
+			// Enabled while Obsidian was running (BRAT, the community browser, an update): the installer waits for the plugin to load, so the
+			// work that has no need to hurry (scanning notes, the first sync) starts a moment later instead of inside the install.
+			if (performance.now() >= STARTUP_WINDOW_MS) {
+				const timer = window.setTimeout(startupWork, ENABLED_LATER_DELAY_MS);
+				this.register(() => window.clearTimeout(timer));
+			} else {
+				startupWork();
+			}
 
 			// When "create daily note when missing" is off, the auto-sync waits for
 			// the note. Resume it the moment a real daily note within the sync window
