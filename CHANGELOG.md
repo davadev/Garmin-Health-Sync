@@ -1,92 +1,31 @@
 # Changelog
 
-## 0.14.0-beta.10
+## 0.14.0
 
-Beta 9 was never published: its fixes are part of this beta. The fixes were found in a review of the 0.14.0 changes against 0.13.0.
-
-### Added
-
-- **Readiness for a watch that sends no HRV.** The score used to wait for HRV forever. Without HRV (none in the 30 days, none for last night) it now uses resting heart rate, sleep and body battery, with the resting heart rate carrying more weight (12 per standard deviation). The card says the score is less reliable (`today_no_hrv`) and the verdict never says "train hard". With HRV in the notes but not for last night there is still no score.
-- **The Readiness switch follows the data.** When the daily notes have plenty of other data (at least 14 days) but neither resting heart rate with sleep nor Garmin's readiness, the card is not shown by data, and its switch in **Settings → Garmin Health Sync → Side panel** cannot be turned on; the description says why. A card the user already switched on can still be switched off. With little data yet the switch stays available, because the data may simply not have arrived.
-
-### Fixed
-
-- **A long easy walk is no longer a "hard session".** The load rule (70) counted two hours of walking at an easy heart rate as hard, which capped the verdict and hid the night's flags the next morning. A session now needs an intensity step of 3 or more, or a load of 70 at a step of 2 or more.
-- **A raised resting heart rate with raised breathing stays flagged the morning after a hard session.** That pair is the sign of an illness and had been hidden together with the expected rise, so the "day off" rule could not fire.
-- **No readiness score without last night's HRV.** The week made a score possible when last night was not measured (the HRV card said "No reading" while Readiness said "train as planned"); the score now waits for the night, as in 0.13.0.
-- Docs and README brought up to date: the typical week, the resting heart rate chart, the score and the flags.
-
-## 0.14.0-beta.8
-
-### Changed
-
-- **Less work while an installer waits.** When the plugin is enabled while Obsidian is already running (BRAT, the community browser, an update), the startup work that does not need to hurry (moving history notes, the first auto-sync, looking for existing data, the what's new hint) now starts 3 seconds later instead of inside the install. At a normal Obsidian start nothing changes. Measured with a synthetic vault of up to 1,500 days, loading takes the same as in 0.13.0, so this is a precaution for slow phones, not a fix for a measured regression.
-- The what's new entry for 0.14.0 describes what the release now does: the week chart on both the HRV and resting heart rate cards, the typical week, the 90-day change, and Readiness judging the 7-day average.
-
-## 0.14.0-beta.7
-
-### Fixed
-
-- **"How to read this" no longer folds itself while you read it.** Any redraw of the panel (a note changed, a sync wrote, the layout changed) rebuilt the cards, and the folded sections inside an open light bulb (the explanation and the grouped interpretations) came back closed. They now keep their state across a redraw, for the card whose light bulb is open.
-
-## 0.14.0-beta.6
-
-The two ranges on the HRV and resting heart rate cards now say which question they answer.
-
-### Changed
-
-- **The bar** has a caption ("Last night against your usual days", "Today against your usual days") and keeps its range, the 30 days before plus or minus one standard deviation.
-- **The green band of the chart is the "Typical week"**, which follows the HRV research on 7-day averages more closely: the mean of the up to 60 days before the week (the week itself left out) plus or minus three quarters of a standard deviation, worked out on ln(value). The status says "In / Below / Above your typical week". Bar and chart answer different questions, so they can differ; the text under the light bulb explains how to read the card.
-- Readiness uses the same typical week for the HRV score and flag (flag from three quarters of a standard deviation below).
-- The green band is a little more transparent on a light theme.
-
-## 0.14.0-beta.5
-
-### Fixed
-
-- **The week chart's "Usual" band is now exactly the range bar's range** (mean of the 30 days ± 1 standard deviation). Before, it came from a 60-night baseline that skipped the last week, so the bar could say "in range" while the chart said "below your usual" when your level had drifted. The average is now the plain mean (no log scale), the Readiness HRV score and flag measure the week against the same 30-day range, and the baseline needs 5 days instead of 14. The week itself is part of that range, so a low week is judged a little less sharply than with a separate baseline.
-
-## 0.14.0-beta.4
-
-### Changed
-
-- **The green "Usual" band of the week chart is as wide as the range bar's usual range** (one standard deviation, was half), so it is bigger and "usual" means one thing on the card. The HRV flag in Readiness and "Below your usual" now use the same edges, so they speak up later than before (the research criterion is the narrower half standard deviation; this card is deliberately less sensitive). The score still counts the 7-night average double.
-
-## 0.14.0-beta.3
+The release of the week. The HRV and resting heart rate cards show a week at a glance, and Readiness judges HRV on the 7-night average instead of one night. The thresholds are starting values (see `docs/panel-insights.md`, "Where the numbers come from"). The detail of every step is in the `0.14.0-beta.N` notes of the GitHub releases.
 
 ### Added
 
-- **The resting heart rate card gets the same week chart as HRV**: 14 days as bars (today solid), the 7-day average as a line, the usual range for the week as a band, and one status row with the 90 day change. The headline unit says "Today"; only an average above the usual range is coloured as a warning (a lower resting heart rate is fine). It replaces the two-week trend line on this card.
-
-### Changed
-
-- The week chart is a little taller (64 px) so differences are easier to see, and the spacing around it and under it is more even. The texts speak of days instead of nights, because the resting heart rate is a daily value.
-
-## 0.14.0-beta.2
-
-A more compact HRV card.
-
-### Changed
-
-- The headline value of the HRV card says what it is: "37 ms · Last night". The row that repeated it is gone.
-- The legend is gone: the band is labelled "Usual" inside the chart, and the chart is 16 px lower.
-- One status row: "7-day avg 37 ms · In your usual range" (the nights it rests on only when fewer than 7), with the change of the 90 day average on the right ("↑ 3 ms over 90 days", or steady). The long-term change reuses the year view of the light bulb.
-
-## 0.14.0-beta.1
-
-Weekly HRV on the HRV card and in Readiness. The thresholds are starting values (see `docs/panel-insights.md`, "Where the numbers come from"), please say how they feel on your own data.
-
-### Added
-
-- **A week of HRV on the HRV card.** Under the range bar: the last 14 nights as bars (last night solid), your 7-night average as a line and the band that is usual for your week (the mean of up to 60 nights before the week, plus or minus half a standard deviation, worked out on ln(HRV)). Runs of 3 or more nights without the watch are drawn as dashed boxes and break the line; a night without a value is never counted as low. The status line names last night and the average with the nights it rests on.
-- **Readiness says why.** The first interpretation shows under the score bar without opening the light bulb. New interpretations: `today_week_low`, `today_hard_session`, `hrv_low_hard_session`, `rhr_high_hard_session`, each with its section in `docs/panel-insights.md`.
+- **A week chart on the HRV and resting heart rate cards.** Under the range bar: the last 14 days as bars (the shown day solid), the 7-day average as a line, the "Typical week" as a green band (the mean of up to 60 days before the week, the week itself left out, plus or minus three quarters of a standard deviation, worked out on ln(value)) and one status row ("In / Below / Above your typical week") with the change of the 90 day average. Runs of 3 or more days without a value are drawn as dashed boxes and break the line; a missing night is never counted as low. The headline says what it is ("37 ms · Last night", "Today" for the resting heart rate); only an average above the typical week is coloured as a warning on the resting heart rate. The range bar keeps its range (the 30 days before, plus or minus one standard deviation) and now has a caption saying so.
+- **Readiness says why.** The first interpretation shows under the score bar without opening the light bulb. New interpretations: `today_week_low`, `today_hard_session`, `hrv_low_hard_session`, `rhr_high_hard_session`, `today_no_hrv`, each with its section in `docs/panel-insights.md`.
+- **Readiness for a watch that sends no HRV.** It uses resting heart rate, sleep and body battery (the resting heart rate carrying more weight), says the score is less reliable and never says "train hard". With HRV in the notes but not for last night there is still no score.
+- **The Readiness switch follows the data.** When the daily notes have at least 14 days of other data but neither resting heart rate with sleep nor Garmin's readiness, the card cannot be switched on in **Settings → Garmin Health Sync → Side panel**; the description says why. A card already switched on can still be switched off.
 - A "what's new" entry for 0.14.0 (six languages) with a small HRV week figure.
 
 ### Changed
 
-- **Readiness judges HRV on the 7-night average** (from 4 of 7 nights; otherwise on last night as before) against the nights before the week, counted in units of half a standard deviation. The HRV flag fires when the average is more than half a standard deviation low, or when last night alone is more than 2 standard deviations low and no hard session explains it.
-- **The morning after a hard session** (a non-recovery session of yesterday with a known intensity: step 3 or more, or load 70 or more) the night's low HRV and raised resting heart rate are not flagged and the verdict is at most "go easy". A rest verdict stays.
-- The HRV card no longer shows the two-week trend line; the week chart replaces it.
+- **Readiness judges HRV on the 7-night average** (from 4 of 7 nights; otherwise on last night as before) against the typical week. The HRV flag fires when the average is more than three quarters of a standard deviation low, or when last night alone is more than 2 standard deviations low and no hard session explains it.
+- **The morning after a hard session** (a non-recovery session of yesterday with a known intensity: step 3 or more, or load 70 or more at step 2 or more) the night's low HRV and raised resting heart rate are not flagged and the verdict is at most "go easy". A rest verdict stays, and a raised resting heart rate with raised breathing (the sign of an illness) stays flagged.
+- No readiness score without last night's HRV, as in 0.13.0.
+- The HRV and resting heart rate cards no longer show the two-week trend line; the week chart replaces it.
+- **Less work while an installer waits.** When the plugin is enabled while Obsidian is already running (BRAT, the community browser, an update), the startup work that does not need to hurry now starts 3 seconds later. At a normal Obsidian start nothing changes.
+- The green band is a little more transparent on a light theme.
+
+### Fixed
+
+- **"How to read this" no longer folds itself while you read it.** The folded sections inside an open light bulb keep their state across a redraw of the panel.
+- A long easy walk is no longer a "hard session".
+- Docs and README brought up to date: the typical week, the resting heart rate chart, the score and the flags.
 
 ## 0.13.0
 
