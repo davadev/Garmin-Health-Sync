@@ -29,6 +29,8 @@ export class HealthPanelView extends ItemView {
 	private renderTimer = 0;
 	/** Card whose explanation is open; only one at a time. */
 	private explain: string | null = null;
+	/** The card whose explanation the last draw showed: the folded parts inside it keep their state across a redraw only for the same card. */
+	private explainDrawn: string | null = null;
 	/** The cards are shown as a list that can be rearranged instead of as cards. */
 	private editing = false;
 
@@ -135,6 +137,9 @@ export class HealthPanelView extends ItemView {
 		const root = this.contentEl;
 		// a redraw (a sync wrote a note) keeps the place in the panel
 		const scrolled = root.scrollTop;
+		// ...and so do the folded parts of the open explanation ("how to read this", the grouped interpretations): a redraw while someone is reading them must not close them
+		const unfolded: number[] = [];
+		if (this.explain !== null && this.explain === this.explainDrawn) root.querySelectorAll("details").forEach((d, i) => d.open && unfolded.push(i));
 		root.empty();
 		root.addClass("ghs-panel");
 
@@ -180,6 +185,10 @@ export class HealthPanelView extends ItemView {
 
 		if (this.editing) this.renderEditor(root, lang);
 		else this.renderCards(root, lang);
+		root.querySelectorAll("details").forEach((d, i) => {
+			if (unfolded.includes(i)) d.open = true;
+		});
+		this.explainDrawn = this.explain;
 		root.scrollTop = scrolled;
 	}
 

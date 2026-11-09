@@ -98,6 +98,29 @@ describe("health panel view", () => {
 		expect(view.contentEl.querySelector(".ghs-explain")).toBeNull();
 	});
 
+	it("keeps \"how to read this\" open while the panel is drawn again, so it can be read to the end", async () => {
+		const { view, app } = await open();
+		const infos = (): HTMLButtonElement[] => Array.from(view.contentEl.querySelectorAll(".ghs-info"));
+		const about = (): HTMLDetailsElement | null => view.contentEl.querySelector("details.ghs-about");
+		infos()[0]!.click();
+		// a redraw leaves a part that was folded folded
+		app.metadataCache.fireChanged(app.vault.getMarkdownFiles()[0]!);
+		await vi.advanceTimersByTimeAsync(300);
+		expect(about()!.open).toBe(false);
+		about()!.open = true;
+		// a note changed: the whole panel is drawn again
+		app.metadataCache.fireChanged(app.vault.getMarkdownFiles()[0]!);
+		await vi.advanceTimersByTimeAsync(300);
+		expect(about()!.open).toBe(true);
+		// another card's explanation starts folded
+		infos()[1]!.click();
+		expect(about()!.open).toBe(false);
+		// and the first one does not remember it was open once it was closed
+		infos()[1]!.click();
+		infos()[0]!.click();
+		expect(about()!.open).toBe(false);
+	});
+
 	it("re-renders once, 300 ms after a burst of note changes, with fresh data", async () => {
 		const app = new App();
 		const view = new HealthPanelView(new WorkspaceLeaf(app) as never, { settings: { ...DEFAULT_SETTINGS, panelCards: { today: false } } } as never);

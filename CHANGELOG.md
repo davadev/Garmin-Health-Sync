@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.14.0-beta.7
+
+### Fixed
+
+- **"How to read this" no longer folds itself while you read it.** Any redraw of the panel (a note changed, a sync wrote, the layout changed) rebuilt the cards, and the folded sections inside an open light bulb (the explanation and the grouped interpretations) came back closed. They now keep their state across a redraw, for the card whose light bulb is open.
+
 ## 0.14.0-beta.6
 
 The two ranges on the HRV and resting heart rate cards now say which question they answer.
