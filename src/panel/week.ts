@@ -13,8 +13,8 @@ export const WEEK_MIN_JUDGED = 4;
 /** The baseline is the nights before the week: a low week must not pull down the range it is compared with. */
 const BASELINE_DAYS = 60;
 const BASELINE_MIN = 14;
-/** Smallest spread of ln(HRV): about 4 percent of the level, so a very steady sleeper does not get a razor-thin band. */
-const LN_SD_FLOOR = 0.04;
+/** Smallest spread of ln(value): about 4 percent of the level (HRV), so a very steady sleeper does not get a razor-thin band. */
+export const LN_SD_FLOOR = 0.04;
 /** The band is the smallest worthwhile change: half a standard deviation of the baseline (Plews et al. 2012, Javaloyes et al. 2019). */
 export const SWC_SD = 0.5;
 /** A run of this many nights without a value is drawn as a gap. */
@@ -46,7 +46,7 @@ function lnOf(v: number | null): number | null {
 	return v !== null && v > 0 ? Math.log(v) : null;
 }
 
-export function computeWeek(index: DayIndex, key: string, date: string): WeekModel {
+export function computeWeek(index: DayIndex, key: string, date: string, sdFloor: number = LN_SD_FLOOR): WeekModel {
 	const nights: (number | null)[] = [];
 	const lns: (number | null)[] = [];
 	// the 6 nights before the chart's first night are needed for the first average
@@ -70,7 +70,7 @@ export function computeWeek(index: DayIndex, key: string, date: string): WeekMod
 		const v = lnOf(index.value(key, shiftDate(date, -i)));
 		if (v !== null) earlier.push(v);
 	}
-	const b = baseline(earlier, BASELINE_MIN, LN_SD_FLOOR);
+	const b = baseline(earlier, BASELINE_MIN, sdFloor);
 	const band = b ? { low: Math.exp(b.mean - SWC_SD * b.sd), mean: Math.exp(b.mean), high: Math.exp(b.mean + SWC_SD * b.sd) } : null;
 
 	const last = avgLn(nights.length - 1 + offset);

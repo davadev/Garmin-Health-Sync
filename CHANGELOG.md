@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.14.0-beta.3
+
+### Added
+
+- **The resting heart rate card gets the same week chart as HRV**: 14 days as bars (today solid), the 7-day average as a line, the usual range for the week as a band, and one status row with the 90 day change. The headline unit says "Today"; only an average above the usual range is coloured as a warning (a lower resting heart rate is fine). It replaces the two-week trend line on this card.
+
+### Changed
+
+- The week chart is a little taller (64 px) so differences are easier to see, and the spacing around it and under it is more even. The texts speak of days instead of nights, because the resting heart rate is a daily value.
+
 ## 0.14.0-beta.2
 
 A more compact HRV card.
