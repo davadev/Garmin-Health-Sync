@@ -184,11 +184,9 @@ export class HealthPanelView extends ItemView {
 
 		if (this.editing) this.renderEditor(root, lang);
 		else this.renderCards(root, lang);
-		const folded = root.querySelectorAll("details");
-		for (const i of unfolded) {
-			const details = folded.item(i);
-			if (details) details.open = true;
-		}
+		Array.from(root.querySelectorAll("details"))
+			.filter((_, i) => unfolded.includes(i))
+			.forEach((d) => (d.open = true));
 		this.explainDrawn = this.explain;
 		root.scrollTop = scrolled;
 	}
