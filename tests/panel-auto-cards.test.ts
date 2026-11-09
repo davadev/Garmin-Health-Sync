@@ -30,7 +30,15 @@ const WITH_DATA = (ago: number): Record<string, unknown> => ({ hrv: 50 + (ago % 
 describe("a panel that chooses its cards by data", () => {
 	it("shows the cards that have data and leaves out the others, in order", async () => {
 		const view = await open({ panelAuto: true }, WITH_DATA);
-		expect(titles(view)).toEqual([en.panelTodayTitle, en.panelHrvTitle, en.panelStepsTitle]);
+		expect(titles(view)).toEqual([en.panelHrvTitle, en.panelStepsTitle]);
+	});
+
+	it("shows the Readiness card when its data is there: with or without HRV, or only Garmin's own readiness, and not for data it cannot use", async () => {
+		const basics = (ago: number): Record<string, unknown> => ({ resting_hr: 52 + (ago % 3), sleep_duration: "7h 10min", steps: 8000 });
+		expect(titles(await open({ panelAuto: true }, (ago) => ({ ...basics(ago), hrv: 50 })))).toContain(en.panelTodayTitle);
+		expect(titles(await open({ panelAuto: true }, basics))).toContain(en.panelTodayTitle);
+		expect(titles(await open({ panelAuto: true }, (ago) => ({ training_readiness: 60 + ago, steps: 8000 })))).toContain(en.panelTodayTitle);
+		expect(titles(await open({ panelAuto: true }, WITH_DATA))).not.toContain(en.panelTodayTitle);
 	});
 
 	it("shows every card in a panel that was set up before, whatever data there is", async () => {
@@ -39,7 +47,7 @@ describe("a panel that chooses its cards by data", () => {
 
 	it("keeps a card the user switched on, and never shows one the user switched off", async () => {
 		const view = await open({ panelAuto: true, panelCards: { sleep: true, hrv: false } }, WITH_DATA);
-		expect(titles(view)).toEqual([en.panelTodayTitle, en.panelSleepTitle, en.panelStepsTitle]);
+		expect(titles(view)).toEqual([en.panelSleepTitle, en.panelStepsTitle]);
 	});
 
 	it("shows all cards when none has data, so the panel is never blank, but still not the switched-off ones", async () => {
@@ -50,9 +58,9 @@ describe("a panel that chooses its cards by data", () => {
 
 	it("takes a card in as soon as its metric has a value, also a duration or a text, and drops its section header with it", async () => {
 		const view = await open({ panelAuto: true }, (ago) => (ago === 3 ? { sleep_duration: "7h 10min", training_status: "PRODUCTIVE", hrv: 50 } : { hrv: 50 }));
-		expect(titles(view)).toEqual([en.panelTodayTitle, en.panelHrvTitle, en.panelSleepTitle]);
+		expect(titles(view)).toEqual([en.panelHrvTitle, en.panelSleepTitle]);
 		const sections = Array.from(view.contentEl.querySelectorAll(".ghs-section")).map((e) => e.textContent);
-		expect(sections).toEqual([en.panelSectionToday, en.panelSectionRecovery, en.panelSectionSleep]);
+		expect(sections).toEqual([en.panelSectionRecovery, en.panelSectionSleep]);
 	});
 
 	it("shows the cards that read workouts when a workout is there", async () => {
@@ -79,7 +87,7 @@ describe("a panel that chooses its cards by data", () => {
 
 	it("ignores blank properties of a template", async () => {
 		const view = await open({ panelAuto: true }, () => ({ hrv: 50, steps: "", floors: null, spo2: undefined }));
-		expect(titles(view)).toEqual([en.panelTodayTitle, en.panelHrvTitle]);
+		expect(titles(view)).toEqual([en.panelHrvTitle]);
 	});
 });
 

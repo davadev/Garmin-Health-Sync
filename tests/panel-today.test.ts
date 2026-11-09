@@ -131,7 +131,6 @@ describe("the readiness score", () => {
 	});
 
 	it("is not there without HRV, resting heart rate or sleep", async () => {
-		expect(computeToday(await index({}, () => ({ hrv: undefined })), END, null).score).toBeNull();
 		expect(computeToday(await index({}, () => ({ resting_hr: undefined })), END, null).score).toBeNull();
 		expect(computeToday(await index({}, () => ({ sleep_duration: undefined })), END, null).score).toBeNull();
 		expect(computeToday(await index({}, () => ({}), 3), END, null).score).toBeNull();
@@ -431,4 +430,56 @@ describe("the week, the single night and the hard session", () => {
 		expect(m.score).toBeNull();
 	});
 });
+
+describe("a watch that sends no HRV", () => {
+	const noHrv = { hrv: undefined };
+	const flat = (): Fm => noHrv;
+
+	it("gets a reduced score from resting heart rate, sleep and body battery, marked as such", async () => {
+		const usual = computeToday(await index({ resting_hr: 52 }, flat), END, null);
+		expect(usual.reduced).toBe(true);
+		expect(usual.score).toBe(60);
+		// one standard deviation of resting heart rate carries the weight of both signals: 12 instead of 7 + 10 for HRV
+		expect(computeToday(await index({ resting_hr: 54 }, flat), END, null).score).toBe(48);
+		expect(computeToday(await index({ resting_hr: 50 }, flat), END, null).score).toBe(72);
+		expect(computeToday(await index({ resting_hr: 52, body_battery_max: 80 }, (ago) => ({ ...noHrv, body_battery_max: alt(ago, 62, 58) })), END, null).score).toBe(65);
+	});
+
+	it("is not reduced with HRV, and not reduced when only last night's HRV is missing: that has no score", async () => {
+		expect(computeToday(await index({ hrv: USUAL, resting_hr: 52 }), END, null).reduced).toBe(false);
+		const missing = computeToday(await index({ hrv: USUAL, resting_hr: 52 }, () => ({}), 45, { hrv: undefined }), END, null);
+		expect(missing.reduced).toBe(false);
+		expect(missing.score).toBeNull();
+	});
+
+	it("never says train hard, however good the day looks", async () => {
+		const m = computeToday(await index({ resting_hr: 48 }, flat), END, null);
+		expect(m.band).toBe(3);
+		expect(m.flags).toEqual([]);
+		expect(m.verdict).toBe("planned");
+	});
+
+	it("keeps the other rules: flags, a low band means rest, a young range pulls towards 60", async () => {
+		expect(computeToday(await index({ resting_hr: 57 }, flat), END, null).verdict).toBe("rest");
+		const young = computeToday(await index({ resting_hr: 58 }, flat, 12), END, null);
+		expect(young.baselineDays).toBe(11);
+		expect(young.score).toBe(47); // 60 - 12 x 2 x 11 / 21 (the z value is held at 2)
+		expect(young.early).toBe(true);
+	});
+
+	it("says first that the score is reduced, instead of claiming that HRV is in its usual range", async () => {
+		expect((await todayIds({ resting_hr: 52 }, flat))).toEqual(["today_no_hrv"]);
+		expect(await todayIds({ resting_hr: 52 }, (ago) => ({ ...noHrv, sleep_duration: ago < 7 ? "6h 40min" : "7h 30min" }))).toEqual(["today_no_hrv", "today_flag_sleep"]);
+		expect(await todayIds({ hrv: USUAL, resting_hr: 52 }, () => ({}))).toEqual(["today_no_flags"]);
+	});
+
+	it("says so under the score bar too, in the plugin language", async () => {
+		const model = { ...computeToday(await index({ resting_hr: 52 }, flat), END, null), insights: [{ id: "today_no_hrv" as const }] };
+		const root = document.createElement("div");
+		renderToday(root, model, "de", false, noop);
+		expect(root.querySelector(".ghs-card-why")?.textContent).toBe(de.insight_today_no_hrv);
+	});
+});
+
+const todayIds = async (today: Fm, rest: (ago: number) => Fm): Promise<string[]> => todayInsights(new Signals(await index(today, rest), END, null)).map((i) => i.id);
 

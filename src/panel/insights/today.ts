@@ -18,9 +18,11 @@ const FLAG_INSIGHT: Record<FlagId, InsightId> = {
 export function todayInsights(s: Signals): Insight[] {
 	const m = computeToday(s.index, s.date, s.birthYear);
 	if (m.score === null) return [];
+	// a watch without HRV: say so first, it is what makes the score less reliable
+	const noHrv: Insight[] = m.reduced ? [{ id: "today_no_hrv" }] : [];
 	// the morning after a hard session comes first: it says why HRV and resting heart rate are not held against the day
 	const hard: Insight[] = m.facts.hard ? [{ id: "today_hard_session" }] : [];
-	if (m.flags.length === 0) return m.facts.hard ? hard : [{ id: "today_no_flags" }];
+	if (m.flags.length === 0) return m.reduced ? [...noHrv, ...hard] : m.facts.hard ? hard : [{ id: "today_no_flags" }];
 	const out = m.flags.map((flag): Insight => {
 		const id = FLAG_INSIGHT[flag];
 		if (flag === "hrv" && m.facts.hrvWeek?.low) return { id: "today_week_low", params: { avg: String(Math.round(m.facts.hrvWeek.average)), n: String(m.facts.hrvWeek.nights) } };
@@ -29,5 +31,5 @@ export function todayInsights(s: Signals): Insight[] {
 		if (flag === "load") return { id, params: { pct: String(Math.round((m.facts.loadRatio! - 1) * 100)) } };
 		return { id };
 	});
-	return [...hard, ...out].slice(0, MAX_INSIGHTS);
+	return [...noHrv, ...hard, ...out].slice(0, MAX_INSIGHTS);
 }

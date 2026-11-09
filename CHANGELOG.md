@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.14.0-beta.10
+
+### Added
+
+- **Readiness for a watch that sends no HRV.** The score used to wait for HRV forever. Without HRV (none in the 30 days, none for last night) it now uses resting heart rate, sleep and body battery, with the resting heart rate carrying more weight (12 per standard deviation). The card says the score is less reliable (`today_no_hrv`) and the verdict never says "train hard". With HRV in the notes but not for last night there is still no score.
+- **The Readiness switch follows the data.** When the daily notes have plenty of other data (at least 14 days) but neither resting heart rate with sleep nor Garmin's readiness, the card is not shown by data, and its switch in **Settings → Garmin Health Sync → Side panel** cannot be turned on; the description says why. A card the user already switched on can still be switched off. With little data yet the switch stays available, because the data may simply not have arrived.
+
 ## 0.14.0-beta.9
 
 Found in a review of the 0.14.0 changes against 0.13.0.

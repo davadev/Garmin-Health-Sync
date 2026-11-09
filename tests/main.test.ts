@@ -55,6 +55,13 @@ beforeEach(() => {
 	document.documentElement.lang = "";
 });
 
+describe("what the Today card can show", () => {
+	it("says unknown while the notes hold too little data to tell, which keeps the switch of the card available", async () => {
+		const { plugin } = await load(null);
+		expect(plugin.todayAvailability()).toBe("unknown");
+	});
+});
+
 describe("loading settings", () => {
 	it("starts from the defaults on a first run", async () => {
 		const { plugin } = await load(null);

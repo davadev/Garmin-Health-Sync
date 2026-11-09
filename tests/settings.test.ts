@@ -20,7 +20,7 @@ interface Item {
 	action?: (el: HTMLElement) => void;
 }
 
-function make(patch: Partial<HealthSyncSettings> = {}, session = false) {
+function make(patch: Partial<HealthSyncSettings> = {}, session = false, today: "full" | "reduced" | "garmin" | "unknown" | "none" = "unknown") {
 	const settings: HealthSyncSettings = { ...DEFAULT_SETTINGS, enabledMetrics: { ...DEFAULT_SETTINGS.enabledMetrics }, lastSyncTimes: {}, language: "en", ...patch };
 	const plugin = {
 		settings,
@@ -29,6 +29,7 @@ function make(patch: Partial<HealthSyncSettings> = {}, session = false) {
 		applyServerRegion: vi.fn(),
 		applyPanelEnabled: vi.fn().mockResolvedValue(undefined),
 		refreshPanels: vi.fn(),
+		todayAvailability: () => today,
 		noteProperties: { modeChanged: vi.fn() },
 		logout: vi.fn().mockResolvedValue(undefined),
 		loginViaBrowser: vi.fn().mockImplementation((done?: () => void) => {
@@ -151,6 +152,32 @@ describe("the settings layout", () => {
 		it("falls back to the default of a metric missing from the record", () => {
 			expect(descs({ enabledMetrics: {} })("hrv")).toContain(en.panelNeedsHrv);
 			expect(descs({ enabledMetrics: {} })("spo2")).toContain(en.panelCardTurnOn.split("{")[0]!);
+		});
+	});
+
+	describe("the Readiness switch", () => {
+		const today = (m: ReturnType<typeof make>): { desc?: string; control?: { disabled?: () => boolean } } => keyed(m.defs(), "panel:today") as never;
+
+		it("can be switched on while the data can still give something, also while it is too early to tell", () => {
+			for (const state of ["full", "reduced", "garmin", "unknown"] as const) {
+				const m = make({}, false, state);
+				expect(today(m).control!.disabled!()).toBe(false);
+				expect(m.tab.getControlValue("panel:today")).toBe(true);
+				expect(today(m).desc).not.toContain(en.panelTodayUnavailable);
+			}
+		});
+
+		it("cannot be switched on when the data has nothing it can use, and says why; it shows as off", () => {
+			const m = make({}, false, "none");
+			expect(today(m).control!.disabled!()).toBe(true);
+			expect(m.tab.getControlValue("panel:today")).toBe(false);
+			expect(today(m).desc).toContain(en.panelTodayUnavailable);
+		});
+
+		it("can still be switched off when the user had switched it on, and keeps showing as on", () => {
+			const m = make({ panelCards: { today: true } }, false, "none");
+			expect(m.tab.getControlValue("panel:today")).toBe(true);
+			expect(today(m).control!.disabled!()).toBe(false);
 		});
 	});
 
