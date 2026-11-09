@@ -8,9 +8,10 @@ import { heartRateHistory, intensityStep, sessionLoad } from "../load";
 import { maxHrAt } from "../zones";
 import { computeWeek, type WeekModel } from "../week";
 
-/** A session of this load (about an hour in zone 4) or in the fourth or fifth intensity step is a hard one: HRV and resting heart rate are expected to be off the night after. */
+/** A session in the fourth or fifth intensity step, or one of this load (about an hour in zone 4) that is at least a middle effort, is a hard one: HRV and resting heart rate are expected to be off the night after. A long easy walk has the load but not the effort, so it does not count. */
 export const HARD_SESSION_LOAD = 70;
 const HARD_SESSION_STEP = 3;
+const MIDDLE_STEP = 2;
 
 /** The smallest standard deviation per metric, so a very steady user does not get razor-thin ranges. */
 const SD_FLOOR = { hrv: 2, resting_hr: 1.5, spo2: 0.7, respiration_rate: 0.4, stress: 5, steps: 500 };
@@ -76,7 +77,7 @@ export class Signals {
 			// without a known intensity (no heart rate, no birth year, too few sessions) the minutes alone do not make a session hard
 			this.hard = { session: this.index.sessions(day).some((x) => {
 				const step = intensityStep(x, history, maxHr);
-				return step !== null && (step >= HARD_SESSION_STEP || sessionLoad(x, history, maxHr) >= HARD_SESSION_LOAD);
+				return step !== null && (step >= HARD_SESSION_STEP || (step >= MIDDLE_STEP && sessionLoad(x, history, maxHr) >= HARD_SESSION_LOAD));
 			}) };
 		}
 		return this.hard.session;

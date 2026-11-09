@@ -114,12 +114,14 @@ export function computeToday(index: DayIndex, date: string, birthYear: number | 
 	const facts: TodayFacts = { hrvWeek: week.z !== null && week.average !== null ? { average: week.average, nights: week.coverage, low: week.z < WEEK_LOW_Z } : null, hard, debt, batteryGap, loadRatio };
 
 	const flags: FlagId[] = [];
+	const breathingUp = (s.z("respiration_rate") ?? 0) > 1.5;
 	if (week.z !== null ? week.z < WEEK_LOW_Z || (nightZ !== null && nightZ < NIGHT_LOW_Z && !hard) : nightZ !== null && nightZ < -1 && !hard) flags.push("hrv");
-	if (rhrZ !== null && rhrZ > 1 && !hard) flags.push("rhr");
+	// a raised resting heart rate after a hard session is expected, unless the breathing is up as well: that pair is the sign of an illness and stays
+	if (rhrZ !== null && rhrZ > 1 && (!hard || breathingUp)) flags.push("rhr");
 	if (debt !== null && debt > 120) flags.push("sleep");
 	if (batteryGap !== null && batteryGap > 15) flags.push("battery");
 	if (stress.level !== null && stress.week !== null && stress.level > stress.week + 10) flags.push("stress");
-	if ((s.z("respiration_rate") ?? 0) > 1.5) flags.push("breathing");
+	if (breathingUp) flags.push("breathing");
 	const spo2 = index.value("spo2", date);
 	if (spo2 !== null && spo2 < 94) flags.push("spo2");
 	if (loadRatio !== null && loadRatio > 1.5) flags.push("load");
@@ -128,7 +130,8 @@ export function computeToday(index: DayIndex, date: string, birthYear: number | 
 	const early = baselineDays < TODAY_RELIABLE_DAYS;
 	const trust = Math.min(1, baselineDays / TODAY_RELIABLE_DAYS);
 	// no score from a range too young to lean on, nor without last night's sleep: a missing night would count as no debt and raise the score
-	const score = hrvZ !== null && rhrZ !== null && debt !== null && sleep.minutes !== null && baselineDays >= TODAY_MIN_DAYS ? scoreOf(hrvZ, rhrZ, debt, battery.usualPeak !== null && battery.max !== null ? battery.max - battery.usualPeak : null, trust) : null;
+	// without last night's HRV there is no score, however many nights of the week there are: the week is no stand-in for a night that was not measured
+	const score = hrvZ !== null && nightZ !== null && rhrZ !== null && debt !== null && sleep.minutes !== null && baselineDays >= TODAY_MIN_DAYS ? scoreOf(hrvZ, rhrZ, debt, battery.usualPeak !== null && battery.max !== null ? battery.max - battery.usualPeak : null, trust) : null;
 	const band = score === null ? null : ((BANDS.findIndex((b) => score < b.upTo) as Band));
 	return { insights: [], score, band, verdict: band === null ? null : verdictOf(band, flags, early, hard), flags, facts, garmin, have: Math.min(baselineDays, sleep.have), sleepNights: sleep.have, baselineDays, early };
 }

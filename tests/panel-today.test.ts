@@ -407,4 +407,28 @@ describe("the week, the single night and the hard session", () => {
 		renderToday(none, { ...model, insights: [] }, "en", false, noop);
 		expect(none.querySelector(".ghs-card-why")).toBeNull();
 	});
+
+	it("does not call a long easy walk a hard session, however long it is", async () => {
+		const walk = (ago: number): Fm => ({ walking: `${ago === 1 ? 120 : 40}min \u00b7 \u00d8${ago === 1 ? 95 : 100} bpm` });
+		const m = await withBirth(high, walk);
+		expect(m.facts.hard).toBe(false);
+		expect(m.verdict).toBe("hard");
+	});
+
+	it("keeps the pair of a raised resting heart rate and raised breathing as a flag after a hard session: it is the sign of an illness", async () => {
+		const breathing = (ago: number): Fm => ({ ...yesterdayRun(170)(ago), respiration_rate: alt(ago, 13, 15.4) });
+		const m = await withBirth({ hrv: USUAL, resting_hr: 62, respiration_rate: 19 }, breathing);
+		expect(m.facts.hard).toBe(true);
+		expect(m.flags).toEqual(["rhr", "breathing"]);
+		expect(m.verdict).toBe("rest");
+		// a raised resting heart rate alone is explained by the session
+		expect((await withBirth({ hrv: USUAL, resting_hr: 62 }, yesterdayRun(170))).flags).toEqual([]);
+	});
+
+	it("gives no score without last night's HRV, however many nights of the week there are", async () => {
+		const m = computeToday(await index({ hrv: USUAL, resting_hr: 52 }, () => ({}), 45, { hrv: undefined }), END, null);
+		expect(m.facts.hrvWeek).not.toBeNull();
+		expect(m.score).toBeNull();
+	});
 });
+
