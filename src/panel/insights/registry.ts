@@ -25,6 +25,7 @@ export const INSIGHTS = {
 	today_flag_load: { card: "today", kind: "watch" },
 	today_no_flags: { card: "today", kind: "good" },
 	today_hard_session: { card: "today", kind: "watch" },
+	today_no_hrv: { card: "today", kind: "watch" },
 	today_week_low: { card: "today", kind: "watch" },
 
 	hrv_low_load: { card: "hrv", kind: "watch" },

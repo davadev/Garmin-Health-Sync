@@ -306,16 +306,20 @@ export class HealthSyncSettingTab extends PluginSettingTab {
 	private panelCardDefinitions(lang: string): SettingDefinition[] {
 		const enabled = this.plugin.settings.enabledMetrics;
 		const off = (keys: string[]): string => keys.filter((key) => !(enabled[key] ?? METRICS.find((m) => m.key === key)!.defaultEnabled)).map((key) => this.metricLabel(key, lang)).join(", ");
+		// the Today card cannot say anything for data without resting heart rate and sleep (and without Garmin's readiness): it cannot be switched on then
+		const todayBlocked = this.plugin.todayAvailability() === "none";
 		return PANEL_CARDS.map((card) => {
+			const blocked = card.id === "today" && todayBlocked;
 			const missing = off(card.metrics);
 			const detail = off(card.extra ?? []);
 			const parts = [t(card.needs, lang)];
+			if (blocked) parts.push(t("panelTodayUnavailable", lang));
 			if (missing) parts.push(t("panelCardTurnOn", lang).replace("{metrics}", missing));
 			if (detail) parts.push(t("panelCardAlsoUseful", lang).replace("{metrics}", detail));
 			return {
 				name: t(card.title, lang),
 				desc: parts.join(" "),
-				control: { type: "toggle", key: `${PANEL_CARD_KEY_PREFIX}${card.id}` },
+				control: { type: "toggle", key: `${PANEL_CARD_KEY_PREFIX}${card.id}`, disabled: () => blocked && this.getControlValue(`${PANEL_CARD_KEY_PREFIX}${card.id}`) !== true },
 			};
 		});
 	}
@@ -329,7 +333,9 @@ export class HealthSyncSettingTab extends PluginSettingTab {
 	getControlValue(key: string): unknown {
 		if (key === "birthYear") return this.plugin.settings.birthYear === null ? "" : String(this.plugin.settings.birthYear);
 		if (key.startsWith(PANEL_CARD_KEY_PREFIX)) {
-			return this.plugin.settings.panelCards[key.slice(PANEL_CARD_KEY_PREFIX.length)] ?? true;
+			const id = key.slice(PANEL_CARD_KEY_PREFIX.length);
+			// never switched by the user and nothing to show: off, not a switch that is on for a card that is not there
+			return this.plugin.settings.panelCards[id] ?? !(id === "today" && this.plugin.todayAvailability() === "none");
 		}
 		if (key.startsWith(METRIC_KEY_PREFIX)) {
 			const metricKey = key.slice(METRIC_KEY_PREFIX.length);

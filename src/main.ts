@@ -20,6 +20,7 @@ import { NoteProperties } from "./note-properties";
 import { garminKeys } from "./history/record";
 import { applyDetection, detectGarminData } from "./detect";
 import { DayIndex } from "./panel/index";
+import { todayAvailability, type TodayAvailability } from "./panel/cards/today-card";
 import { STARTUP_WINDOW_MS, showWhatsNewIfDue, showWhatsNewNotes } from "./whats-new";
 
 const AUTO_SYNC_TRIGGER_DEBOUNCE_MS = 30 * 1000;
@@ -685,6 +686,11 @@ export default class HealthSyncPlugin extends Plugin {
 	/** Redacted log of the last data fetch (settings → copy diagnostics). */
 	getSyncDiagnostics(): string {
 		return `${this.garminProvider.getSyncDiagnostics() || "no sync run since the plugin started"}\n${this.describeNotes()}`;
+	}
+
+	/** What the Today card can show for the data in the daily notes now; the settings use it to keep a card that could only be empty from being switched on. */
+	todayAvailability(): TodayAvailability {
+		return todayAvailability(new DayIndex(this.app, () => this.settings), localDateString(new Date()));
 	}
 
 	/** What the panel sees in the vault, without a note's name or a value: the settings that decide which notes count, how many notes it found, and which of our own properties the newest one holds. */

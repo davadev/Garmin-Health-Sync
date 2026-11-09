@@ -38,7 +38,7 @@ function collectKeys(items: AnyItem[]): string[] {
 
 function makeTab(): HealthSyncSettingTab {
 	const settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS)) as typeof DEFAULT_SETTINGS;
-	const plugin = { settings, isSessionValid: () => false };
+	const plugin = { settings, isSessionValid: () => false, todayAvailability: () => "unknown" };
 	return new HealthSyncSettingTab({} as never, plugin as never);
 }
 

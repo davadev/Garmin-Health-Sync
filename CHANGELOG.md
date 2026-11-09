@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.14.0-beta.10
+
+### Added
+
+- **Readiness for a watch that sends no HRV.** The score used to wait for HRV forever. Without HRV (none in the 30 days, none for last night) it now uses resting heart rate, sleep and body battery, with the resting heart rate carrying more weight (12 per standard deviation). The card says the score is less reliable (`today_no_hrv`) and the verdict never says "train hard". With HRV in the notes but not for last night there is still no score.
+- **The Readiness switch follows the data.** When the daily notes have plenty of other data (at least 14 days) but neither resting heart rate with sleep nor Garmin's readiness, the card is not shown by data, and its switch in **Settings → Garmin Health Sync → Side panel** cannot be turned on; the description says why. A card the user already switched on can still be switched off. With little data yet the switch stays available, because the data may simply not have arrived.
+
+## 0.14.0-beta.9
+
+Found in a review of the 0.14.0 changes against 0.13.0.
+
+### Fixed
+
+- **A long easy walk is no longer a "hard session".** The load rule (70) counted two hours of walking at an easy heart rate as hard, which capped the verdict and hid the night's flags the next morning. A session now needs an intensity step of 3 or more, or a load of 70 at a step of 2 or more.
+- **A raised resting heart rate with raised breathing stays flagged the morning after a hard session.** That pair is the sign of an illness and had been hidden together with the expected rise, so the "day off" rule could not fire.
+- **No readiness score without last night's HRV.** The week made a score possible when last night was not measured (the HRV card said "No reading" while Readiness said "train as planned"); the score now waits for the night, as in 0.13.0.
+- Docs and README brought up to date: the typical week, the resting heart rate chart, the score and the flags.
+
 ## 0.14.0-beta.8
 
 ### Changed

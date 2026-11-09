@@ -1,6 +1,6 @@
 import type { TranslationKeys } from "../i18n/en";
 import { computeBattery, renderBattery } from "./cards/battery-card";
-import { computeToday, renderToday } from "./cards/today-card";
+import { computeToday, renderToday, todayAvailability } from "./cards/today-card";
 import { computeLoad, renderLoad } from "./cards/load-card";
 import { computeBody, renderBody } from "./cards/body-card";
 import { computeFloors, renderFloors } from "./cards/floors-card";
@@ -138,6 +138,12 @@ const DATA_DAYS = 90;
 /** Whether a card has anything to show: a value of one of the metrics it needs on one of the last 90 days, a session for the cards that read workouts, a habit for the Habits card. */
 export function cardHasData(card: PanelCard, index: DayIndex, today: string, habits: Record<string, HabitInfo>): boolean {
 	if (card.id === "habits") return Object.keys(habits).length > 0 || Object.keys(index.habitsInNotes()).length > 0;
+	// a card that can say nothing for this data (no resting heart rate with sleep, no Garmin readiness) is not shown by data
+	if (card.id === "today") {
+		const available = todayAvailability(index, today);
+		if (available === "none") return false;
+		if (available === "garmin") return true;
+	}
 	for (let i = 0; i < DATA_DAYS; i++) {
 		const day = shiftDate(today, -i);
 		if (card.metrics.length === 0 ? index.sessions(day).length > 0 : card.metrics.some((key) => index.has(key, day))) return true;
