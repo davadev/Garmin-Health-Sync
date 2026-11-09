@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.14.0-beta.5
+
+### Fixed
+
+- **The week chart's "Usual" band is now exactly the range bar's range** (mean of the 30 days ± 1 standard deviation). Before, it came from a 60-night baseline that skipped the last week, so the bar could say "in range" while the chart said "below your usual" when your level had drifted. The average is now the plain mean (no log scale), the Readiness HRV score and flag measure the week against the same 30-day range, and the baseline needs 5 days instead of 14. The week itself is part of that range, so a low week is judged a little less sharply than with a separate baseline.
+
 ## 0.14.0-beta.4
 
 ### Changed
