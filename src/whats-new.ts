@@ -9,7 +9,7 @@ const SEEN_KEY = "garmin-health-sync-whats-new-seen";
 const HINTED_KEY = "garmin-health-sync-whats-new-hinted";
 
 /** Obsidian was started this recently: the plugin was loaded by the app start, not enabled or updated while it ran. */
-const STARTUP_WINDOW_MS = 45_000;
+export const STARTUP_WINDOW_MS = 45_000;
 
 function read(app: App, key: string): string {
 	try {

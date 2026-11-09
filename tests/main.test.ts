@@ -1823,9 +1823,31 @@ describe("what's new", () => {
 		const { app } = await load({ language: "en" }, undefined, "0.11.2");
 		vi.spyOn(performance, "now").mockReturnValue(300_000);
 		app.workspace.layoutReady();
+		await vi.advanceTimersByTimeAsync(3000);
 		await settle();
 		expect(Modal.opened).toHaveLength(0);
 		expect(Notice.messages()).toContain(en.noticeWhatsNewRestart.replace("{version}", "0.11.2"));
+	});
+
+	it("waits 3 seconds with its startup work when it is enabled while Obsidian is running, so an installer does not wait for it", async () => {
+		const { app } = await load({ language: "en" }, undefined, "0.11.2");
+		const hint = en.noticeWhatsNewRestart.replace("{version}", "0.11.2");
+		vi.spyOn(performance, "now").mockReturnValue(300_000);
+		app.workspace.layoutReady();
+		await vi.advanceTimersByTimeAsync(2999);
+		expect(Notice.messages()).not.toContain(hint);
+		await vi.advanceTimersByTimeAsync(1);
+		await settle();
+		expect(Notice.messages()).toContain(hint);
+	});
+
+	it("does not start the startup work when the plugin is unloaded before the wait is over", async () => {
+		const { app, plugin } = await load({ language: "en" }, undefined, "0.11.2");
+		vi.spyOn(performance, "now").mockReturnValue(300_000);
+		app.workspace.layoutReady();
+		(plugin as unknown as { unload: () => void }).unload();
+		await vi.advanceTimersByTimeAsync(5000);
+		expect(Notice.messages()).not.toContain(en.noticeWhatsNewRestart.replace("{version}", "0.11.2"));
 	});
 
 	it("logs a failure to show the notes and keeps the plugin running", async () => {
