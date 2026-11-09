@@ -16,17 +16,21 @@ const END = "2026-10-22";
 const noop = (): void => undefined;
 type Fm = Record<string, unknown>;
 const alt = (ago: number, a: number, b: number): number => (ago % 2 === 0 ? a : b);
+/** An HRV level that lies `z` standard deviations of ln(HRV) (at least 0.04) from the usual of the 58/62 nights below: the 7-night average judged by the score. */
+const weekZ = (z: number): number => Math.exp(Math.log(Math.sqrt(62 * 58)) + 0.04 * z);
+const USUAL = weekZ(0);
 
 /**
  * 45 days: HRV 58/62 (mean 60, sd 2), resting heart rate 50/54 (mean 52, sd 2), 7 h 30 sleep every night (no debt).
- * `today` overrides the shown day, `rest` the other days.
+ * `today` overrides the shown day, `rest` the other days. An HRV in `today` is the level of the whole last week (the
+ * Readiness score judges the 7-night average); `lastNight` overrides the shown night alone.
  */
-async function index(today: Fm = {}, rest: (ago: number) => Fm = () => ({}), days = 45): Promise<DayIndex> {
+async function index(today: Fm = {}, rest: (ago: number) => Fm = () => ({}), days = 45, lastNight: Fm = {}): Promise<DayIndex> {
 	const app = new App();
 	await seedHistory(app, {
 		end: END,
 		days,
-		frontmatter: (ago) => ({ hrv: alt(ago, 62, 58), resting_hr: alt(ago, 54, 50), sleep_duration: "7h 30min", ...rest(ago), ...(ago === 0 ? today : {}) }),
+		frontmatter: (ago) => ({ hrv: alt(ago, 62, 58), resting_hr: alt(ago, 54, 50), sleep_duration: "7h 30min", ...(ago < 7 && today.hrv !== undefined ? { hrv: today.hrv } : {}), ...rest(ago), ...(ago === 0 ? { ...today, ...lastNight } : {}) }),
 	});
 	return new DayIndex(app as never, () => settings);
 }
@@ -36,16 +40,17 @@ const high = { hrv: 80, resting_hr: 52 };
 
 describe("the readiness score", () => {
 	it("is 60 when HRV, resting heart rate and sleep are exactly as usual", async () => {
-		const m = computeToday(await index({ hrv: 60, resting_hr: 52 }), END, null);
+		const m = computeToday(await index({ hrv: USUAL, resting_hr: 52 }), END, null);
 		expect(m.score).toBe(60);
 		expect(m.band).toBe(2);
 		expect(m.flags).toEqual([]);
 	});
 
 	it("adds 10 per standard deviation of HRV and subtracts 7 per standard deviation of resting heart rate", async () => {
-		expect(computeToday(await index({ hrv: 62, resting_hr: 52 }), END, null).score).toBe(70); // +1 sd
-		expect(computeToday(await index({ hrv: 60, resting_hr: 54 }), END, null).score).toBe(53); // +1 sd of resting heart rate
-		expect(computeToday(await index({ hrv: 62, resting_hr: 50 }), END, null).score).toBe(77);
+		// the 7-night average counts in units of the smallest worthwhile change, half a standard deviation: +0.5 sd of HRV is +1 unit = 10
+		expect(computeToday(await index({ hrv: weekZ(0.5), resting_hr: 52 }), END, null).score).toBe(70);
+		expect(computeToday(await index({ hrv: USUAL, resting_hr: 54 }), END, null).score).toBe(53); // +1 sd of resting heart rate
+		expect(computeToday(await index({ hrv: weekZ(0.5), resting_hr: 50 }), END, null).score).toBe(77);
 	});
 
 	it("holds each z value at 2 standard deviations and the score at 100", async () => {
@@ -60,15 +65,15 @@ describe("the readiness score", () => {
 	it("subtracts 4 per hour of sleep debt, at most 3 hours of it", async () => {
 		// the last week 6 h 20 min after weeks of 7 h 30: 40 min short each of 7 nights = 280 min = 4.67 h -> capped at 3 -> -12
 		const shorter = (night: string) => (ago: number): Fm => ({ sleep_duration: ago < 7 ? night : "7h 30min" });
-		const m = computeToday(await index({ hrv: 60, resting_hr: 52 }, shorter("6h 20min")), END, null);
+		const m = computeToday(await index({ hrv: USUAL, resting_hr: 52 }, shorter("6h 20min")), END, null);
 		expect(m.score).toBe(48);
 		expect(m.facts.debt).toBe(280);
 		// 6 h 50 min nights: 70 min of debt -> -4.67
-		expect(computeToday(await index({ hrv: 60, resting_hr: 52 }, shorter("6h 50min")), END, null).score).toBe(55);
+		expect(computeToday(await index({ hrv: USUAL, resting_hr: 52 }, shorter("6h 50min")), END, null).score).toBe(55);
 	});
 
 	it("counts the debt against the usual sleep, so a person who never reaches 7 hours does not owe it every day", async () => {
-		const m = computeToday(await index({ hrv: 60, resting_hr: 52 }, () => ({ sleep_duration: "6h 20min" })), END, null);
+		const m = computeToday(await index({ hrv: USUAL, resting_hr: 52 }, () => ({ sleep_duration: "6h 20min" })), END, null);
 		expect(m.facts.debt).toBe(0);
 		expect(m.score).toBe(60);
 		expect(m.flags).toEqual([]);
@@ -76,7 +81,8 @@ describe("the readiness score", () => {
 
 	it("pulls the score towards 60 by the days of range while it is young, and not at 21 days or more", async () => {
 		const far = { hrv: 54, resting_hr: 58 }; // far out of range: both z values are held at 2, 10 x 2 + 7 x 2 = 34
-		const young = computeToday(await index(far, () => ({}), 12), END, null);
+		// a young range has no baseline for the week: the night is judged against the days there are
+		const young = computeToday(await index({ resting_hr: 58 }, () => ({}), 12, { hrv: 54 }), END, null);
 		expect(young.baselineDays).toBe(11);
 		expect(young.score).toBe(42); // 60 - 34 x 11 / 21: a new watch with 12 days of HRV is not "poor"
 		expect(young.band).toBe(1);
@@ -86,7 +92,7 @@ describe("the readiness score", () => {
 
 	it("does not call for a day off from a low band alone while the range is young", async () => {
 		const far = { hrv: 54, resting_hr: 58 };
-		const young = computeToday(await index(far, () => ({}), 12), END, null);
+		const young = computeToday(await index({ resting_hr: 58 }, () => ({}), 12, { hrv: 54 }), END, null);
 		expect(young.band).toBe(1);
 		expect(young.verdict).toBe("easy");
 		const settled = computeToday(await index(far, () => ({}), 45), END, null);
@@ -99,12 +105,12 @@ describe("the readiness score", () => {
 
 	it("adds a quarter of how far the body battery peak is above or below the usual, at most 8 either way, and leaves it out without one", async () => {
 		const battery = (ago: number): Fm => ({ body_battery_max: alt(ago, 62, 58) });
-		expect(computeToday(await index({ hrv: 60, resting_hr: 52, body_battery_max: 80 }, battery), END, null).score).toBe(65); // +20 * 0.25
-		expect(computeToday(await index({ hrv: 60, resting_hr: 52, body_battery_max: 40 }, battery), END, null).score).toBe(55);
-		expect(computeToday(await index({ hrv: 60, resting_hr: 52, body_battery_max: 100 }, battery), END, null).score).toBe(68); // +40 would be +10
-		expect(computeToday(await index({ hrv: 60, resting_hr: 52, body_battery_max: 20 }, battery), END, null).score).toBe(52);
-		expect(computeToday(await index({ hrv: 60, resting_hr: 52, body_battery_max: undefined }, battery), END, null).score).toBe(60); // no peak today
-		expect(computeToday(await index({ hrv: 60, resting_hr: 52 }), END, null).score).toBe(60);
+		expect(computeToday(await index({ hrv: USUAL, resting_hr: 52, body_battery_max: 80 }, battery), END, null).score).toBe(65); // +20 * 0.25
+		expect(computeToday(await index({ hrv: USUAL, resting_hr: 52, body_battery_max: 40 }, battery), END, null).score).toBe(55);
+		expect(computeToday(await index({ hrv: USUAL, resting_hr: 52, body_battery_max: 100 }, battery), END, null).score).toBe(68); // +40 would be +10
+		expect(computeToday(await index({ hrv: USUAL, resting_hr: 52, body_battery_max: 20 }, battery), END, null).score).toBe(52);
+		expect(computeToday(await index({ hrv: USUAL, resting_hr: 52, body_battery_max: undefined }, battery), END, null).score).toBe(60); // no peak today
+		expect(computeToday(await index({ hrv: USUAL, resting_hr: 52 }), END, null).score).toBe(60);
 	});
 
 	it.each([
@@ -117,8 +123,8 @@ describe("the readiness score", () => {
 		[89, 3],
 		[90, 4],
 	])("puts a score of %s in band %s", async (score, band) => {
-		// HRV alone between 40 and 80; below that with a higher resting heart rate, above with a lower one
-		const today = score >= 40 && score <= 80 ? { hrv: 60 + 2 * ((score - 60) / 10), resting_hr: 52 } : score < 40 ? { hrv: 56, resting_hr: 52 + 2 * ((40 - score) / 7) } : { hrv: 90, resting_hr: 52 - 2 * ((score - 80) / 7) };
+		// the week alone between 40 and 80; below that with a higher resting heart rate, above with a lower one
+		const today = score >= 40 && score <= 80 ? { hrv: weekZ((score - 60) / 20), resting_hr: 52 } : score < 40 ? { hrv: weekZ(-2), resting_hr: 52 + 2 * ((40 - score) / 7) } : { hrv: weekZ(2), resting_hr: 52 - 2 * ((score - 80) / 7) };
 		const m = computeToday(await index(today), END, null);
 		expect(m.score).toBe(score);
 		expect(m.band).toBe(band);
@@ -133,11 +139,12 @@ describe("the readiness score", () => {
 });
 
 describe("the flags", () => {
-	const flags = async (today: Fm, rest: (ago: number) => Fm = () => ({})) => computeToday(await index({ hrv: 60, resting_hr: 52, ...today }, rest), END, null).flags;
+	const flags = async (today: Fm, rest: (ago: number) => Fm = () => ({})) => computeToday(await index({ hrv: USUAL, resting_hr: 52, ...today }, rest), END, null).flags;
 
 	it("flags a low HRV and a high resting heart rate beyond one standard deviation", async () => {
-		expect(await flags({ hrv: 57 })).toEqual(["hrv"]);
-		expect(await flags({ hrv: 58.5 })).toEqual([]);
+		// the 7-night average: flagged half a standard deviation (the smallest worthwhile change) below the usual
+		expect(await flags({ hrv: weekZ(-0.6) })).toEqual(["hrv"]);
+		expect(await flags({ hrv: weekZ(-0.4) })).toEqual([]);
 		expect(await flags({ resting_hr: 55 })).toEqual(["rhr"]);
 		expect(await flags({ resting_hr: 53.5 })).toEqual([]);
 	});
@@ -184,12 +191,12 @@ describe("the verdict", () => {
 
 	it("is train as planned for a high band with one flag, or a moderate band without", async () => {
 		expect(await verdict({ ...high, stress: 50 }, stress)).toBe("planned");
-		expect(await verdict({ hrv: 60, resting_hr: 52 })).toBe("planned");
+		expect(await verdict({ hrv: USUAL, resting_hr: 52 })).toBe("planned");
 	});
 
 	it("is go easy for a high band with two flags, or a moderate band with one", async () => {
 		expect(await verdict({ ...high, stress: 50, spo2: 93 }, stress)).toBe("easy");
-		expect(await verdict({ hrv: 60, resting_hr: 52, stress: 50 }, stress)).toBe("easy");
+		expect(await verdict({ hrv: USUAL, resting_hr: 52, stress: 50 }, stress)).toBe("easy");
 	});
 
 	it("is a day off for a poor or low band", async () => {
@@ -255,9 +262,9 @@ describe("the Today card", () => {
 		expect(root.querySelector(".ghs-card-verdict-rest")).not.toBeNull();
 		expect(text(".ghs-verdict")).toBe(en.panelVerdictRest);
 		expect(text(".ghs-card-value")).toBe("26 Poor");
-		render(computeToday(await index({ hrv: 60, resting_hr: 52 }), END, null));
+		render(computeToday(await index({ hrv: USUAL, resting_hr: 52 }), END, null));
 		expect(root.querySelector(".ghs-card-verdict-planned")).not.toBeNull();
-		render(computeToday(await index({ hrv: 60, resting_hr: 52, stress: 50 }, () => ({ stress: 30 })), END, null));
+		render(computeToday(await index({ hrv: USUAL, resting_hr: 52, stress: 50 }, () => ({ stress: 30 })), END, null));
 		expect(root.querySelector(".ghs-card-verdict-easy")).not.toBeNull();
 	});
 
@@ -302,22 +309,102 @@ describe("what the interpretation says about the day", () => {
 	});
 
 	it("says nothing stands out when no flag applies", async () => {
-		expect(await insights({ hrv: 60, resting_hr: 52 })).toEqual([{ id: "today_no_flags" }]);
+		expect(await insights({ hrv: USUAL, resting_hr: 52 })).toEqual([{ id: "today_no_flags" }]);
 	});
 
 	it("names each flag that shaped the verdict, with the numbers where it helps", async () => {
-		expect(await insights({ hrv: 57, resting_hr: 52 })).toEqual([{ id: "today_flag_hrv" }]);
-		expect(await insights({ hrv: 60, resting_hr: 55 })).toEqual([{ id: "today_flag_rhr" }]);
-		expect(await insights({ hrv: 60, resting_hr: 52 }, (ago) => ({ sleep_duration: ago < 7 ? "6h 40min" : "7h 30min" }))).toEqual([{ id: "today_flag_sleep", params: { debt: "2 h 20 min" } }]);
-		expect(await insights({ hrv: 60, resting_hr: 52, body_battery_max: 40 }, (ago) => ({ body_battery_max: alt(ago, 62, 58) }))).toEqual([{ id: "today_flag_battery", params: { gap: "20" } }]);
-		expect(await insights({ hrv: 60, resting_hr: 52, stress: 50 }, () => ({ stress: 30 }))).toEqual([{ id: "today_flag_stress" }]);
-		expect(await insights({ hrv: 60, resting_hr: 52, respiration_rate: 17 }, (ago) => ({ respiration_rate: alt(ago, 13, 15.4) }))).toEqual([{ id: "today_flag_breathing" }]);
-		expect(await insights({ hrv: 60, resting_hr: 52, spo2: 93 })).toEqual([{ id: "today_flag_spo2" }]);
-		expect(await insights({ hrv: 60, resting_hr: 52 }, (ago) => run(ago, 60, 30))).toEqual([{ id: "today_flag_load", params: { pct: "60" } }]);
+		expect(await insights({ hrv: 57, resting_hr: 52 })).toEqual([{ id: "today_week_low", params: { avg: "57", n: "7" } }]);
+		// one night far below the usual, in a normal week
+		expect(todayInsights(new Signals(await index({ resting_hr: 52 }, () => ({}), 45, { hrv: 55.5 }), END, null))).toEqual([{ id: "today_flag_hrv" }]);
+		expect(await insights({ hrv: USUAL, resting_hr: 55 })).toEqual([{ id: "today_flag_rhr" }]);
+		expect(await insights({ hrv: USUAL, resting_hr: 52 }, (ago) => ({ sleep_duration: ago < 7 ? "6h 40min" : "7h 30min" }))).toEqual([{ id: "today_flag_sleep", params: { debt: "2 h 20 min" } }]);
+		expect(await insights({ hrv: USUAL, resting_hr: 52, body_battery_max: 40 }, (ago) => ({ body_battery_max: alt(ago, 62, 58) }))).toEqual([{ id: "today_flag_battery", params: { gap: "20" } }]);
+		expect(await insights({ hrv: USUAL, resting_hr: 52, stress: 50 }, () => ({ stress: 30 }))).toEqual([{ id: "today_flag_stress" }]);
+		expect(await insights({ hrv: USUAL, resting_hr: 52, respiration_rate: 17 }, (ago) => ({ respiration_rate: alt(ago, 13, 15.4) }))).toEqual([{ id: "today_flag_breathing" }]);
+		expect(await insights({ hrv: USUAL, resting_hr: 52, spo2: 93 })).toEqual([{ id: "today_flag_spo2" }]);
+		expect(await insights({ hrv: USUAL, resting_hr: 52 }, (ago) => run(ago, 60, 30))).toEqual([{ id: "today_flag_load", params: { pct: "60" } }]);
 	});
 
 	it("shows at most three flags, in the order of the rules", async () => {
 		const out = await insights({ hrv: 57, resting_hr: 55, spo2: 93, stress: 50 }, (ago) => ({ stress: 30, ...run(ago, 60, 30) }));
-		expect(out.map((i) => i.id)).toEqual(["today_flag_hrv", "today_flag_rhr", "today_flag_stress"]);
+		expect(out.map((i) => i.id)).toEqual(["today_week_low", "today_flag_rhr", "today_flag_stress"]);
+	});
+});
+
+describe("the week, the single night and the hard session", () => {
+	const flagsOf = async (today: Fm, rest: (ago: number) => Fm = () => ({}), days = 45, lastNight: Fm = {}) => computeToday(await index({ resting_hr: 52, ...today }, rest, days, lastNight), END, null).flags;
+	/** Every day an 80 minute run at 100 bpm (easy); yesterday's at `hr`, 170 bpm being zone 4 for someone born in 1986. */
+	const yesterdayRun = (hr: number) => (ago: number): Fm => ({ running: `80min · Ø${ago === 1 ? hr : 100} bpm` });
+	const born = 1986;
+	const withBirth = async (today: Fm, rest: (ago: number) => Fm, lastNight: Fm = {}) => computeToday(await index(today, rest, 45, lastNight), END, born);
+
+	it("does not flag one low night in a normal week", async () => {
+		expect(await flagsOf({ hrv: USUAL }, () => ({}), 45, { hrv: 56 })).toEqual([]); // z of the night -1.7
+	});
+
+	it("flags one night more than 2 standard deviations below the usual", async () => {
+		expect(await flagsOf({ hrv: USUAL }, () => ({}), 45, { hrv: 55.5 })).toEqual(["hrv"]); // night z -2.25, the week only -0.3
+	});
+
+	it("never counts a night without a value as a low one", async () => {
+		const holes = (ago: number): Fm => (ago === 1 || ago === 3 || ago === 5 ? { hrv: undefined } : {});
+		const whole = computeToday(await index({ hrv: USUAL, resting_hr: 52 }), END, null);
+		const gappy = computeToday(await index({ hrv: USUAL, resting_hr: 52 }, holes), END, null);
+		expect(gappy.flags).toEqual([]);
+		expect(gappy.score).toBe(whole.score);
+	});
+
+	it("judges the shown night alone while the week has fewer than 4 nights", async () => {
+		const holes = (ago: number): Fm => (ago >= 1 && ago <= 4 ? { hrv: undefined } : {});
+		const m = computeToday(await index({ resting_hr: 52 }, holes, 45, { hrv: 56 }), END, null);
+		expect(m.facts.hrvWeek).toBeNull();
+		expect(m.flags).toEqual(["hrv"]); // the night is 1.7 standard deviations down
+	});
+
+	it("is not fooled by a low week hiding in its own baseline", async () => {
+		const m = computeToday(await index({ hrv: weekZ(-1), resting_hr: 52 }), END, null);
+		expect(m.flags).toEqual(["hrv"]);
+		expect(m.facts.hrvWeek).toMatchObject({ nights: 7, low: true });
+	});
+
+	it("explains a hard session of yesterday and caps the verdict at go easy", async () => {
+		const m = await withBirth(high, yesterdayRun(170));
+		expect(m.facts.hard).toBe(true);
+		expect(m.band).toBe(3);
+		expect(m.verdict).toBe("easy");
+		expect(todayInsights(new Signals(await index(high, yesterdayRun(170)), END, born))).toEqual([{ id: "today_hard_session" }]);
+	});
+
+	it("does not call an easy session hard", async () => {
+		const m = await withBirth(high, yesterdayRun(100));
+		expect(m.facts.hard).toBe(false);
+		expect(m.verdict).toBe("hard");
+	});
+
+	it("does not call a session hard whose intensity is not known", async () => {
+		const m = computeToday(await index(high, (ago) => (ago === 1 ? { running: "120min" } : {})), END, null);
+		expect(m.facts.hard).toBe(false);
+	});
+
+	it("does not flag a night that a hard session explains, nor a raised resting heart rate", async () => {
+		const m = await withBirth({ hrv: USUAL, resting_hr: 56 }, yesterdayRun(170), { hrv: 55.5 });
+		expect(m.flags).toEqual([]);
+		const without = await withBirth({ hrv: USUAL, resting_hr: 56 }, () => ({}), { hrv: 55.5 });
+		expect(without.flags).toEqual(["hrv", "rhr"]);
+	});
+
+	it("keeps a day off a day off after a hard session", async () => {
+		const m = await withBirth({ hrv: weekZ(-2), resting_hr: 60 }, yesterdayRun(170));
+		expect(m.verdict).toBe("rest");
+	});
+
+	it("says why under the bar without opening the light bulb", async () => {
+		const model = { ...(await withBirth(high, yesterdayRun(170))), insights: [{ id: "today_hard_session" as const }] };
+		const root = document.createElement("div");
+		renderToday(root, model, "en", false, noop);
+		expect(root.querySelector(".ghs-card-why")?.textContent).toBe(en.insight_today_hard_session);
+		const none = document.createElement("div");
+		renderToday(none, { ...model, insights: [] }, "en", false, noop);
+		expect(none.querySelector(".ghs-card-why")).toBeNull();
 	});
 });

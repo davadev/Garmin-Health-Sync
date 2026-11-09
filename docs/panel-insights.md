@@ -21,10 +21,10 @@ The interpretation is deliberately kept under the light bulb so the cards stay u
 
 The Today card is a rule of thumb taken from the original concept, **not a validated score**. It is not calibrated against Garmin's readiness (which is shown next to it when the watch provides it).
 
-- **Score (0 to 100):** 60 + t x (10 x z(HRV) - 7 x z(resting heart rate) - 4 x sleep debt in hours (at most 3) + 0.25 x (body battery peak - usual peak, between -8 and +8)). A day with nothing unusual scores 60, so an ordinary day is moderate, not tired. The z values are held between -2 and 2 (HRV and resting heart rate move together, so a far-out pair is one signal counted twice) and use the user's own 30 day range; a missing body battery leaves its term out. `t` is the trust in that range: the days with both HRV and resting heart rate divided by 21, at most 1, so a young range (a new watch, or a new account) pulls the score towards 60 instead of swinging it. The sleep debt is counted against the sleep the person usually gets (the median of the last 28 nights, kept between an hour under the need and the need; see the Sleep card), not against the general need, which would charge a short sleeper the same debt every day. `t` counts the days of the last 30 on which HRV *and* resting heart rate were both measured, so two ranges that cover different weeks (a watch that changed in between) do not add up to one. Without HRV, resting heart rate or the sleep debt there is no own score; neither is there one with fewer than 5 such days, nor without last night's sleep (a missing night would count as no debt and raise the score). When some of the last 7 nights have no sleep data the debt is a lower bound, which the card says ("The sleep debt rests on 5 of 7 nights ..."). The weights are a judgment call, not fitted to Garmin's readiness.
+- **Score (0 to 100):** 60 + t x (10 x z(HRV) - 7 x z(resting heart rate) - 4 x sleep debt in hours (at most 3) + 0.25 x (body battery peak - usual peak, between -8 and +8)). A day with nothing unusual scores 60, so an ordinary day is moderate, not tired. The z values are held between -2 and 2 (HRV and resting heart rate move together, so a far-out pair is one signal counted twice) and use the user's own 30 day range. **HRV is judged on the 7-night average, not on one night:** z(HRV) is 2 x z7, where z7 is the distance of the geometric mean of the last 7 nights (the shown night included) from the baseline mean in standard deviations of ln(HRV), so a distance of 0.5 standard deviations (the smallest worthwhile change, see "Where the numbers come from") counts as 1 and moves the score by 10. With fewer than 4 of the 7 nights, or without a baseline of 14 nights, it falls back to the shown night against the 30 day range; a missing body battery leaves its term out. `t` is the trust in that range: the days with both HRV and resting heart rate divided by 21, at most 1, so a young range (a new watch, or a new account) pulls the score towards 60 instead of swinging it. The sleep debt is counted against the sleep the person usually gets (the median of the last 28 nights, kept between an hour under the need and the need; see the Sleep card), not against the general need, which would charge a short sleeper the same debt every day. `t` counts the days of the last 30 on which HRV *and* resting heart rate were both measured, so two ranges that cover different weeks (a watch that changed in between) do not add up to one. Without HRV, resting heart rate or the sleep debt there is no own score; neither is there one with fewer than 5 such days, nor without last night's sleep (a missing night would count as no debt and raise the score). When some of the last 7 nights have no sleep data the debt is a lower bound, which the card says ("The sleep debt rests on 5 of 7 nights ..."). The weights are a judgment call, not fitted to Garmin's readiness.
 - **Bands:** 0-29 poor, 30-49 low, 50-69 moderate, 70-89 high, 90-100 prime.
-- **Flags:** HRV low, resting heart rate high, sleep debt (against the usual sleep) above 2 hours, body battery peak more than 15 below usual, stress more than 10 above the 7 day average, breathing more than 1.5 standard deviations up, SpO2 below 94 percent, load ratio above 1.5.
-- **Verdict:** rest (day off, walk and mobility) for 3 or more flags, raised breathing together with a high resting heart rate, or band poor or low once the range rests on 21 days (before that a low band alone gives "go easy"); train hard for band high or better with no flag; train as planned for band high or better with one flag or band moderate with none; go easy (zone 2) otherwise.
+- **Flags:** HRV low (the 7-night average more than 0.5 standard deviations below the baseline, or the shown night more than 2 standard deviations below the 30 day range when no hard session explains it; with fewer than 4 nights of the week, the shown night more than 1 standard deviation below), resting heart rate high (not raised the morning after a hard session), sleep debt (against the usual sleep) above 2 hours, body battery peak more than 15 below usual, stress more than 10 above the 7 day average, breathing more than 1.5 standard deviations up, SpO2 below 94 percent, load ratio above 1.5.
+- **Verdict:** rest (day off, walk and mobility) for 3 or more flags, raised breathing together with a high resting heart rate, or band poor or low once the range rests on 21 days (before that a low band alone gives "go easy"); train hard for band high or better with no flag; train as planned for band high or better with one flag or band moderate with none; go easy (zone 2) otherwise. **The morning after a hard session** the verdict is at most "go easy" (a rest verdict stays), and the night's low HRV and raised resting heart rate are not flagged. A hard session is one of yesterday that is not a recovery session and whose intensity is known (heart rate with a birth year, or at least 10 earlier sessions) with an intensity step of 3 or more, or a load (minutes times the intensity factor) of 70 or more. Without a known intensity the minutes alone do not make a session hard. The threshold is a starting value, not a validated one.
 
 ## How to add or change an interpretation
 
@@ -36,6 +36,7 @@ The Today card is a rule of thumb taken from the original concept, **not a valid
 ## Where the numbers come from
 
 - *Usual range*: the mean and standard deviation of the 30 days before the shown day, from 5 days of data on. From 8 values on, a value more than 5 robust spreads from the median (1.4826 times the median absolute deviation, but at least the floor below) is left out of the mean and the spread, unless that would leave out a quarter or more of the values (then the days are of two kinds, for example before and after a new watch, and none is an outlier): one sensor error or one day of fever would otherwise widen the range for a month. The trend line stays a plain mean of the last 7 days against the 7 before, and the 14 bars show every value, so a freak value stays visible there. Sleep stages count only nights with more than 0 minutes of the stage (a watch that does not record a stage sends 0, which is no reading). A number typed into a text property ("8000") is read as the number. (standard deviation floors: HRV 2 ms, resting heart rate 1.5 bpm, SpO2 0.7 percent, breathing 0.4 per minute, stress 5, steps 500, body battery peak 5).
+- *HRV week (HRV card and Today card)*: the 14 bars are the last 14 nights; the line is the rolling average of 7 nights (geometric mean, that is the mean of ln(HRV), shown back in ms), drawn from 3 nights of the 7 and judged by Today from 4. The usual range for a week is the baseline mean plus or minus half a standard deviation (the smallest worthwhile change). The baseline is ln(HRV) of the up to 60 nights before the 7 of the week (from 14 nights on, with the same outlier rule as the usual range), so a low week cannot pull down the range it is compared with; the spread is at least 0.04 (about 4 percent of the level). Nights without a value are left out, never counted as low; a run of 3 or more is drawn as a dashed box. The use of a 7 day rolling mean of ln RMSSD against a smallest worthwhile change follows Plews et al. 2012 and Javaloyes et al. 2019; three valid nights a week give a weekly mean that tracks the full week (Plews et al. 2014, *Int J Sports Physiol Perform* 9:783-790, not linked because the page was not opened). Today asks for 4 because overnight values are noisier than the morning readings of those studies. **Limits:** the studies are in athletes with morning RMSSD, Garmin sends an overnight average; reviews find the benefit of HRV-guided training small and not clear, and the best baseline is still debated. The numbers are starting values, not validated thresholds.
 - *Load ratio*: the last 7 days over the weekly average of the last 28 days, each session weighted by its intensity (see the Load balance card). Without a birth year the intensity is where the session's average heart rate ranks among the last 90 sessions, counting half of the sessions with exactly the same heart rate, so a session that equals all the others is a middle one, not the hardest. The average is taken over the days of the 28 that have a note or history record, so a history that is only two or three weeks old is not divided by four weeks; with fewer than 14 such days no ratio is shown.
 - *Sleep need and debt*: 7 hours (8 for ages 14 to 17 and 9 for ages 10 to 13 when a birth year is set); debt is the shortfall summed over the last 7 nights.
 - *Tonight's aim and the debt on the card*: the Sleep card does not ask for more than a person's life allows. With at least 3 earlier nights before the coming weekday (up to the last 8), the aim is the upper quarter of those nights, held between the need minus 1 hour (6 hours for an adult, 7 for ages 14 to 17, 8 for ages 10 to 13) and the need, plus a quarter of the debt (at most 30 minutes), rounded up to 15 minutes. Without that pattern it stays the need plus a quarter of the debt (at most 1 hour). The debt on the card is counted against what the person usually sleeps: the median of the last 28 nights (from 10 nights on), held between the same floor and the need; the interpretations above still count against the general need. The floor is a plausibility limit chosen so the card never presents a very short night as a goal; it is not a validated threshold.
@@ -50,6 +51,8 @@ Only sources that were looked up when this file was written are listed. Where a 
 - **windred**: Windred DP et al. Sleep regularity is a stronger predictor of mortality risk than sleep duration: a prospective cohort study. *SLEEP* 2024;47(1). [https://www.ukbiobank.ac.uk/publications/sleep-regularity-is-a-stronger-predictor-of-mortality-risk-than-sleep-duration-a-prospective-cohort-study/](https://www.ukbiobank.ac.uk/publications/sleep-regularity-is-a-stronger-predictor-of-mortality-risk-than-sleep-duration-a-prospective-cohort-study/)
 - **kitamura**: Kitamura S et al. Estimating individual optimal sleep duration and potential sleep debt. *Sci Rep* 2016;6:35812. [https://doi.org/10.1038/srep35812](https://doi.org/10.1038/srep35812)
 - **vandongen**: Van Dongen HPA, Maislin G, Mullington JM, Dinges DF. The cumulative cost of additional wakefulness. *Sleep* 2003;26:117-126. [https://pubmed.ncbi.nlm.nih.gov/12683469/](https://pubmed.ncbi.nlm.nih.gov/12683469/)
+- **plews**: Plews DJ, Laursen PB, Kilding AE, Buchheit M. Heart rate variability in elite triathletes, is variation in variability the key to effective training? A case comparison. *Eur J Appl Physiol* 2012;112:3729-3741. [https://pubmed.ncbi.nlm.nih.gov/22367011/](https://pubmed.ncbi.nlm.nih.gov/22367011/)
+- **javaloyes**: Javaloyes A et al. Training prescription guided by heart-rate variability in cycling. *Int J Sports Physiol Perform* 2019. [https://dspace.umh.es/handle/11000/30650](https://dspace.umh.es/handle/11000/30650)
 - **buchheit**: Buchheit M. Monitoring training status with HR measures: do all roads lead to Rome? *Front Physiol* 2014;5:73. [https://doi.org/10.3389/fphys.2014.00073](https://doi.org/10.3389/fphys.2014.00073)
 - **mishra**: Mishra T et al. Pre-symptomatic detection of COVID-19 from smartwatch data. *Nat Biomed Eng* 2020;4:1208-1220. [https://doi.org/10.1038/s41551-020-00640-6](https://doi.org/10.1038/s41551-020-00640-6)
 - **natarajan**: Natarajan A, Su HW, Heneghan C. Assessment of physiological signs associated with COVID-19 measured using wearable devices. *npj Digit Med* 2020;3:156. [https://doi.org/10.1038/s41746-020-00363-7](https://doi.org/10.1038/s41746-020-00363-7)
@@ -76,10 +79,26 @@ See also: [panel-cards.md](panel-cards.md) (what each card shows and how it is c
 ### today_flag_hrv
 
 - **Card:** today
-- **Trigger:** HRV is more than 1 standard deviation below its 30 day mean.
+- **Trigger:** HRV is below the usual: the 7-night average more than 0.5 standard deviations under the baseline is shown as today_week_low; this plain sentence is for a single night more than 2 standard deviations below the 30 day range with no hard session, or, with fewer than 4 nights in the week, more than 1 standard deviation below.
 - **Text (English):** HRV is below your usual range.
 - **Basis:** Part of the Today verdict. HRV is one of the heart rate measures that follow training status.
 - **References:** [buchheit](https://doi.org/10.3389/fphys.2014.00073)
+
+### today_hard_session
+
+- **Card:** today
+- **Trigger:** Yesterday held a session that is not a recovery session, whose intensity is known and is step 3 or more, or whose load is 70 or more.
+- **Text (English):** Yesterday's session was hard. A lower HRV and a higher resting heart rate this morning are expected after hard effort, so they are not counted against you. An easy day lets your body catch up.
+- **Basis:** HRV and resting heart rate follow training load, and a hard session lowers HRV and lifts resting heart rate the next morning; interpreting them needs that context. The thresholds are a plausibility choice, not validated.
+- **References:** [buchheit](https://doi.org/10.3389/fphys.2014.00073)
+
+### today_week_low
+
+- **Card:** today
+- **Trigger:** At least 4 of the last 7 nights have an HRV and their geometric mean is more than 0.5 standard deviations (of ln HRV) below the mean of the nights before that week.
+- **Text (English):** Your HRV averaged {avg} ms over the last {n} nights, below your usual range for a week. One night can dip, but a whole week points to a lasting load, so keep the next days easy.
+- **Basis:** A 7-night rolling average of HRV that falls under the smallest worthwhile change below the person's own baseline is the criterion used in HRV-guided training to lower intensity; one night is noisier than the week. It is a signal, not a diagnosis.
+- **References:** [plews](https://pubmed.ncbi.nlm.nih.gov/22367011/); [javaloyes](https://dspace.umh.es/handle/11000/30650)
 
 ### today_flag_rhr
 
@@ -177,6 +196,14 @@ See also: [panel-cards.md](panel-cards.md) (what each card shows and how it is c
 - **Basis:** HRV reflects autonomic recovery and responds to training load; interpreting it needs the training context.
 - **References:** [buchheit](https://doi.org/10.3389/fphys.2014.00073); [gabbett](https://doi.org/10.1136/bjsports-2015-095788)
 
+### hrv_low_hard_session
+
+- **Card:** hrv
+- **Trigger:** HRV is more than 1 standard deviation below its 30 day mean and yesterday held a hard session (see today_hard_session). It comes before the other reasons.
+- **Text (English):** Yesterday's hard session explains a low night. HRV commonly dips for a day or two after hard effort and returns with an easier day.
+- **Basis:** HRV reflects autonomic recovery and drops after hard training, so a low night right after one is expected.
+- **References:** [buchheit](https://doi.org/10.3389/fphys.2014.00073)
+
 ### hrv_low_sleep
 
 - **Card:** hrv
@@ -256,6 +283,14 @@ See also: [panel-cards.md](panel-cards.md) (what each card shows and how it is c
 - **Text (English):** A higher resting heart rate together with a lower HRV or faster breathing often marks the start of an illness. If you feel unwell, take a day off and watch the next mornings.
 - **Basis:** Elevated resting heart rate with changes in HRV and respiration is the pattern seen around illness onset in wearable data.
 - **References:** [mishra](https://doi.org/10.1038/s41551-020-00640-6); [natarajan](https://doi.org/10.1038/s41746-020-00363-7)
+
+### rhr_high_hard_session
+
+- **Card:** resting_hr
+- **Trigger:** Resting heart rate is more than 1 standard deviation above its 30 day mean and yesterday held a hard session (see today_hard_session). It comes before the other reasons.
+- **Text (English):** Your resting heart rate is up the morning after a hard session, which is normal. It usually settles within a day or two of easier training.
+- **Basis:** Resting heart rate follows training status and rises after hard effort; interpreting it needs the training context.
+- **References:** [buchheit](https://doi.org/10.3389/fphys.2014.00073)
 
 ### rhr_high_hydration
 
