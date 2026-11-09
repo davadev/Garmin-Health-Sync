@@ -15,7 +15,7 @@ const USUAL = [58, 62, 60, 57, 61, 59, 63, 60, 56, 62];
 
 function model(value: number, insights: RangeModel["insights"], key: "hrv" | "resting_hr", best: number | null = null): RangeModel {
 	const base = key === "hrv" ? USUAL : USUAL.map((v) => v - 7);
-	return { insights, value, have: USUAL.length, baseline: baseline(base, 5, key === "hrv" ? 2 : 1.5), early: false, z: null, trend: null, long: null, history: { rank: null, best } };
+	return { insights, value, have: USUAL.length, baseline: baseline(base, 5, key === "hrv" ? 2 : 1.5), early: false, z: null, trend: null, long: null, history: { rank: null, best }, date: "2026-01-01", week: null };
 }
 
 /** A settings row as Obsidian draws it: the name on the left, a control on the right. */

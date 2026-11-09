@@ -199,3 +199,22 @@ describe("resting heart rate card", () => {
 		expect(text(".ghs-explain")).toBe(en.panelRestingHrExplain);
 	});
 });
+
+describe("the week chart on the HRV card", () => {
+	it("draws the nights with their average on the HRV card and keeps the range bar", async () => {
+		const m = computeHrv(await indexWith(60), END);
+		expect(m.week?.nights).toHaveLength(14);
+		render(m);
+		expect(root.querySelectorAll(".ghs-hrvweek .ghs-night-bar")).toHaveLength(14);
+		expect(root.querySelector(".ghs-range")).not.toBeNull();
+		expect(root.querySelector(".ghs-trend-text")).toBeNull();
+	});
+
+	it("leaves the other range cards on their trend line", async () => {
+		const index = await indexWith(60);
+		const m = computeRange(RESTING_HR_CARD, index, END);
+		expect(m.week).toBeNull();
+		render(m, "en", false, () => undefined, RESTING_HR_CARD);
+		expect(root.querySelector(".ghs-hrvweek")).toBeNull();
+	});
+});

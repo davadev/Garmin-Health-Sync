@@ -128,7 +128,8 @@ describe("trend lines in the cards", () => {
 			const card = Array.from(view.contentEl.querySelectorAll(".ghs-card")).find((c) => c.querySelector(".ghs-card-title")?.textContent === title);
 			return card?.querySelector(".ghs-trend-text")?.textContent ?? undefined;
 		};
-		expect(lines(en.panelHrvTitle)).toBe("↑ +10 ms vs the week before");
+		// the HRV card shows its 14 nights with the 7-night average instead of the two-week trend line
+		expect(lines(en.panelHrvTitle)).toBeUndefined();
 		expect(lines(en.panelRestingHrTitle)).toBe("↑ +10 bpm vs the week before");
 		expect(lines(en.panelSpo2Title)).toBe("↑ +2 % vs the week before");
 		expect(lines(en.panelBreathingTitle)).toBe("↑ +1 /min vs the week before");
