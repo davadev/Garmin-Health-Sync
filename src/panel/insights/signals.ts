@@ -4,6 +4,13 @@ import { computeSleep, type SleepModel } from "../cards/sleep-card";
 import type { DayIndex } from "../index";
 import { baseline, windowValues, zScore } from "../stats";
 import { longView, type LongView } from "../longview";
+import { heartRateHistory, intensityStep, sessionLoad } from "../load";
+import { maxHrAt } from "../zones";
+import { computeWeek, type WeekModel } from "../week";
+
+/** A session of this load (about an hour in zone 4) or in the fourth or fifth intensity step is a hard one: HRV and resting heart rate are expected to be off the night after. */
+export const HARD_SESSION_LOAD = 70;
+const HARD_SESSION_STEP = 3;
 
 /** The smallest standard deviation per metric, so a very steady user does not get razor-thin ranges. */
 const SD_FLOOR = { hrv: 2, resting_hr: 1.5, spo2: 0.7, respiration_rate: 0.4, stress: 5, steps: 500 };
@@ -17,6 +24,8 @@ const MIN_DAYS = 5;
 export class Signals {
 	private sleepModel: SleepModel | null = null;
 	private loadModel: LoadModel | null = null;
+	private weekModel: WeekModel | null = null;
+	private hard: { session: boolean } | null = null;
 
 	constructor(readonly index: DayIndex, readonly date: string, readonly birthYear: number | null) {}
 
@@ -51,5 +60,25 @@ export class Signals {
 
 	load(): LoadModel {
 		return (this.loadModel ??= computeLoad(this.index, this.date, this.birthYear));
+	}
+
+	/** The last 14 nights of HRV with their 7-night average, judged against the nights before the week. */
+	week(): WeekModel {
+		return (this.weekModel ??= computeWeek(this.index, "hrv", this.date));
+	}
+
+	/** Whether yesterday held a hard session (not a recovery one): the night after it HRV and resting heart rate are expected to be off. */
+	hardYesterday(): boolean {
+		if (this.hard === null) {
+			const day = this.yesterday();
+			const maxHr = maxHrAt(this.birthYear, day);
+			const history = heartRateHistory(this.index, day);
+			// without a known intensity (no heart rate, no birth year, too few sessions) the minutes alone do not make a session hard
+			this.hard = { session: this.index.sessions(day).some((x) => {
+				const step = intensityStep(x, history, maxHr);
+				return step !== null && (step >= HARD_SESSION_STEP || sessionLoad(x, history, maxHr) >= HARD_SESSION_LOAD);
+			}) };
+		}
+		return this.hard.session;
 	}
 }

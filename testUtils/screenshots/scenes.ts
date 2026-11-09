@@ -44,7 +44,7 @@ export const SCENES: Scene[] = [
 		daysBack: 7,
 		cards: ["today", "hrv", "resting_hr", "spo2", "respiration_rate"],
 		open: [],
-		expect: [".ghs-readiness-bar", ".ghs-range-labelled"],
+		expect: [".ghs-readiness-bar", ".ghs-range-labelled", ".ghs-hrvweek"],
 	},
 	{
 		id: "panel-today-dark",
@@ -54,7 +54,7 @@ export const SCENES: Scene[] = [
 		daysBack: 7,
 		cards: ["today", "hrv", "resting_hr", "spo2", "respiration_rate"],
 		open: [],
-		expect: [".ghs-readiness-bar"],
+		expect: [".ghs-readiness-bar", ".ghs-hrvweek"],
 	},
 	{
 		id: "panel-sleep",

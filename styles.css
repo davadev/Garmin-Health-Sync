@@ -117,6 +117,8 @@
 	--ghs-level-3: var(--color-green);
 	--ghs-level-4: var(--color-orange);
 	--ghs-level-5: var(--color-red);
+	/* The usual range of a week on the HRV card: a faint green behind the bars */
+	--ghs-band: var(--background-modifier-hover);
 	display: flex;
 	flex-direction: column;
 	gap: var(--size-4-6);
@@ -130,6 +132,7 @@
 		--ghs-shade-3: color-mix(in oklab, var(--ghs-data) 45%, var(--ghs-card));
 		--ghs-shade-4: color-mix(in oklab, var(--ghs-data) 25%, var(--ghs-card));
 		--ghs-level-2: color-mix(in srgb, var(--color-green) 45%, var(--ghs-card));
+		--ghs-band: color-mix(in srgb, var(--color-green) 22%, transparent);
 	}
 
 	/* On a dark theme the cards take a stronger hint of the accent and the data colour is lifted, because a dark accent barely shows on a dark card */
@@ -1815,4 +1818,104 @@
 .is-mobile .ghs-insight-group > summary {
 	min-height: 44px;
 	margin: -10px 0;
+}
+
+/* HRV: 14 nights, the 7-night average as a line and the usual range of a week behind them */
+.ghs-hrvweek {
+	margin: var(--size-4-2) 0;
+}
+
+.ghs-hrvweek-chart {
+	position: relative;
+	height: 72px;
+	margin-bottom: var(--size-4-5);
+}
+
+.ghs-hrvweek-bars {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: flex-end;
+	gap: var(--size-2-2);
+}
+
+.ghs-hrvweek-band {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: var(--ghs-y, 0%);
+	height: var(--ghs-h, 0%);
+	background: var(--ghs-band);
+	border-radius: var(--radius-s);
+}
+
+.ghs-hrvweek-gap {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: var(--ghs-x, 0%);
+	width: var(--ghs-w, 0%);
+	border: 1px dashed var(--background-modifier-border);
+	border-radius: var(--radius-s);
+}
+
+.ghs-hrvweek-line {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	overflow: visible;
+	pointer-events: none;
+}
+
+.ghs-hrvweek-line polyline {
+	fill: none;
+	stroke: var(--text-normal);
+	stroke-width: 2px;
+	stroke-linejoin: round;
+	stroke-linecap: round;
+	vector-effect: non-scaling-stroke;
+}
+
+.ghs-hrvweek-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-3);
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+}
+
+.ghs-hrvweek-key::before {
+	content: "";
+	display: inline-block;
+	width: var(--size-4-3);
+	height: var(--size-4-2);
+	margin-right: var(--size-2-2);
+	border-radius: var(--radius-s);
+	vertical-align: middle;
+}
+
+.ghs-hrvweek-key-nights::before {
+	background: var(--ghs-data);
+}
+
+.ghs-hrvweek-key-average::before {
+	height: 2px;
+	background: var(--text-normal);
+}
+
+.ghs-hrvweek-key-band::before {
+	background: var(--ghs-band);
+}
+
+.ghs-hrvweek-status {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+	margin-top: var(--size-2-2);
+	font-size: var(--font-ui-smaller);
+}
+
+.ghs-hrvweek-below {
+	color: var(--color-orange);
 }

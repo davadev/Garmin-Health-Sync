@@ -507,3 +507,24 @@ describe("sessions", () => {
 		expect(sessionsInsights(s)).toEqual([]);
 	});
 });
+
+describe("the night after a hard session", () => {
+	/** Every day an easy 80 minute run, yesterday's in zone 4 (170 bpm for someone born in 1986) or easy. */
+	const days = (hr: number) => (ago: number): Fm => ({ running: `80min · Ø${ago === 1 ? hr : 100} bpm` });
+
+	it("explains a low HRV first, ahead of the other reasons", async () => {
+		const s = await signals((ago) => ({ hrv: ago === 0 ? 54 : alt(ago, 62, 58), ...days(170)(ago) }), 45, 1986);
+		expect(ids(hrvInsights(s))).toEqual(["hrv_low_hard_session"]);
+	});
+
+	it("explains a raised resting heart rate first", async () => {
+		const s = await signals((ago) => ({ resting_hr: ago === 0 ? 60 : alt(ago, 50, 54), ...days(170)(ago) }), 45, 1986);
+		expect(ids(restingHrInsights(s))).toEqual(["rhr_high_hard_session"]);
+	});
+
+	it("says nothing about a hard session after an easy one", async () => {
+		const s = await signals((ago) => ({ hrv: ago === 0 ? 54 : alt(ago, 62, 58), resting_hr: ago === 0 ? 60 : alt(ago, 50, 54), ...days(100)(ago) }), 45, 1986);
+		expect(ids(hrvInsights(s))).not.toContain("hrv_low_hard_session");
+		expect(ids(restingHrInsights(s))).not.toContain("rhr_high_hard_session");
+	});
+});

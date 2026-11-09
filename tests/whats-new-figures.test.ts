@@ -10,7 +10,7 @@ import { en } from "../src/i18n/en";
 import { de } from "../src/i18n/de";
 
 /** Every figure; a new one has to be listed here, so it cannot ship undrawn. */
-const FIGURE_IDS: FigureId[] = ["panel", "light-bulb", "history", "properties", "backfill", "commands", "best-days"];
+const FIGURE_IDS: FigureId[] = ["panel", "light-bulb", "history", "properties", "backfill", "commands", "best-days", "hrv-week"];
 const draw = (id: FigureId, lang = "en"): HTMLElement => renderFigure(document.createElement("div"), id, lang);
 
 describe("what's new figures", () => {
@@ -66,6 +66,22 @@ describe("what's new figures", () => {
 		expect(fig.querySelector(".ghs-dot")).not.toBeNull();
 		expect(fig.querySelector(".ghs-best")!.getAttribute("title")).toBe("Best days: 61 ms");
 		expect(draw("best-days", "de").querySelector(".ghs-best")!.getAttribute("title")).toContain("61 ms");
+	});
+
+	it("shows the HRV week chart with the average under the usual band", () => {
+		const fig = draw("hrv-week");
+		expect(fig.querySelectorAll(".ghs-hrvweek .ghs-night-bar")).toHaveLength(14);
+		expect(fig.querySelector(".ghs-hrvweek-band")).not.toBeNull();
+		expect(fig.querySelector(".ghs-hrvweek-below")).not.toBeNull();
+		expect(fig.querySelectorAll("polyline").length).toBeGreaterThan(0);
+	});
+
+	it("is drawn under the first item of the 0.14.0 notes", () => {
+		const notes = notesOfLine("0.14.0");
+		expect(notes[0]!.items.map((i) => i.figure)).toEqual(["hrv-week", undefined, undefined]);
+		const modal = new WhatsNewModal(new App() as never, "en", notes);
+		modal.open();
+		expect(modal.contentEl.querySelectorAll(".ghs-fig-hrv-week")).toHaveLength(1);
 	});
 
 	it("is drawn under the first item of the 0.13.0 notes", () => {

@@ -18,13 +18,16 @@ const FLAG_INSIGHT: Record<FlagId, InsightId> = {
 export function todayInsights(s: Signals): Insight[] {
 	const m = computeToday(s.index, s.date, s.birthYear);
 	if (m.score === null) return [];
-	if (m.flags.length === 0) return [{ id: "today_no_flags" }];
+	// the morning after a hard session comes first: it says why HRV and resting heart rate are not held against the day
+	const hard: Insight[] = m.facts.hard ? [{ id: "today_hard_session" }] : [];
+	if (m.flags.length === 0) return m.facts.hard ? hard : [{ id: "today_no_flags" }];
 	const out = m.flags.map((flag): Insight => {
 		const id = FLAG_INSIGHT[flag];
+		if (flag === "hrv" && m.facts.hrvWeek?.low) return { id: "today_week_low", params: { avg: String(Math.round(m.facts.hrvWeek.average)), n: String(m.facts.hrvWeek.nights) } };
 		if (flag === "sleep") return { id, params: { debt: formatMinutes(m.facts.debt!) } };
 		if (flag === "battery") return { id, params: { gap: String(Math.round(m.facts.batteryGap!)) } };
 		if (flag === "load") return { id, params: { pct: String(Math.round((m.facts.loadRatio! - 1) * 100)) } };
 		return { id };
 	});
-	return out.slice(0, MAX_INSIGHTS);
+	return [...hard, ...out].slice(0, MAX_INSIGHTS);
 }

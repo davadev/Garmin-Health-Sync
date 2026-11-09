@@ -42,6 +42,8 @@ export function hrvInsights(s: Signals): Insight[] {
 	if (z < -1) {
 		const { ratio } = s.load();
 		const { debt, need } = s.sleep();
+		// the night after a hard session a low HRV is expected: that comes first, the other reasons only add to it
+		if (s.hardYesterday()) out.push({ id: "hrv_low_hard_session" });
 		if (ratio !== null && ratio > SPIKE_RATIO) out.push({ id: "hrv_low_load", params: { pct: pct(ratio - 1) } });
 		if (debt !== null && debt >= SLEEP_DEBT_MIN) out.push({ id: "hrv_low_sleep", params: { debt: formatMinutes(debt), need: hours(need) } });
 		if ((s.z("stress") ?? 0) > 1) out.push({ id: "hrv_low_stress" });
@@ -67,6 +69,7 @@ export function restingHrInsights(s: Signals): Insight[] {
 	if (z > 1) {
 		const { ratio } = s.load();
 		const { debt } = s.sleep();
+		if (s.hardYesterday()) out.push({ id: "rhr_high_hard_session" });
 		if (ratio !== null && ratio > SPIKE_RATIO) out.push({ id: "rhr_high_load", params: { pct: pct(ratio - 1) } });
 		if (debt !== null && debt >= SLEEP_DEBT_MIN) out.push({ id: "rhr_high_sleep", params: { debt: formatMinutes(debt) } });
 		if ((s.z("hrv") ?? 0) < -1 || (s.z("respiration_rate") ?? 0) > 1) out.push({ id: "rhr_high_illness" });

@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.14.0-beta.1
+
+Weekly HRV on the HRV card and in Readiness. The thresholds are starting values (see `docs/panel-insights.md`, "Where the numbers come from"), please say how they feel on your own data.
+
+### Added
+
+- **A week of HRV on the HRV card.** Under the range bar: the last 14 nights as bars (last night solid), your 7-night average as a line and the band that is usual for your week (the mean of up to 60 nights before the week, plus or minus half a standard deviation, worked out on ln(HRV)). Runs of 3 or more nights without the watch are drawn as dashed boxes and break the line; a night without a value is never counted as low. The status line names last night and the average with the nights it rests on.
+- **Readiness says why.** The first interpretation shows under the score bar without opening the light bulb. New interpretations: `today_week_low`, `today_hard_session`, `hrv_low_hard_session`, `rhr_high_hard_session`, each with its section in `docs/panel-insights.md`.
+- A "what's new" entry for 0.14.0 (six languages) with a small HRV week figure.
+
+### Changed
+
+- **Readiness judges HRV on the 7-night average** (from 4 of 7 nights; otherwise on last night as before) against the nights before the week, counted in units of half a standard deviation. The HRV flag fires when the average is more than half a standard deviation low, or when last night alone is more than 2 standard deviations low and no hard session explains it.
+- **The morning after a hard session** (a non-recovery session of yesterday with a known intensity: step 3 or more, or load 70 or more) the night's low HRV and raised resting heart rate are not flagged and the verdict is at most "go easy". A rest verdict stays.
+- The HRV card no longer shows the two-week trend line; the week chart replaces it.
+
 ## 0.13.0
 
 The release of the personal best. The detail of every step is in the `0.13.0-beta.N` notes of the GitHub releases.

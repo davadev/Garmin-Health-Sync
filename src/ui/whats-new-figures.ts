@@ -1,13 +1,14 @@
 import { t } from "../i18n/t";
 import { RESTING_HR_CARD, HRV_CARD, renderRange, type RangeModel } from "../panel/cards/range-card";
 import { baseline } from "../panel/stats";
+import type { WeekModel } from "../panel/week";
 
 /**
  * Small illustrations for the "what's new" window, drawn with the real side panel code and styles instead of shipped
  * as images: they follow the user's theme and language, add nothing to the plugin's size and cannot go stale. They are
  * decoration (hidden from screen readers, not clickable); the text of the item carries the meaning.
  */
-export type FigureId = "panel" | "light-bulb" | "history" | "properties" | "backfill" | "commands" | "best-days";
+export type FigureId = "panel" | "light-bulb" | "history" | "properties" | "backfill" | "commands" | "best-days" | "hrv-week";
 
 const noop = (): void => undefined;
 /** Ten ordinary mornings, so the card has a usual range to draw. */
@@ -15,7 +16,7 @@ const USUAL = [58, 62, 60, 57, 61, 59, 63, 60, 56, 62];
 
 function model(value: number, insights: RangeModel["insights"], key: "hrv" | "resting_hr", best: number | null = null): RangeModel {
 	const base = key === "hrv" ? USUAL : USUAL.map((v) => v - 7);
-	return { insights, value, have: USUAL.length, baseline: baseline(base, 5, key === "hrv" ? 2 : 1.5), early: false, z: null, trend: null, long: null, history: { rank: null, best } };
+	return { insights, value, have: USUAL.length, baseline: baseline(base, 5, key === "hrv" ? 2 : 1.5), early: false, z: null, trend: null, long: null, history: { rank: null, best }, date: "2026-01-01", week: null };
 }
 
 /** A settings row as Obsidian draws it: the name on the left, a control on the right. */
@@ -59,6 +60,14 @@ function lightBulbFigure(fig: HTMLElement, lang: string): void {
 /** An HRV card with the diamond of the personal best on its bar, next to the ring of the day. */
 function bestDaysFigure(fig: HTMLElement, lang: string): void {
 	renderRange(fig.createDiv({ cls: "ghs-panel ghs-fig-panel" }), HRV_CARD, model(57, [], "hrv", 61), lang, false, noop);
+}
+
+/** An HRV card with the week chart on made-up nights: a dip after two hard days, the average under the usual band. */
+function hrvWeekFigure(fig: HTMLElement, lang: string): void {
+	const nights = [62, 59, 63, 60, 61, 58, 60, 57, 56, 52, 49, 54, null, 51];
+	const avg = [null, null, 61.2, 60.6, 60.7, 60.4, 60.4, 59.4, 58.7, 57.4, 55.4, 54.6, 53.9, 53.1];
+	const week: WeekModel = { nights, avg, coverage: 6, band: { low: 57, mean: 60, high: 63 }, average: 53.1, z: -1.2, gaps: [] };
+	renderRange(fig.createDiv({ cls: "ghs-panel ghs-fig-panel" }), HRV_CARD, { ...model(51, [], "hrv"), date: "2026-10-22", week }, lang, false, noop);
 }
 
 function historyFigure(fig: HTMLElement, lang: string): void {
@@ -106,6 +115,7 @@ export function renderFigure(parent: HTMLElement, id: FigureId, lang: string): H
 	if (id === "panel") panelFigure(fig, lang);
 	else if (id === "light-bulb") lightBulbFigure(fig, lang);
 	else if (id === "best-days") bestDaysFigure(fig, lang);
+	else if (id === "hrv-week") hrvWeekFigure(fig, lang);
 	else if (id === "history") historyFigure(fig, lang);
 	else if (id === "properties") propertiesFigure(fig, lang);
 	else if (id === "backfill") backfillFigure(fig, lang);
