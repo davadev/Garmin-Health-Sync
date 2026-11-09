@@ -50,7 +50,7 @@ describe("computeWeek", () => {
 		expect(w.z!).toBeLessThan(-3);
 	});
 
-	it("builds the band as the baseline mean +/- half a standard deviation, on the log scale", async () => {
+	it("builds the band as the baseline mean +/- one standard deviation, on the log scale", async () => {
 		const w = await weekOf((ago) => (ago % 2 === 0 ? 50 : 70));
 		const b = w.band!;
 		expect(b.low).toBeLessThan(b.mean);
@@ -59,9 +59,9 @@ describe("computeWeek", () => {
 		expect(b.high / b.mean).toBeCloseTo(b.mean / b.low, 6);
 	});
 
-	it("keeps the band at least 4 percent wide for a very steady sleeper", async () => {
+	it("keeps the band at least 8 percent wide for a very steady sleeper", async () => {
 		const w = await weekOf(() => 60);
-		expect(w.band!.high / w.band!.mean).toBeCloseTo(Math.exp(0.02), 6);
+		expect(w.band!.high / w.band!.mean).toBeCloseTo(Math.exp(0.04), 6);
 	});
 
 	it("has no band and no judgement while the baseline rests on fewer than 14 nights", async () => {

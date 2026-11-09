@@ -47,7 +47,7 @@ describe("the readiness score", () => {
 	});
 
 	it("adds 10 per standard deviation of HRV and subtracts 7 per standard deviation of resting heart rate", async () => {
-		// the 7-night average counts in units of the smallest worthwhile change, half a standard deviation: +0.5 sd of HRV is +1 unit = 10
+		// the 7-night average counts double: +0.5 sd of HRV moves the score by 10
 		expect(computeToday(await index({ hrv: weekZ(0.5), resting_hr: 52 }), END, null).score).toBe(70);
 		expect(computeToday(await index({ hrv: USUAL, resting_hr: 54 }), END, null).score).toBe(53); // +1 sd of resting heart rate
 		expect(computeToday(await index({ hrv: weekZ(0.5), resting_hr: 50 }), END, null).score).toBe(77);
@@ -142,9 +142,9 @@ describe("the flags", () => {
 	const flags = async (today: Fm, rest: (ago: number) => Fm = () => ({})) => computeToday(await index({ hrv: USUAL, resting_hr: 52, ...today }, rest), END, null).flags;
 
 	it("flags a low HRV and a high resting heart rate beyond one standard deviation", async () => {
-		// the 7-night average: flagged half a standard deviation (the smallest worthwhile change) below the usual
-		expect(await flags({ hrv: weekZ(-0.6) })).toEqual(["hrv"]);
-		expect(await flags({ hrv: weekZ(-0.4) })).toEqual([]);
+		// the 7-night average: flagged below the usual range of a week, one standard deviation under the baseline
+		expect(await flags({ hrv: weekZ(-1.2) })).toEqual(["hrv"]);
+		expect(await flags({ hrv: weekZ(-0.8) })).toEqual([]);
 		expect(await flags({ resting_hr: 55 })).toEqual(["rhr"]);
 		expect(await flags({ resting_hr: 53.5 })).toEqual([]);
 	});
@@ -362,7 +362,7 @@ describe("the week, the single night and the hard session", () => {
 	});
 
 	it("is not fooled by a low week hiding in its own baseline", async () => {
-		const m = computeToday(await index({ hrv: weekZ(-1), resting_hr: 52 }), END, null);
+		const m = computeToday(await index({ hrv: weekZ(-1.5), resting_hr: 52 }), END, null);
 		expect(m.flags).toEqual(["hrv"]);
 		expect(m.facts.hrvWeek).toMatchObject({ nights: 7, low: true });
 	});

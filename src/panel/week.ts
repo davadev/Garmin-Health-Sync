@@ -15,8 +15,11 @@ const BASELINE_DAYS = 60;
 const BASELINE_MIN = 14;
 /** Smallest spread of ln(value): about 4 percent of the level (HRV), so a very steady sleeper does not get a razor-thin band. */
 export const LN_SD_FLOOR = 0.04;
-/** The band is the smallest worthwhile change: half a standard deviation of the baseline (Plews et al. 2012, Javaloyes et al. 2019). */
-export const SWC_SD = 0.5;
+/**
+ * The usual range of a week is one standard deviation of the baseline, the same width as the range bar of the night, so "usual" means one thing on the card.
+ * The research criterion (smallest worthwhile change, Plews et al. 2012, Javaloyes et al. 2019) is half of that; this card is deliberately less sensitive, to give fewer false alarms.
+ */
+export const USUAL_SD = 1;
 /** A run of this many nights without a value is drawn as a gap. */
 const GAP_MIN = 3;
 
@@ -33,7 +36,7 @@ export interface WeekModel {
 	avg: (number | null)[];
 	/** Nights with a value among the 7 ending on the shown night. */
 	coverage: number;
-	/** Usual range for a week in ms: the baseline mean +/- half a standard deviation, null while the baseline is too young. */
+	/** Usual range for a week in ms: the baseline mean +/- one standard deviation, null while the baseline is too young. */
 	band: { low: number; mean: number; high: number } | null;
 	/** The 7-night average of the shown night, in ms. */
 	average: number | null;
@@ -71,7 +74,7 @@ export function computeWeek(index: DayIndex, key: string, date: string, sdFloor:
 		if (v !== null) earlier.push(v);
 	}
 	const b = baseline(earlier, BASELINE_MIN, sdFloor);
-	const band = b ? { low: Math.exp(b.mean - SWC_SD * b.sd), mean: Math.exp(b.mean), high: Math.exp(b.mean + SWC_SD * b.sd) } : null;
+	const band = b ? { low: Math.exp(b.mean - USUAL_SD * b.sd), mean: Math.exp(b.mean), high: Math.exp(b.mean + USUAL_SD * b.sd) } : null;
 
 	const last = avgLn(nights.length - 1 + offset);
 	const coverage = nights.slice(-WEEK_WINDOW).filter((v) => v !== null).length;
