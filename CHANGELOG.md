@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.14.0-beta.4
+
+### Changed
+
+- **The green "Usual" band of the week chart is as wide as the range bar's usual range** (one standard deviation, was half), so it is bigger and "usual" means one thing on the card. The HRV flag in Readiness and "Below your usual" now use the same edges, so they speak up later than before (the research criterion is the narrower half standard deviation; this card is deliberately less sensitive). The score still counts the 7-night average double.
+
 ## 0.14.0-beta.3
 
 ### Added

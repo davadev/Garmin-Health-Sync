@@ -4,6 +4,7 @@ import { formatNumber } from "../format";
 import { insightText, type Insight } from "../insights/registry";
 import { Signals } from "../insights/signals";
 import { pairedDays } from "../stats";
+import { USUAL_SD } from "../week";
 import type { DayIndex } from "../index";
 import { computeBattery } from "./battery-card";
 import { computeStress } from "./stress-card";
@@ -64,15 +65,15 @@ const clamp = (v: number, lo: number, hi: number): number => Math.min(hi, Math.m
 /** Where a day with no sign of strain or of a good recovery lands: the lower end of "moderate" would call every ordinary day tired. */
 const NEUTRAL_SCORE = 60;
 
-/** HRV is judged on the 7-night average in units of the smallest worthwhile change (half a standard deviation): the 7-night z counts double. */
+/** The average of 7 nights swings less than one night, so its distance from the usual counts double in the score. */
 const SWC_PER_SD = 2;
-/** The week is low below the smallest worthwhile change under the usual. */
-const WEEK_LOW_Z = -0.5;
+/** The week is low when its average is below the usual range of a week (one standard deviation, the edge of the band on the HRV card). */
+const WEEK_LOW_Z = -USUAL_SD;
 /** A single night this far below the usual is flagged unless a hard session explains it. */
 const NIGHT_LOW_Z = -2;
 
 /**
- * Own readiness: 60 + 10 z(HRV; the 7-night average in units of 0.5 sd when there are 4 nights, else the night) - 7 z(resting heart rate) - 4 per hour of sleep debt (at most 3 h) + 0.25 (battery peak - usual,
+ * Own readiness: 60 + 10 z(HRV; twice the distance of the 7-night average when there are 4 nights, else the night) - 7 z(resting heart rate) - 4 per hour of sleep debt (at most 3 h) + 0.25 (battery peak - usual,
  * between -8 and +8), 0 to 100. The z values are held between -2 and 2: HRV and resting heart rate move together, so a
  * far-out pair is one signal counted twice. Everything that depends on the usual range is scaled by `trust`, which
  * is below 1 while that range rests on fewer than 21 days, so a young range pulls the score towards the neutral
