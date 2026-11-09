@@ -1,20 +1,23 @@
-// Why it matters: the Readiness score and the HRV card judge the last week, not one night. A baseline that contains
-// the week hides a low week, a missing night counted as low raises false alarms, and an average built on two nights
-// is a guess shown as a fact.
+// Why it matters: the HRV and resting heart rate cards judge the last week, not one night, against the same usual range
+// as their range bar. A band that differs from the bar shows "in range" above and "below" underneath, a missing night
+// counted as low raises false alarms, and an average built on two nights is a guess shown as a fact.
 import { describe, expect, it } from "vitest";
 import { App } from "../testUtils/mocks/obsidian";
 import { seedHistory } from "../testUtils/fakeHistory";
 import { DayIndex } from "../src/panel/index";
+import { computeRange, HRV_CARD } from "../src/panel/cards/range-card";
 import { computeWeek } from "../src/panel/week";
 
 const settings = { dailyNotePath: "", dailyNoteFormat: "YYYY-MM-DD" };
 const END = "2026-10-22";
 
-async function weekOf(hrv: (ago: number) => number | null, days = 80): Promise<ReturnType<typeof computeWeek>> {
+async function indexOf(hrv: (ago: number) => number | null, days = 80): Promise<DayIndex> {
 	const app = new App();
 	await seedHistory(app, { end: END, days, frontmatter: (ago) => { const v = hrv(ago); return v === null ? null : { hrv: v }; } });
-	return computeWeek(new DayIndex(app as never, () => settings), "hrv", END);
+	return new DayIndex(app as never, () => settings);
 }
+const weekOf = async (hrv: (ago: number) => number | null, days = 80): Promise<ReturnType<typeof computeWeek>> => computeWeek(await indexOf(hrv, days), "hrv", END, 2);
+const alt = (ago: number, a = 62, b = 58): number => (ago % 2 === 0 ? a : b);
 
 describe("computeWeek", () => {
 	it("lists 14 nights, the shown night last, and averages them over 7 nights", async () => {
@@ -23,9 +26,8 @@ describe("computeWeek", () => {
 		expect(w.nights[13]).toBe(60);
 		expect(w.nights[0]).toBe(73);
 		expect(w.coverage).toBe(7);
-		// geometric mean of 60..66 lies a little under the arithmetic mean 63
-		expect(w.average!).toBeGreaterThan(62.8);
-		expect(w.average!).toBeLessThan(63);
+		expect(w.average).toBe(63); // 60..66
+		expect(w.avg[12]).toBe(64); // the night before: 61..67
 	});
 
 	it("needs 3 of 7 nights to draw an average and 4 to judge the week", async () => {
@@ -37,42 +39,41 @@ describe("computeWeek", () => {
 	});
 
 	it("never counts a missing night as a low one", async () => {
-		const full = await weekOf(() => 60);
-		const holes = await weekOf((ago) => (ago === 1 || ago === 3 ? null : 60));
-		expect(holes.average).toBeCloseTo(full.average!, 6);
-		expect(holes.z).toBeCloseTo(full.z!, 6);
+		const full = await weekOf((ago) => alt(ago));
+		const holes = await weekOf((ago) => (ago === 1 || ago === 2 ? null : alt(ago)));
+		expect(holes.average!).toBeCloseTo(full.average!, 0);
+		expect(holes.z!).toBeGreaterThan(-0.5);
+		expect(Math.abs(holes.z! - full.z!)).toBeLessThan(0.5);
 	});
 
-	it("compares the week with the nights before it, so a low week cannot hide itself", async () => {
-		const w = await weekOf((ago) => (ago < 7 ? 40 : 60 + (ago % 2 === 0 ? 3 : -3)));
-		expect(w.band!.mean).toBeCloseTo(60, 0);
-		expect(w.average!).toBeCloseTo(40, 3);
-		expect(w.z!).toBeLessThan(-3);
+	it("uses the usual range of the range bar: the same mean and standard deviation, one either side", async () => {
+		const index = await indexOf((ago) => (ago < 7 ? 52 : alt(ago, 66, 62)));
+		const bar = computeRange(HRV_CARD, index, END).baseline!;
+		const w = computeWeek(index, "hrv", END, HRV_CARD.sdFloor);
+		expect(w.band).toEqual({ low: bar.mean - bar.sd, mean: bar.mean, high: bar.mean + bar.sd });
 	});
 
-	it("builds the band as the baseline mean +/- one standard deviation, on the log scale", async () => {
-		const w = await weekOf((ago) => (ago % 2 === 0 ? 50 : 70));
-		const b = w.band!;
-		expect(b.low).toBeLessThan(b.mean);
-		expect(b.high).toBeGreaterThan(b.mean);
-		// log scale: the band is symmetric in ratio, not in ms
-		expect(b.high / b.mean).toBeCloseTo(b.mean / b.low, 6);
+	it("judges a low week against that range", async () => {
+		const w = await weekOf((ago) => (ago < 7 ? 52 : alt(ago, 66, 62)));
+		expect(w.average).toBe(52);
+		expect(w.average!).toBeLessThan(w.band!.low);
+		expect(w.z!).toBeLessThan(-1);
 	});
 
-	it("keeps the band at least 8 percent wide for a very steady sleeper", async () => {
+	it("keeps the band at least as wide as the floor for a very steady sleeper", async () => {
 		const w = await weekOf(() => 60);
-		expect(w.band!.high / w.band!.mean).toBeCloseTo(Math.exp(0.04), 6);
+		expect(w.band).toEqual({ low: 58, mean: 60, high: 62 });
 	});
 
-	it("has no band and no judgement while the baseline rests on fewer than 14 nights", async () => {
-		const w = await weekOf((ago) => (ago < 7 + 13 ? 60 : null), 80);
+	it("has no band and no judgement while the baseline rests on fewer than 5 days", async () => {
+		const w = await weekOf(() => 60, 5);
 		expect(w.band).toBeNull();
 		expect(w.z).toBeNull();
-		expect(w.average).not.toBeNull();
+		expect(w.average).toBe(60);
 	});
 
-	it("leaves out the freak reading of a sensor error like the usual range does", async () => {
-		const w = await weekOf((ago) => (ago === 20 ? 400 : 60 + (ago % 2 === 0 ? 2 : -2)));
+	it("leaves out the freak reading of a sensor error like the range bar does", async () => {
+		const w = await weekOf((ago) => (ago === 20 ? 400 : alt(ago)));
 		expect(w.band!.mean).toBeCloseTo(60, 0);
 	});
 
