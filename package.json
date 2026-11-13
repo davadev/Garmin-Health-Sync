@@ -33,7 +33,7 @@
 		"eslint": "10.13.0",
 		"eslint-plugin-obsidianmd": "^0.4.2",
 		"globals": "17.13.0",
-		"happy-dom": "20.14.6",
+		"happy-dom": "21.0.4",
 		"jiti": "2.7.0",
 		"knip": "6.43.0",
 		"obsidian": "1.14.4",
