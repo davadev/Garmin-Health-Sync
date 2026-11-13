@@ -1,20 +1,16 @@
 # Changelog
 
-## 0.14.1-beta.2
+## 0.14.1
 
-Adds the "what's new" entry for 0.14.1 and merges the pending dev-dependency update (#183). Everything else is as in `0.14.1-beta.1`.
+Security: clears all open Dependabot alerts. Development dependencies only; nothing changes in the shipped `main.js`. The detail of every step is in the `0.14.1-beta.N` notes of the GitHub releases.
 
 ### Added
 
 - A "what's new" entry for 0.14.1 (six languages) about the dependency security fixes.
 
-## 0.14.1-beta.1
-
-Security: clears all open Dependabot alerts. Development dependencies only; nothing changes in the shipped `main.js`.
-
 ### Changed
 
-- Updated `happy-dom` to 21.0.4 and the lockfile entries `fast-uri`, `brace-expansion`, `picomatch` and `@humanfs/node` to their patched versions.
+- Updated `happy-dom` to 21.0.4 and the lockfile entries `fast-uri`, `brace-expansion`, `picomatch` and `@humanfs/node` to their patched versions; merged the pending dev-dependency update.
 - Scoped `overrides` in `package.json` for `minimatch` 11.0.1, `ajv` 8.20.0 and `moment` 2.31.0 where the parent packages still pin vulnerable versions.
 - `.npmrc`: `brace-expansion` is excluded from `min-release-age` so its fix (published days ago) can land.
 - Dependabot: security updates arrive grouped in one pull request.
