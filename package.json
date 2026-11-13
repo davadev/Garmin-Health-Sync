@@ -31,7 +31,7 @@
 		"@vitest/coverage-v8": "5.0.5",
 		"esbuild": "0.28.2",
 		"eslint": "10.13.0",
-		"eslint-plugin-obsidianmd": "^0.4.2",
+		"eslint-plugin-obsidianmd": "^0.5.1",
 		"globals": "17.13.0",
 		"happy-dom": "20.14.6",
 		"jiti": "2.7.0",
