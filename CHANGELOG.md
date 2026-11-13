@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.14.1-beta.2
+
+Adds the "what's new" entry for 0.14.1 and merges the pending dev-dependency update (#183). Everything else is as in `0.14.1-beta.1`.
+
+### Added
+
+- A "what's new" entry for 0.14.1 (six languages) about the dependency security fixes.
+
 ## 0.14.1-beta.1
 
 Security: clears all open Dependabot alerts. Development dependencies only; nothing changes in the shipped `main.js`.

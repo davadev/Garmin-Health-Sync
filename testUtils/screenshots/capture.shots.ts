@@ -5,10 +5,16 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { it, vi } from "vitest";
 import { App, WorkspaceLeaf } from "../mocks/obsidian";
-import { notesOfLine } from "../../src/release-notes";
+import { notesToShow } from "../../src/release-notes";
 
 /** A version above every entry: the notes of the newest entry only, so the image shows the window of the release in the making and cannot go stale. */
 const NEWEST = "999.0.0";
+
+/** The newest release note with an illustration: a maintenance release (no figure) must not blank the image. */
+function newestIllustrated() {
+	const withFigure = notesToShow("", NEWEST).filter((n) => n.items.some((i) => i.figure));
+	return withFigure.slice(-1);
+}
 import { WhatsNewModal } from "../../src/ui/whats-new-modal";
 import { HealthPanelView } from "../../src/panel/view";
 import { PANEL_CARDS } from "../../src/panel/cards";
@@ -33,7 +39,7 @@ it("renders every scene", async () => {
 			// the panel opens on today; the morning after the shown day, one step back lands on the shown day
 			vi.setSystemTime(new Date(`${shiftDate(shown, 1)}T09:00:00`));
 			if (scene.kind === "whats-new") {
-				const modal = new WhatsNewModal(new App() as never, scene.language, notesOfLine(NEWEST));
+				const modal = new WhatsNewModal(new App() as never, scene.language, newestIllustrated());
 				modal.open();
 				for (const selector of scene.expect) if (!modal.contentEl.querySelector(selector)) throw new Error(`scene ${scene.id}: nothing matches ${selector}`);
 				writeFileSync(path.join(OUT, `${scene.id}.html`), `<div class="modal ghs-whats-new-modal"><div class="modal-content">${modal.contentEl.innerHTML}</div></div>`);
