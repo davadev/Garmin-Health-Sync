@@ -33,7 +33,7 @@
 		"eslint": "10.13.0",
 		"eslint-plugin-obsidianmd": "^0.4.2",
 		"globals": "17.13.0",
-		"happy-dom": "20.14.6",
+		"happy-dom": "21.0.4",
 		"jiti": "2.7.0",
 		"knip": "6.43.0",
 		"obsidian": "1.14.4",
@@ -47,5 +47,27 @@
 	},
 	"allowScripts": {
 		"esbuild": false
+	},
+	"overrides": {
+		"moment": "2.31.0",
+		"@eslint/config-array": {
+			"minimatch": "11.0.1"
+		},
+		"@typescript-eslint/typescript-estree": {
+			"minimatch": "11.0.1"
+		},
+		"eslint": {
+			"minimatch": "11.0.1"
+		},
+		"eslint-plugin-n": {
+			"minimatch": "11.0.1"
+		},
+		"eslint-plugin-json-schema-validator": {
+			"minimatch": "11.0.1",
+			"ajv": "8.20.0"
+		},
+		"json-schema-migrate": {
+			"ajv": "8.20.0"
+		}
 	}
 }

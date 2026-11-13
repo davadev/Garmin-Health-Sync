@@ -1,7 +1,8 @@
 # Dependency update feed.
 #
 # PR-only by design: nothing here auto-merges, so Dependabot can never affect a release on its own.
-# Do not merge Dependabot PRs while a beta of the current release is open.
+# Do not merge Dependabot VERSION update PRs while a beta of the current release is open (security
+# update PRs are the exception: merge them as soon as CI is green).
 #
 # IMPORTANT: never reply `@dependabot ignore ...` on a PR. That stores the ignore in Dependabot's
 # server-side state instead of this file, invisible to review. Every ignore belongs in the
@@ -21,6 +22,12 @@ updates:
       default-days: 14
       semver-major-days: 30
     groups:
+      # All security fixes in ONE PR: separate PRs each rewrite package-lock.json and conflict. Security
+      # updates ignore `cooldown`, `update-types` and the version-update PR limit above.
+      security:
+        applies-to: security-updates
+        patterns:
+          - "*"
       # vitest and @vitest/coverage-v8 must move TOGETHER, majors included: coverage-v8 peer-pins
       # vitest to an EXACT version, so a PR bumping one alone can never install (ERESOLVE).
       # No update-types filter on purpose. Listed FIRST because Dependabot assigns a dependency to
