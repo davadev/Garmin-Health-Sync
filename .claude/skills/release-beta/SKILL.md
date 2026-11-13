@@ -7,6 +7,8 @@ description: Cut a prerelease (X.Y.Z-beta.N) of Garmin Health Sync for BRAT test
 
 `main`'s `manifest.json`, `package.json` and `versions.json` **do not change**. CI stamps the beta version into the working tree only (`stamp-prerelease.mjs`, never commit its output). The invariant: `main`'s manifest always names a version that already has a published, non-prerelease release.
 
+**Dependabot gate first.** Before tagging, run the Dependabot gate in `AGENTS.md` (Dependabot gate): every open Dependabot PR is folded into this beta (merged or superseded), not left behind.
+
 ## Steps
 1. The change is merged to `main` via PR with CI green. `git checkout main && git pull`; `main`'s manifest is still the current stable version.
 2. `npm run check-release -- --with-build` -> `0 failed, 0 warned`; `npm run lint:cloud-parity` -> `0 errors`. Never skip. A project hook (`.claude/hooks/pre-tag-check.mjs`) re-runs `check-release --with-lint` before any semver tag command and blocks on failure; it does not replace this step.

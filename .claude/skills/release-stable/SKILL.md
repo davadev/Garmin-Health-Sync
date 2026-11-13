@@ -7,6 +7,8 @@ description: Promote a tested beta to stable X.Y.Z of Garmin Health Sync. ONLY o
 
 Only after Daniel says so explicitly, and only when: the last beta's smoke list passed on a real phone and on desktop (no new issues reported), and the directory entry is checked (it points at `davadev/Garmin-Health-Sync`, or the listing offers the current stable through the redirect). The stable release must be **published before `main` advertises it**.
 
+**Alert gate.** Run the Dependabot gate in `AGENTS.md` (Dependabot gate) before tagging: **0 open alerts**, or the user has been told which remain and why. Dependabot PRs that opened after the tested beta go into the next beta, not into this stable.
+
 ## Steps
 1. `git checkout -b release/X.Y.Z main` (`release/*` is reserved for this).
 2. `npm version X.Y.Z --no-git-tag-version` (updates `package.json` + lock and runs the `version` script, `version-bump.mjs`, which writes `manifest.json` and `versions.json` and stages them; rehearsed on 2026-10-25, it does run with `--no-git-tag-version`). Check `git diff HEAD --stat` shows all four files (staged changes do not show in a plain `git diff`) and `git tag --list X.Y.Z` is empty. If `manifest.json` / `versions.json` did not change: `npm_package_version=X.Y.Z node version-bump.mjs`. `versions.json` sorted, `X.Y.Z` last, no beta keys. Merge the beta CHANGELOG sections into one `## X.Y.Z` section.

@@ -142,6 +142,13 @@ Always-on rules:
 - Docs stay interlinked and current (`docs/README.md` is the index): a card in `PANEL_CARDS` needs its section in `docs/panel-cards.md` (`tests/panelCardsDocs.test.ts`), a metric in `src/metrics.ts` needs its row in `docs/metrics.md` (`tests/metricsDocs.test.ts`), a setting needs its line in `docs/settings.md`, and every relative link and anchor in the README files and `docs/*.md` must resolve (`tests/docsLinks.test.ts`). The six `README*.md` keep the same sections, feature bullets and images (`tests/readmeParity.test.ts`). Credits for ideas taken from other plugins live in `NOTICE.md` and the README Credits.
 - Release notes come from this version's own section in `CHANGELOG.md` (`## X.Y.Z` or `## X.Y.Z-beta.N`); add it before tagging. Contact for decisions and warnings: Daniel.
 
+### Dependabot gate (before every beta, before every stable)
+
+1. **Open PRs.** `gh pr list --state open --author "app/dependabot"`. Fold every one into the next beta: merge it, or supersede it with your own branch (a conflicting or failing grouped PR is redone on a fresh branch and closed with a pointer), and only then tag. Never tag a beta around an open Dependabot PR. A PR that opens after a beta was tested goes into the following beta, not into the stable that promotes the tested one.
+2. **Alerts.** `gh api repos/<owner>/<repo>/dependabot/alerts --jq '[.[]|select(.state=="open")]|length'`. HTTP 403 "Dependabot alerts are disabled" means they are off: turn them on with `gh api -X PUT repos/<owner>/<repo>/vulnerability-alerts` (repo admin; a GET of the same path answering 204 means on), then re-read in a few minutes. Optionally `gh api -X PUT repos/<owner>/<repo>/automated-security-fixes`. Guide: playbook `SUPPLY-CHAIN.md`, "Turning on Dependabot alerts".
+3. **Fix, do not dismiss.** Lockfile first (`npm update <pkg>`, exact bump for a direct dependency), then parent-scoped `overrides`, then a clean `rm -rf node_modules && npm ci && npm ls --all && npm audit`. Never dismiss an alert to get green.
+4. **Stable needs 0 open alerts.** If one cannot be fixed (no patch yet, a parent breaks under the override), tell the user which and why before tagging stable; the user decides.
+
 ## Security, privacy, and compliance
 
 Follow Obsidian's **Developer Policies** and **Plugin Guidelines**. In particular:
