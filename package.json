@@ -17,6 +17,7 @@
 		"screenshots": "node scripts/render-screenshots.mjs",
 		"check:screenshots": "node scripts/render-screenshots.mjs --check",
 		"check-release": "node scripts/check-release.mjs",
+		"sync": "node scripts/sync-main.mjs",
 		"check:i18n-sync": "node scripts/check-i18n-sync.mjs",
 		"lint:cloud-parity": "node scripts/lint-cloud-parity.mjs",
 		"lint:css": "stylelint styles.css"

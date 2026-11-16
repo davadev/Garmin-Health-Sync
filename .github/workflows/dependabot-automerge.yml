@@ -1,0 +1,76 @@
+# TEMPLATE: .github/workflows/dependabot-automerge.yml
+# WHAT: stage 2 of the Dependabot auto-merge lane. After CI finishes on a Dependabot PR it decides, on trusted code, whether
+#       the PR may merge by itself (scripts/automerge-policy.mjs; rules in scripts/lib/automergePolicy.mjs). It also watches
+#       main: a red CI after an auto-merge opens an issue that pauses the lane.
+# CHANGE: nothing. Per-plugin knobs (dry run, required checks, artifacts, denylist) are in .github/automerge.json.
+# GUARDS: this job has a write token, so it never checks out or runs the PR: it reads the PR through the API at the exact
+#         head commit, takes only two facts from the build artifact (hashes that must name this PR, head and base) and pins
+#         the merge to that commit. `workflow_run` always runs the workflow file from the default branch, so a PR cannot
+#         edit this file to approve itself.
+name: Dependabot auto-merge
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+
+# One decision at a time: each merge moves main and makes the next PR's build stale.
+concurrency:
+  group: dependabot-automerge
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  decide:
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      startsWith(github.event.workflow_run.head_branch, 'dependabot/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: write
+    steps:
+      # No ref: the default branch, i.e. trusted code, never the PR.
+      - name: Check out the default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download the build verdict
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: gh run download "$RUN_ID" --name verdict --dir verdict || echo "no verdict artifact"
+      - name: Decide
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.workflow_run.pull_requests[0].number }}
+        run: node scripts/automerge-policy.mjs --pr "$PR" --verdict verdict/verdict.json
+
+  # A red CI on main right after an auto-merge: stop merging until a human has looked. Close the issue to resume.
+  guard-main:
+    if: >-
+      (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch') &&
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      startsWith(github.event.workflow_run.head_commit.message, 'Merge pull request') &&
+      contains(github.event.workflow_run.head_commit.message, '/dependabot/')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Open the issue that pauses auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          gh label create automerge-broke-main --force --color B60205 --description "CI is red on main after a Dependabot auto-merge; auto-merge is paused"
+          gh issue create --label automerge-broke-main --title "CI is red on main after an auto-merge" \
+            --body "Commit $SHA failed: $RUN_URL. Auto-merge is paused. Revert the commit (git revert -m 1 $SHA) or fix forward, then close this issue to resume."

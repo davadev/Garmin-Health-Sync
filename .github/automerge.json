@@ -1,0 +1,26 @@
+{
+  "dryRun": true,
+  "enforcement": "workflow",
+  "ciWorkflow": "ci.yml",
+  "requiredChecks": [
+    "validate",
+    "timezones (America/Los_Angeles)",
+    "timezones (Pacific/Auckland)",
+    "timezones (Europe/Vienna)",
+    "store-listing"
+  ],
+  "buildCommand": "npm run build",
+  "artifacts": [
+    "main.js"
+  ],
+  "nodeVersionFile": ".nvmrc",
+  "nodeVersion": null,
+  "denylist": [
+    "esbuild",
+    "@codemirror/*",
+    "obsidian",
+    "typescript",
+    "@types/node",
+    "@eslint/js"
+  ]
+}
