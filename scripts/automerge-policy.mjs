@@ -24,11 +24,6 @@ const pr = api(`repos/${repo}/pulls/${number}`);
 const base = api(`repos/${repo}/git/ref/heads/main`).object.sha;
 const files = api(`repos/${repo}/pulls/${number}/files?per_page=100`);
 const runs = api(`repos/${repo}/commits/${pr.head.sha}/check-runs?per_page=100`).check_runs;
-const alerts = api(`repos/${repo}/dependabot/alerts?state=open&per_page=100`).map((a) => ({
-  name: a.dependency.package.name,
-  severity: a.security_advisory.severity,
-  patched: a.security_vulnerability.first_patched_version?.identifier ?? "",
-}));
 const paused = api(`repos/${repo}/issues?labels=automerge-broke-main&state=open`).length > 0;
 const verdict = (() => {
   try {
@@ -69,6 +64,17 @@ for (const [path, entry] of Object.entries(headLock.packages)) {
     /* unknown age: the policy treats it as a reason to skip */
   }
 }
+
+// GITHUB_TOKEN cannot read Dependabot alerts (HTTP 403), so "security" comes from the PR itself: Dependabot labels its security
+// updates `security` and states the severity in the body. A security PR without a readable severity counts as `high`
+// (3 days of age, never the 0-day critical shortcut).
+const isSecurity = (pr.labels ?? []).some((l) => l.name === "security");
+const severity = (/severity[^a-z]{0,20}(critical|high|moderate|medium|low)/i.exec(pr.body ?? "")?.[1] ?? "high").toLowerCase();
+const alerts = isSecurity
+  ? Object.entries(headLock.packages)
+      .filter(([path, entry]) => path !== "" && JSON.stringify(baseLock.packages[path]) !== JSON.stringify(entry))
+      .map(([path, entry]) => ({ name: entry.name ?? path.slice(path.lastIndexOf("node_modules/") + 13), severity, patched: entry.version }))
+  : [];
 
 const result = evaluate({ config, repo, pr, files, basePackage, headPackage, baseLock, headLock, runs, verdict, baseSha: base, alerts, ages, repoFacts, paused });
 const lines = result.changes.map((c) => `- \`${c.name}\` ${c.from ?? "new"} -> ${c.to}`).join("\n");
