@@ -96,7 +96,16 @@ if (result.action === "needs-beta") {
   gh("issue", "create", "--title", `Security update needs a beta: PR #${number}`, "--label", "needs-beta", "--body", `${pr.html_url}\n\n${lines}\n\nThe update changes the built artifact, so it must ship as a beta. It was not merged.`);
 }
 if (result.action === "merge" && !config.dryRun) {
-  gh("pr", "merge", String(number), "--merge", "--match-head-commit", pr.head.sha);
+  try {
+    gh("pr", "merge", String(number), "--merge", "--match-head-commit", pr.head.sha);
+  } catch (error) {
+    // GitHub's own rules (a required review, a check still pending, a moved head) may refuse a merge the policy allowed.
+    // That is a stop, not a failure: say so on the PR and end green so the owner is not paged for a rule doing its job.
+    const reason = String(error.stderr ?? error.message).split("\n")[0];
+    console.log(`::warning title=Auto-merge refused by GitHub::${reason}`);
+    gh("pr", "comment", String(number), "--body", `Auto-merge: the policy allowed this PR but GitHub refused the merge (${reason}). It stays open for a human.`);
+    process.exit(0);
+  }
   // Merges made with GITHUB_TOKEN do not start the push workflows: start CI on main by hand.
   gh("workflow", "run", config.ciWorkflow, "--ref", "main");
 }
