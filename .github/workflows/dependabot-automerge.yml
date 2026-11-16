@@ -28,7 +28,8 @@ jobs:
       github.event.workflow_run.conclusion == 'success' &&
       startsWith(github.event.workflow_run.head_branch, 'dependabot/')
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # The job also waits for the CI run it starts on main after a merge (slowest repo: ~6 minutes).
+    timeout-minutes: 30
     permissions:
       contents: write
       pull-requests: write
@@ -50,7 +51,25 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.workflow_run.pull_requests[0].number }}
+        id: decide
         run: node scripts/automerge-policy.mjs --pr "$PR" --verdict verdict/verdict.json
+      # A CI run started with GITHUB_TOKEN does not trigger `workflow_run`, so the guard job below never sees it fail.
+      # Watch it here instead and open the issue that pauses auto-merge.
+      - name: Watch CI on main after the merge
+        if: steps.decide.outputs.merged == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          ci=$(node -p "require('./.github/automerge.json').ciWorkflow")
+          sleep 20
+          id=$(gh run list --workflow "$ci" --branch main --event workflow_dispatch --limit 1 --json databaseId --jq '.[0].databaseId')
+          if ! gh run watch "$id" --exit-status > /dev/null; then
+            url=$(gh run view "$id" --json url --jq .url)
+            gh label create automerge-broke-main --force --color B60205 --description "CI is red on main after a Dependabot auto-merge; auto-merge is paused"
+            gh issue create --label automerge-broke-main --title "CI is red on main after an auto-merge" \
+              --body "The CI run $url failed after an auto-merge. Auto-merge is paused. Revert the merge commit or fix forward, then close this issue to resume."
+          fi
 
   # A red CI on main right after an auto-merge: stop merging until a human has looked. Close the issue to resume.
   guard-main:
