@@ -7,7 +7,7 @@
 // GUARDS: the PR's own files are read through the API at the exact head commit, never executed; the merge is pinned to
 //         that commit (`--match-head-commit`), so a push after the check cannot ride along.
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { appendFileSync, readFileSync } from "node:fs";
 import { checkNpmrc } from "./lib/supplyChainChecks.mjs";
 import { evaluate } from "./lib/automergePolicy.mjs";
 
@@ -108,4 +108,6 @@ if (result.action === "merge" && !config.dryRun) {
   }
   // Merges made with GITHUB_TOKEN do not start the push workflows: start CI on main by hand.
   gh("workflow", "run", config.ciWorkflow, "--ref", "main");
+  // Tell the workflow a merge happened: it watches that CI run and opens the pause issue when it fails.
+  if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, "merged=true\n");
 }
