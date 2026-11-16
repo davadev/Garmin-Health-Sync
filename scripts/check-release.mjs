@@ -11,6 +11,7 @@
 //
 // The checks themselves are pure predicates in scripts/lib/releaseChecks.mjs (unit tested);
 // this file only gathers the inputs and reports.
+import { checkAutomergeLane } from "./lib/automergeLane.mjs";
 import { readFile, stat, readdir } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { join, dirname, relative } from "node:path";
@@ -287,6 +288,13 @@ if (pkg) {
 	const dep = checkDependabotCooldown(await readText(".github/dependabot.yml"));
 	if (dep.ok) pass("Dependabot cooldown (npm + github-actions)", `>= ${MIN_AGE_DAYS} days`);
 	else fail("Dependabot cooldown (npm + github-actions)", dep.problems.join("; "));
+
+	// The auto-merge lane (.github/workflows/dependabot-automerge.yml) holds a write token: its config must parse and its
+	// workflow must start from no permissions at all.
+	const lane = checkAutomergeLane(await readText(".github/automerge.json"), await readText(".github/workflows/dependabot-automerge.yml"));
+	if (lane.ok) pass("Dependabot auto-merge lane", lane.dryRun ? "configured, dry run (never merges)" : "configured, live");
+	else fail("Dependabot auto-merge lane", lane.problems.join("; "));
+
 	const rc = checkNpmrc(await readText(".npmrc"));
 	if (rc.ok) pass("npm min-release-age", `${rc.days} days`);
 	else fail("npm min-release-age", rc.problem);

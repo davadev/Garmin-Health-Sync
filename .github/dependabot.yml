@@ -1,8 +1,13 @@
 # Dependency update feed.
 #
-# PR-only by design: nothing here auto-merges, so Dependabot can never affect a release on its own.
-# Do not merge Dependabot VERSION update PRs while a beta of the current release is open (security
-# update PRs are the exception: merge them as soon as CI is green).
+# Dependabot never merges anything itself. The auto-merge lane (.github/workflows/dependabot-automerge.yml, rules in
+# scripts/lib/automergePolicy.mjs, knobs in .github/automerge.json) merges a PR only when it is a plain dependency bump,
+# CI is green on the exact head commit, and the built main.js is byte-identical to main's. A PR that would change the
+# shipped bytes is never merged unattended: a security fix gets the `needs-beta` label and an issue, everything else
+# waits for a human.
+# Do not merge Dependabot VERSION update PRs by hand while a beta of the current release is open (security
+# update PRs are the exception: merge them as soon as CI is green). The lane is allowed to, because its
+# rule is that the built main.js stays byte-identical, so the beta under test does not change.
 #
 # IMPORTANT: never reply `@dependabot ignore ...` on a PR. That stores the ignore in Dependabot's
 # server-side state instead of this file, invisible to review. Every ignore belongs in the
@@ -14,6 +19,8 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    labels:
+      - dependencies
     # Do not adopt a new version immediately. Supply-chain attacks are usually a malicious release
     # that is live for hours to a few days before it is pulled. 14 days matches `min-release-age`
     # in .npmrc; check-release fails if either disappears. Cooldown applies to VERSION updates

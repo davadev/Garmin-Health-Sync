@@ -13,6 +13,9 @@ on:
     branches:
       - main
   pull_request:
+  # The Dependabot auto-merge lane merges with GITHUB_TOKEN, and such a merge does not start the push trigger above, so the
+  # lane starts CI on main by hand.
+  workflow_dispatch:
 
 # Newer pushes to a PR replace older runs; never on main.
 concurrency:
@@ -170,3 +173,42 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: node scripts/check-store-listing.mjs
+
+  # Stage 1 of the Dependabot auto-merge lane (.github/workflows/dependabot-automerge.yml is stage 2). Runs only for
+  # Dependabot PRs, with a read-only token and no secrets. Builds the shipped artifacts of main and of the PR and records
+  # their hashes; a PR that leaves them identical changed nothing a user receives. The script comes from the BASE checkout.
+  shipped-bytes:
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: base
+          persist-credentials: false
+      - name: Check out the pull request head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: head
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: base/.nvmrc
+      - name: Build both and compare
+        working-directory: base
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node scripts/shipped-bytes.mjs --base . --head ../head --out ../verdict.json --pr "$PR" --head-sha "$HEAD_SHA" --base-sha "$BASE_SHA"
+      - name: Upload the verdict
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: verdict
+          path: verdict.json

@@ -1,0 +1,41 @@
+# TEMPLATE: .github/workflows/deps-sweep.yml
+# WHAT: weekly safety net for the Dependabot auto-merge lane. Collects everything the lane left for a human (open alerts,
+#       Dependabot PRs older than 10 days, `needs-beta` and `automerge-broke-main` issues) into ONE issue, updated in place
+#       and closed when empty. That issue is the only thing the owner has to read.
+# CHANGE: nothing.
+# GUARDS: a lane that goes quiet because every PR is stuck looks exactly like a lane with nothing to do.
+name: Dependency sweep
+
+on:
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: write
+      security-events: read
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      TITLE: Dependency attention needed
+    steps:
+      - name: Collect and report
+        run: |
+          alerts=$(gh api "repos/$GH_REPO/dependabot/alerts?state=open&per_page=100" --jq '.[] | "- alert: `\(.dependency.package.name)` \(.security_advisory.severity): \(.security_advisory.summary)"' 2>/dev/null || echo "- alerts could not be read (are Dependabot alerts on?)")
+          stuck=$(gh pr list --author "app/dependabot" --state open --json number,title,createdAt --jq '.[] | select((now - (.createdAt | fromdateiso8601)) > 864000) | "- PR #\(.number) open for over 10 days: \(.title)"')
+          flagged=$(gh issue list --state open --json number,title,labels --jq '.[] | select(.labels | map(.name) | any(. == "needs-beta" or . == "automerge-broke-main")) | "- issue #\(.number): \(.title)"')
+          body=$(printf '%s\n%s\n%s\n' "$alerts" "$stuck" "$flagged" | sed '/^$/d')
+          existing=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number --jq '.[0].number // empty')
+          if [ -z "$body" ]; then
+            [ -n "$existing" ] && gh issue close "$existing" --comment "Nothing needs attention any more."
+            exit 0
+          fi
+          if [ -n "$existing" ]; then gh issue edit "$existing" --body "$body"; else gh issue create --title "$TITLE" --body "$body"; fi
