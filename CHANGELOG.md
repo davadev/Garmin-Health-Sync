@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.14.2-beta.1
+
+Maintenance beta. Check the HRV or resting heart rate week chart in a desktop popout window, and resume Obsidian on a phone to confirm auto-sync still runs.
+
+### Fixed
+
+- Create the week chart's SVG in the card's own document, so it works in a popout window.
+- Keep the auto-sync visibility listener on the main window's document.
+- Spell “VO2 max” consistently in the English metric label.
+
+### Internal
+
+- Update Vitest, the Obsidian lint plugin, Knip and TypeScript ESLint; remove an unused lint dependency. These remain development-only.
+
 ## 0.14.1
 
 Security: clears all open Dependabot alerts. Development dependencies only; nothing changes in the shipped `main.js`. The detail of every step is in the `0.14.1-beta.N` notes of the GitHub releases.
