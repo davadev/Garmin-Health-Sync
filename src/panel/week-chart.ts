@@ -73,7 +73,7 @@ export function renderWeek(parent: HTMLElement, week: WeekModel, date: string, l
 	});
 
 	// one line per run of nights with an average: a gap breaks the line instead of being bridged
-	const svg = document.createElementNS(SVG_NS, "svg");
+	const svg = chart.ownerDocument.createElementNS(SVG_NS, "svg");
 	svg.setAttribute("class", "ghs-hrvweek-line");
 	svg.setAttribute("viewBox", `0 0 ${WEEK_NIGHTS} 100`);
 	svg.setAttribute("preserveAspectRatio", "none");
@@ -82,7 +82,7 @@ export function renderWeek(parent: HTMLElement, week: WeekModel, date: string, l
 	let run: string[] = [];
 	const flush = (): void => {
 		if (run.length > 1) {
-			const line = document.createElementNS(SVG_NS, "polyline");
+			const line = svg.ownerDocument.createElementNS(SVG_NS, "polyline");
 			line.setAttribute("points", run.join(" "));
 			svg.appendChild(line);
 		}

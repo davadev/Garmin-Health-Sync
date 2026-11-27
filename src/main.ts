@@ -178,8 +178,9 @@ export default class HealthSyncPlugin extends Plugin {
 			// load.
 			// A phone suspends the app, so nothing runs while it is away: coming back to the app catches up (the 30 s debounce
 			// keeps a quick switch between apps from syncing twice).
-			this.registerDomEvent(document, "visibilitychange", () => {
-				if (document.visibilityState === "visible") this.background(this.tryAutoSync(), "auto-sync");
+			const mainDocument = window.document;
+			this.registerDomEvent(mainDocument, "visibilitychange", () => {
+				if (mainDocument.visibilityState === "visible") this.background(this.tryAutoSync(), "auto-sync");
 			});
 			this.registerEvent(this.app.vault.on("create", file => this.onDailyNoteMaybeReady(file)));
 			this.registerEvent(this.app.vault.on("modify", file => this.onDailyNoteMaybeReady(file)));
