@@ -81,7 +81,7 @@ export const en = {
 	metric_sleep_awake: "Awake time",
 	metric_sleep_start: "Bedtime",
 	metric_sleep_end: "Wake-up time",
-	metric_vo2_max: "Vo2 max",
+	metric_vo2_max: "VO2 max",
 	metric_training_readiness: "Training readiness",
 	metric_training_status: "Training status",
 	metric_weight_kg: "Weight (kg)",

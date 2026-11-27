@@ -71,7 +71,7 @@ export default defineConfig(
 					"ID", "UUID", "GUID", "SHA", "MD5", "ASCII", "UTF-8", "UTF-16",
 					"DOM", "CDN", "FAQ", "AI", "ML",
 					// Project-specific
-					"GPS", "REM", "HRV", "SpO2",
+					"GPS", "REM", "HRV", "SpO2", "VO2",
 					"ST", // Garmin CAS service ticket prefix (ST-…), manual-login UI
 				],
 				ignoreRegex: ["garmin\\.(com|cn)"],
