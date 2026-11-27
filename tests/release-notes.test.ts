@@ -88,4 +88,11 @@ describe("the shipped notes", () => {
 		expect(notesToShow("0.11.2", "0.12.1").map((n) => n.version)).toEqual(["0.12.0", "0.12.1"]);
 		expect(notesToShow("0.12.1", "0.12.1")).toEqual([]);
 	});
+
+	it("shows the maintenance card to someone updating from 0.14.1, including a beta tester who never saw its notes", () => {
+		const notes = notesToShow("0.14.1", "0.14.2");
+		expect(notes.map((n) => n.version)).toEqual(["0.14.2"]);
+		expect(notes[0]?.title).toBe("whatsNew0142Title");
+		expect(notesToShow("0.14.2-beta.1", "0.14.2")).toEqual([]);
+	});
 });

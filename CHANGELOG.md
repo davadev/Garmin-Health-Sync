@@ -1,14 +1,18 @@
 # Changelog
 
-## 0.14.2-beta.1
+## 0.14.2
 
-Maintenance beta. Check the HRV or resting heart rate week chart in a desktop popout window, and resume Obsidian on a phone to confirm auto-sync still runs.
+Maintenance update. The week charts use the side panel's window when drawing their lines. The detail of the tested beta is in the `0.14.2-beta.1` GitHub release notes.
 
 ### Fixed
 
 - Create the week chart's SVG in the card's own document, so it works in a popout window.
 - Keep the auto-sync visibility listener on the main window's document.
 - Spell “VO2 max” consistently in the English metric label.
+
+### Added
+
+- A "what's new" entry for 0.14.2 in all six languages, covering the week charts and small maintenance changes.
 
 ### Internal
 
